@@ -4,8 +4,11 @@ import json
 from pprint import pprint
 import node_processors as npr
 
-class FuncCallGetter(ast.NodeVisitor):
+class AstTreeVisitor(ast.NodeVisitor):
     func_call_dict = OrderedDict()
+    module_dict = OrderedDict()
+    func_def_dict = OrderedDict()
+
     def visit_Call(self, node):
         node_str = str(node)
         self.func_call_dict[node_str] = {}
@@ -29,8 +32,19 @@ class FuncCallGetter(ast.NodeVisitor):
 
         self.generic_visit(node)
 
-class FuncDefGetter(ast.NodeVisitor):
-    func_def_dict = OrderedDict()
+    def visit_Module(self, node):
+        node_str = str(node)
+        self.module_dict[node_str] = {}
+        self.module_dict[node_str]["body"] = []
+        body_dict = self.module_dict[node_str]["body"]
+        for item in node.body:
+            try:
+                body_dict.append({type(item).__name__: {"name": item.name, "lineno": item.lineno}})
+            except Exception as e:
+                body_dict.append({type(item).__name__: {"lineno": item.lineno}})
+
+        self.generic_visit(node)
+
     def visit_FunctionDef(self, node):
         node_str = str(node)
         self.func_def_dict[node_str] = {}
@@ -46,24 +60,25 @@ class FuncDefGetter(ast.NodeVisitor):
 
         self.generic_visit(node)
 
+
 filename = "quicksort.py"
 parsed_tree = ast.parse((open(filename)).read())
 
-fcall_getter = FuncCallGetter()
-fcall_getter.visit(parsed_tree)
+ast_visitor = AstTreeVisitor()
+ast_visitor.visit(parsed_tree)
 
 print("Printing Function Call Info From Script : {0}".format(filename))
 print("-------------------------------------------")
-for k, v in fcall_getter.func_call_dict.items():
+for k, v in ast_visitor.func_call_dict.items():
     print("{0}: {1}".format(k,v))
 print()
 
-fdef_getter = FuncDefGetter()
-fdef_getter.visit(parsed_tree)
 
 print("Printing Function Def Info From Script : {0}".format(filename))
 print("-------------------------------------------")
 
-for k, v in fdef_getter.func_def_dict.items():
+for k, v in ast_visitor.func_def_dict.items():
     print("{0}: {1}".format(k,v))
     print()
+
+print(ast_visitor.module_dict)
