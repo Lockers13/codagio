@@ -4,6 +4,17 @@ import json
 from pprint import pprint
 import node_processors as npr
 
+
+def rprint_dict(nested, indent=0 ):
+    for k, v in nested.items():
+        if isinstance(v, dict):
+            print("{0}{1}:".format("    " * indent, k))
+            rprint_dict(v, indent+1)
+        else:
+            print("{0}{1}: {2}".format("    " * indent, k, v))
+
+
+
 class AstTreeVisitor(ast.NodeVisitor):
     func_call_dict = OrderedDict()
     module_dict = OrderedDict()
@@ -67,18 +78,17 @@ parsed_tree = ast.parse((open(filename)).read())
 ast_visitor = AstTreeVisitor()
 ast_visitor.visit(parsed_tree)
 
-print("Printing Function Call Info From Script : {0}".format(filename))
-print("-------------------------------------------")
-for k, v in ast_visitor.func_call_dict.items():
-    print("{0}: {1}".format(k,v))
-print()
+mods = ast_visitor.module_dict
+fcalls = ast_visitor.func_call_dict
+fdefs = ast_visitor.func_def_dict
 
+print("\nProcessing Script: {0}...".format(filename))
 
-print("Printing Function Def Info From Script : {0}".format(filename))
-print("-------------------------------------------")
+print("\n\n**************** Module Info ****************\n\n")
+rprint_dict(mods)
 
-for k, v in ast_visitor.func_def_dict.items():
-    print("{0}: {1}".format(k,v))
-    print()
+print("\n\n**************** Function Def Info ****************\n\n")
+rprint_dict(fdefs)
 
-print(ast_visitor.module_dict)
+print("\n\n**************** Function Call Info ****************\n\n")
+rprint_dict(fcalls)

@@ -6,19 +6,46 @@ bin_ops = {"Add": '+', "Sub": '-', "Mult": '*', "Div": '/', "FloorDiv": "//",
 
 def process_test(test, test_dict):
     global bin_ops
-    test_vars = vars(test)
-    for key in test_vars.keys():
+    test_dict[type(test).__name__.lower()] = []
+    tdict = vars(test)
+    for k,v in tdict.items():
         try:
-            obj = test_vars[key][0]
-            if isinstance(obj, ast.Name):
-                if key == "comparators":
-                    test_dict["comp"] = vars(obj)
-            else:
-                test_dict["ops"] = bin_ops[type(obj).__name__]
+            val_iter = iter(v)
+            test_dict[k] = []
+            for vv in val_iter:
+                if isinstance(vv, ast.Name):
+                    test_dict[k].append(vv.id)
+                else:
+                    test_dict[k].append(bin_ops[type(vv).__name__])
         except:
-            if isinstance(test_vars[key], ast.Name):
-                if key == "left":
-                    test_dict["left"] = test_vars[key].id
+            if isinstance(v, ast.Name):
+                test_dict[k] = v.id
+            elif isinstance(v, ast.Subscript):
+                test_dict[k] = "{0}[{1}]".format(str(v.value.id), v.slice.value.id)
+    test_dict["brute_fields"] = tdict
+
+    # global bin_ops
+    # test_vars = vars(test)
+    # for key in test_vars.keys():
+    #     try:
+    #         iter_obj = test_vars[key]
+    #         test_dict[key] = []
+    #         for i in iter_obj:
+    #             test_dict[key].append(i.values())
+    #     except:
+    #         obj = test_vars[key]
+    #         test_dict[key] = obj
+        # try:
+        #     obj = test_vars[key][0]
+        #     if isinstance(obj, ast.Name):
+        #         if key == "comparators":
+        #             test_dict["comp"] = vars(obj)
+        #     else:
+        #         test_dict["ops"] = bin_ops[type(obj).__name__]
+        # except:
+        #     if isinstance(test_vars[key], ast.Name):
+        #         if key == "left":
+        #             test_dict["left"] = test_vars[key].id
 
 def process_binop(arg):
     global bin_ops
@@ -54,8 +81,8 @@ def process_for(node, node_dict):
 
 def process_while(node, node_dict):
     node_dict["while"] = {}
-    node_dict["while"]["test"] = []
-    node_dict["while"]["test"].append(vars(node.test))
+    node_dict["while"]["test"] = {}
+    process_test(node.test, node_dict["while"]["test"])
     node_dict["while"]["body"] = {}
     inner_body_dict = node_dict["while"]["body"]
     for i in node.body:
