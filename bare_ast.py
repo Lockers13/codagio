@@ -3,7 +3,7 @@ from collections import OrderedDict
 import json
 from pprint import pprint
 import node_processors as npr
-
+import mpl_draw as mpld
 
 def rprint_dict(nested, indent=0 ):
     for k, v in nested.items():
@@ -92,3 +92,5 @@ rprint_dict(fdefs)
 
 print("\n\n**************** Function Call Info ****************\n\n")
 rprint_dict(fcalls)
+
+mpld.draw_functiondef(fdefs, 'ast_fdefnames.jpg')
