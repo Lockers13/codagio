@@ -93,6 +93,6 @@ rprint_dict(fdefs)
 print("\n\n**************** Function Call Info ****************\n\n")
 rprint_dict(fcalls)
 
-outpath = "fdefs.png"
-source_drawer = SourceDrawer(outpath)
-source_drawer.fcall_draw(fcalls)
+# outpath = "fdefs.png"
+# source_drawer = SourceDrawer(outpath)
+# source_drawer.fcall_draw(fcalls)

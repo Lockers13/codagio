@@ -78,6 +78,15 @@ def process_for(node, node_dict):
     node_dict["for"] = {}
     node_dict["for"]["iter"] = vars(node.iter)
     node_dict["for"]["target"] = vars(node.target)
+    node_dict["for"]["body"] = {}
+    for i in node.body:
+        for k,v in vars(i).items():
+            if isinstance(v, ast.Call):
+                node_dict["for"]["body"]["func"] = {}
+                for_call = node_dict["for"]["body"]["func"]
+                process_call(v, for_call)
+            else:
+                node_dict["for"]["body"][k] = v
 
 def process_while(node, node_dict):
     node_dict["while"] = {}
@@ -88,6 +97,62 @@ def process_while(node, node_dict):
     for i in node.body:
         process_body(i, inner_body_dict)
 
+def process_targets(node, node_dict):
+    targ_list = []
+    node_dict["type"] = type(node).__name__
+    try:
+        for i in node:
+            if isinstance(i, ast.Tuple):
+                node_dict["vals"] = {}
+                node_vars = vars(i)
+                for k, v in node_vars.items():
+                    try:
+                        iter(v)
+                        node_dict["vals"][k] = process_simple_obj(v, iterable=True)
+                    except:
+                        node_dict["vals"][k] = process_simple_obj(v)
+
+            else:
+                targ_list.append(process_simple_obj(i))
+                node_dict["targs"] = targ_list
+    except Exception as e:
+        node_dict["err"] = str(e)
+
+def process_simple_obj(obj, iterable=False):
+    if iterable:
+        val_list = []
+        for i in obj:
+            print(i)
+            val_list.append(process_simple_obj(i))
+        return val_list
+    else:
+        if isinstance(obj, ast.Name):
+            return obj.id
+        elif isinstance(obj, ast.Subscript):
+            return "{0}[{1}]".format(str(obj.value.id), obj.slice.value.id)
+        else:
+            return obj
+
+def process_value(node, node_dict):
+    try:
+        (node.func)
+        if isinstance(node.func, ast.Name):
+            node_dict["fname"] = node.func.id
+            node_dict["lineno"] = node.func.lineno
+        else:
+            node_dict["fname"] = node.func.attr
+            node_dict["lineno"] = node.func.lineno
+    except:
+        if isinstance(node, ast.Tuple):
+            node_dict["vals"] = {}
+            node_vars = vars(node)
+            for k, v in node_vars.items():
+                try:
+                    iter(v)
+                    node_dict["vals"][k] = process_simple_obj(v, iterable=True)
+                except:
+                    node_dict["vals"][k] = process_simple_obj(v)
+
 def process_try(node, node_dict):
     node_dict["try"] = {}
     node_dict["try"]["body"] = {}
@@ -97,11 +162,27 @@ def process_try(node, node_dict):
             node_dict["try"]["body"][k] = v
     node_dict["try"]["handler"] = vars(node)
 
+def process_assign(node, node_dict):
+    node_dict["assign"] = {}
+    node_dict["assign"]["targets"] = {}
+    count = 0
+    target_dict = node_dict["assign"]["targets"]
+    process_targets(node.targets, target_dict)
+
+    node_dict["assign"]["value"] = {}
+    process_value(node.value, node_dict["assign"]["value"])
+
+
+
 def process_if(node, node_dict):
     node_dict["if"] = {}
     node_dict["if"]["test"] = {}
-    if_dict = node_dict["if"]["test"]
-    process_test(node.test, if_dict)
+    node_dict["if"]["body"] = {}
+    iftest_dict = node_dict["if"]["test"]
+    inner_body_dict = node_dict["if"]["body"]
+    process_test(node.test, iftest_dict)
+    for i in node.body:
+        process_body(i, inner_body_dict)
 
 def process_with(node, node_dict):
     node_dict["with"] = {}
@@ -121,8 +202,8 @@ def process_aug_assign(node, node_dict):
         except:
             node_dict["aug_assign"][k] = v
 
-processor_funcs = {"For": process_for, "While": process_while, "If": process_if,
-                   "Try": process_try, "With": process_with, "AugAssign": process_aug_assign}
+processor_funcs = {"For": process_for, "While": process_while, "If": process_if, "Assign": process_assign,
+                   "Try": process_try, "With": process_with, "AugAssign": process_aug_assign, "Call": process_call}
 
 def process_body(node, node_dict):
     node_name = type(node).__name__
