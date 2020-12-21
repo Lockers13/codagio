@@ -1,6 +1,8 @@
 import ast
 from collections import OrderedDict
 import json
+import subprocess
+import re
 
 def rprint_dict(nested, indent=0):
     for k, v in nested.items():
@@ -9,6 +11,28 @@ def rprint_dict(nested, indent=0):
             rprint_dict(v, indent+1)
         else:
             print("{0}{1}: {2}".format("    " * indent, k, v))
+
+def get_real_calls(filename, fcalls):
+    def any_key(keys, line):
+        for key in keys:
+            if fcalls[key]["func"]["name"] in line:
+                return [True, fcalls[key]["func"]["name"]]
+        return [False, None]
+
+    fileput = '{0}_profile.txt'.format(filename.split(".")[0])
+    with open(fileput, 'w') as output:
+        subprocess.Popen(["python", "-m", "cProfile", "-s", "time", "{0}".format(filename)], stdout=output).wait()
+    with open(fileput, 'r') as f:
+        fkeys = fcalls.keys()
+        for line in f.readlines():
+            key_guess = any_key(fkeys, line)
+            if key_guess[0]:
+                ncalls = line.split()[0]
+                if ncalls == "ncalls":
+                    continue
+                print("No. of real calls of '{0}' in {1} = {2}".format(key_guess[1], filename, ncalls))
+            
+
 
 
 class AstTreeVisitor(ast.NodeVisitor):
@@ -113,6 +137,8 @@ rprint_dict(fdefs)
 print("\n\n**************** Function Call Info ****************\n\n")
 rprint_dict(fcalls)
 print("No. of distinct function calls in source =", ast_visitor.count_hash["fcalls"])
+print()
+get_real_calls(filename, fcalls)
 
 # outpath = "fdefs.png"
 # source_drawer = SourceDrawer(outpath)
