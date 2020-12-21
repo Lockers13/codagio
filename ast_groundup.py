@@ -2,7 +2,6 @@ import ast
 from collections import OrderedDict
 import json
 
-
 def rprint_dict(nested, indent=0):
     for k, v in nested.items():
         if isinstance(v, dict):
@@ -17,7 +16,6 @@ class AstTreeVisitor(ast.NodeVisitor):
     parse_categories = ["modules", "fdefs", "fcalls"]
 
     def __init__(self):
-
         self.program_dict = OrderedDict()
         self.count_hash = {}
 
@@ -47,8 +45,9 @@ class AstTreeVisitor(ast.NodeVisitor):
             elif isinstance(arg, ast.Name):
                 call_dict["args"].append(arg.id)
             elif isinstance(arg, ast.Call):
-                # insert code for nested funcs
-                pass
+                arg_func = "arg_func_{0}".format(self.count_hash["fcalls"])
+                call_dict[arg_func] = {}
+                self.__process_call(arg, call_dict[arg_func])
             elif isinstance(arg, ast.BinOp):
                 pass
                 #l, op, r = npr.process_binop(arg)
