@@ -72,7 +72,7 @@ class AstTreeVisitor(ast.NodeVisitor):
         self.generic_visit(node)
 
 
-filename = "quicksort.py"
+filename = "tester.py"
 parsed_tree = ast.parse((open(filename)).read())
 
 ast_visitor = AstTreeVisitor()
