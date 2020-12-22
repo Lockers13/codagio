@@ -49,8 +49,6 @@ class Profiler():
             split_line = line.split()
             prog_dict["{0} time".format(str(split_line[0]))] = split_line[1]
 
-
-
     def profile(self):
         self.__get_real_calls(self.program_dict["fcalls"])
         self.__get_cpu_time(self.program_dict)
@@ -146,17 +144,3 @@ profiler = Profiler(filename, ast_visitor.program_dict)
 profiler.profile()
 
 rprint_dict(ast_visitor.program_dict)
-# mods = ast_visitor.program_dict.get("modules")
-# fcalls = ast_visitor.program_dict.get("fcalls")
-# fdefs = ast_visitor.program_dict.get("fdefs")
-
-# print("\nProcessing Script: {0}...".format(filename))
-
-# print("\n\n**************** Module Info ****************\n\n")
-# rprint_dict(mods)
-
-# print("\n\n**************** Function Def Info ****************\n\n")
-# rprint_dict(fdefs)
-
-# print("\n\n**************** Function Call Info ****************\n\n")
-# rprint_dict(fcalls)
