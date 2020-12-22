@@ -3,6 +3,12 @@ from collections import OrderedDict
 import json
 import subprocess
 import os
+import argparse
+
+def parse_clargs():
+    ap = argparse.ArgumentParser() 
+    ap.add_argument("-m", action="store_true")
+    return vars(ap.parse_args())
 
 def rprint_dict(nested, indent=0):
     for k, v in nested.items():
@@ -12,20 +18,56 @@ def rprint_dict(nested, indent=0):
         else:
             print("{0}{1}: {2}".format("    " * indent, k, v))
 
-
 class Profiler():
 
     def __init__(self, filename, program_dict):
         self.filename = filename
         self.program_dict = program_dict
 
-    def __get_real_calls(self, fcalls):
+    def __mem_trace(self):
+        def user_fdef_linenos():
+            udef_lines = []
+            fdef_dict = self.program_dict.get("fdefs")
+            fdef_keys = fdef_dict.keys()
+            for fdef_key in fdef_keys:
+                udef_lines.append(fdef_dict[fdef_key]["lineno"])
+            return udef_lines
+        
+        udef_lines = user_fdef_linenos()
+
+        f = open(self.filename, "r")
+        contents = f.readlines()
+        f.close()
+
+        profiled_lines = 0
+
+        for lineno in udef_lines:
+            contents.insert((lineno-1) + profiled_lines, "@profile\n")
+            profiled_lines += 1
+
+        split_fname = self.filename.split(".")
+        pro_file = "{0}_profile.{1}".format(split_fname[0],split_fname[1])
+        f = open(pro_file, "w")
+        contents = "".join(contents)
+        f.write(contents)
+        f.close()
+
+        process = subprocess.Popen(["python", "-m", "memory_profiler", "{0}".format(pro_file)], stdout=subprocess.PIPE)
+        output = process.stdout.readlines()
+
+        with open(pro_file.split(".")[0]+'.txt', 'w') as outfile:
+            for line in output:
+                line = line.decode("utf-8")
+                outfile.write(line)
+
+    def __get_real_calls(self):
         def any_key(keys, line):
             for key in keys:
                 if fcalls[key]["name"] in line:
                     return [True, fcalls[key]["name"], key]
             return [False, None, None]
 
+        fcalls = self.program_dict.get("fcalls")
         fkeys = fcalls.keys()
         process = subprocess.Popen(["python", "-m", "cProfile", "-s", "time", "{0}".format(filename)], stdout=subprocess.PIPE)
         output = process.stdout.readlines()
@@ -39,7 +81,8 @@ class Profiler():
                     continue
                 fcalls[key_guess[2]]["real_calls"] = ncalls
 
-    def __get_cpu_time(self, prog_dict):
+    def __get_cpu_time(self):
+        prog_dict = self.program_dict
         dev_null = open(os.devnull, 'w')
         process = subprocess.Popen(["time",  "-p", "python", "{0}".format(filename), "1>/dev/null"], stderr=subprocess.PIPE, stdout=dev_null)
         dev_null.close()
@@ -49,11 +92,12 @@ class Profiler():
             split_line = line.split()
             prog_dict["{0} time".format(str(split_line[0]))] = split_line[1]
 
-    def profile(self):
-        self.__get_real_calls(self.program_dict["fcalls"])
-        self.__get_cpu_time(self.program_dict)
+    def profile(self, mem):
+        self.__get_real_calls()
+        self.__get_cpu_time()
+        if mem:
+            self.__mem_trace()
         ### And so on ###    
-    
 
 class AstTreeVisitor(ast.NodeVisitor):
 
@@ -85,7 +129,6 @@ class AstTreeVisitor(ast.NodeVisitor):
                     binop_list.append(self.__bin_ops[type(vargs[i]).__name__])
                 except:
                     binop_list.append(str(vargs[i]))
-
         return binop_list
 
     def __process_call(self, node, call_dict, parent=None):
@@ -144,15 +187,15 @@ class AstTreeVisitor(ast.NodeVisitor):
         ### process body ###
         self.generic_visit(node)
 
-filename = input(str("Please enter the name of a file to parse: "))
+args = parse_clargs()
 
+filename = input(str("Please enter the name of a file to parse: "))
 parsed_tree = ast.parse((open(filename)).read())
 
 ast_visitor = AstTreeVisitor()
-
 ast_visitor.visit(parsed_tree)
 
 profiler = Profiler(filename, ast_visitor.program_dict)
-profiler.profile()
+profiler.profile(args.get("m"))
 
 rprint_dict(ast_visitor.program_dict)
