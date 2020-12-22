@@ -2,6 +2,7 @@ import ast
 from collections import OrderedDict
 import json
 import subprocess
+import os
 
 def rprint_dict(nested, indent=0):
     for k, v in nested.items():
@@ -31,7 +32,6 @@ class Profiler():
         ### Note : watch for unintentionally long output ###
         for line in output:
             line = line.decode("utf-8").strip()
-            print(line)
             key_guess = any_key(fkeys, line)
             if key_guess[0]:
                 ncalls = line.split()[0]
@@ -39,8 +39,21 @@ class Profiler():
                     continue
                 fcalls[key_guess[2]]["real_calls"] = ncalls
 
+    def __get_cpu_time(self, prog_dict):
+        dev_null = open(os.devnull, 'w')
+        process = subprocess.Popen(["time",  "-p", "python", "{0}".format(filename), "1>/dev/null"], stderr=subprocess.PIPE, stdout=dev_null)
+        dev_null.close()
+        output = process.stderr.readlines()
+        for line in output:
+            line = line.decode("utf-8").strip()
+            split_line = line.split()
+            prog_dict["{0} time".format(str(split_line[0]))] = split_line[1]
+
+
+
     def profile(self):
-        self.__get_real_calls(self.filename, self.program_dict["fcalls"])
+        self.__get_real_calls(self.program_dict["fcalls"])
+        self.__get_cpu_time(self.program_dict)
         ### And so on ###    
     
 
@@ -132,17 +145,18 @@ ast_visitor.visit(parsed_tree)
 profiler = Profiler(filename, ast_visitor.program_dict)
 profiler.profile()
 
-mods = ast_visitor.program_dict.get("modules")
-fcalls = ast_visitor.program_dict.get("fcalls")
-fdefs = ast_visitor.program_dict.get("fdefs")
+rprint_dict(ast_visitor.program_dict)
+# mods = ast_visitor.program_dict.get("modules")
+# fcalls = ast_visitor.program_dict.get("fcalls")
+# fdefs = ast_visitor.program_dict.get("fdefs")
 
-print("\nProcessing Script: {0}...".format(filename))
+# print("\nProcessing Script: {0}...".format(filename))
 
-print("\n\n**************** Module Info ****************\n\n")
-rprint_dict(mods)
+# print("\n\n**************** Module Info ****************\n\n")
+# rprint_dict(mods)
 
-print("\n\n**************** Function Def Info ****************\n\n")
-rprint_dict(fdefs)
+# print("\n\n**************** Function Def Info ****************\n\n")
+# rprint_dict(fdefs)
 
-print("\n\n**************** Function Call Info ****************\n\n")
-rprint_dict(fcalls)
+# print("\n\n**************** Function Call Info ****************\n\n")
+# rprint_dict(fcalls)
