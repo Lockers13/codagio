@@ -2,7 +2,6 @@ import ast
 from collections import OrderedDict
 import json
 import subprocess
-import re
 
 def rprint_dict(nested, indent=0):
     for k, v in nested.items():
@@ -12,28 +11,38 @@ def rprint_dict(nested, indent=0):
         else:
             print("{0}{1}: {2}".format("    " * indent, k, v))
 
-def get_real_calls(filename, fcalls):
-    def any_key(keys, line):
-        for key in keys:
-            if fcalls[key]["func"]["name"] in line:
-                return [True, fcalls[key]["func"]["name"]]
-        return [False, None]
 
-    fileput = '{0}_profile.txt'.format(filename.split(".")[0])
-    with open(fileput, 'w') as output:
-        subprocess.Popen(["python", "-m", "cProfile", "-s", "time", "{0}".format(filename)], stdout=output).wait()
-    with open(fileput, 'r') as f:
+class Profiler():
+
+    def __init__(self, filename, program_dict):
+        self.filename = filename
+        self.program_dict = program_dict
+
+    def __get_real_calls(self, fcalls):
+        def any_key(keys, line):
+            for key in keys:
+                if fcalls[key]["name"] in line:
+                    return [True, fcalls[key]["name"], key]
+            return [False, None, None]
+
         fkeys = fcalls.keys()
-        for line in f.readlines():
+        process = subprocess.Popen(["python", "-m", "cProfile", "-s", "time", "{0}".format(filename)], stdout=subprocess.PIPE)
+        output = process.stdout.readlines()
+        ### Note : watch for unintentionally long output ###
+        for line in output:
+            line = line.decode("utf-8").strip()
+            print(line)
             key_guess = any_key(fkeys, line)
             if key_guess[0]:
                 ncalls = line.split()[0]
                 if ncalls == "ncalls":
                     continue
-                print("No. of real calls of '{0}' in {1} = {2}".format(key_guess[1], filename, ncalls))
-            
+                fcalls[key_guess[2]]["real_calls"] = ncalls
 
-
+    def profile(self):
+        self.__get_real_calls(self.filename, self.program_dict["fcalls"])
+        ### And so on ###    
+    
 
 class AstTreeVisitor(ast.NodeVisitor):
 
@@ -49,7 +58,7 @@ class AstTreeVisitor(ast.NodeVisitor):
         for pcat in self.__parse_categories:
             self.program_dict[pcat] = OrderedDict()
             self.count_hash[pcat] = 0
-
+            
     def __process_binop(self, arg):
         binop_list = []
         for i in range(3):
@@ -72,14 +81,12 @@ class AstTreeVisitor(ast.NodeVisitor):
         call_dict[call_key] = {}
         call_dict[call_key]["parent"] = parent
         self.__process_args(node.args, call_dict[call_key])
-        call_dict[call_key]["func"] = {}
-        func_details = call_dict[call_key]["func"]
         if isinstance(node.func, ast.Name):
-            func_details["name"] = node.func.id
-            func_details["lineno"] = node.func.lineno
+            call_dict[call_key]["name"] = node.func.id
+            call_dict[call_key]["lineno"] = node.func.lineno
         else:
-            func_details["name"] = node.func.attr
-            func_details["lineno"] = node.func.lineno
+            call_dict[call_key]["name"] = node.func.attr
+            call_dict[call_key]["lineno"] = node.func.lineno
 
     def __process_args(self, arg_node, call_dict):
         call_dict["args"] = []
@@ -120,7 +127,10 @@ filename = input(str("Please enter the name of a file to parse: "))
 parsed_tree = ast.parse((open(filename)).read())
 
 ast_visitor = AstTreeVisitor()
+
 ast_visitor.visit(parsed_tree)
+profiler = Profiler(filename, ast_visitor.program_dict)
+profiler.profile()
 
 mods = ast_visitor.program_dict.get("modules")
 fcalls = ast_visitor.program_dict.get("fcalls")
@@ -136,10 +146,3 @@ rprint_dict(fdefs)
 
 print("\n\n**************** Function Call Info ****************\n\n")
 rprint_dict(fcalls)
-print("No. of distinct function calls in source =", ast_visitor.count_hash["fcalls"])
-print()
-get_real_calls(filename, fcalls)
-
-# outpath = "fdefs.png"
-# source_drawer = SourceDrawer(outpath)
-# source_drawer.fcall_draw(fcalls)
