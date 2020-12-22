@@ -78,6 +78,8 @@ class AstTreeVisitor(ast.NodeVisitor):
                 binop_list.append(vargs[i].id)
             elif isinstance(vargs[i], ast.Num):
                 binop_list.append(vargs[i].n)
+            elif isinstance(vargs[i], ast.Str):
+                binop_list.append(vargs[i].s)
             else:
                 try:
                     binop_list.append(self.__bin_ops[type(vargs[i]).__name__])
@@ -130,8 +132,17 @@ class AstTreeVisitor(ast.NodeVisitor):
     def visit_FunctionDef(self, node):
         fdef_dict = self.program_dict["fdefs"]
         self.count_hash["fdefs"] += 1
+        fdef_key = "fdef_{0}".format(self.count_hash["fdefs"])
+        fdef_dict[fdef_key] = {}
+        fdef_dict[fdef_key]["name"] = node.name
+        fdef_dict[fdef_key]["retval"] = node.returns
+        fdef_dict[fdef_key]["lineno"] = node.lineno
+        fdef_dict[fdef_key]["args"] = []
+        for arg in node.args.args:
+            fdef_dict[fdef_key]["args"].append(arg.arg)
+        fdef_dict[fdef_key]["body"] = {}
+        ### process body ###
         self.generic_visit(node)
-
 
 filename = input(str("Please enter the name of a file to parse: "))
 
@@ -140,6 +151,7 @@ parsed_tree = ast.parse((open(filename)).read())
 ast_visitor = AstTreeVisitor()
 
 ast_visitor.visit(parsed_tree)
+
 profiler = Profiler(filename, ast_visitor.program_dict)
 profiler.profile()
 
