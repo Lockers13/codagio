@@ -119,19 +119,20 @@ class Profiler():
 
     def __cprof(self):
         pass
-    #     def any_key(keys, line):
-    #         for key in keys:
-    #             if fcalls[key]["name"] in line:
-    #                 return [True, fcalls[key]["name"], key]
-    #         return [False, None, None]
+        def any_key(keys, line):
+            for key in keys:
+                if fcalls[key]["name"] in line:
+                    return [True, fcalls[key]["name"], key]
+            return [False, None, None]
 
     #     fcalls = self.program_dict.get("fcalls")
     #     fkeys = fcalls.keys()
-    #     process = subprocess.Popen(["python", "-m", "cProfile", "-s", "time", "{0}".format(filename)], stdout=subprocess.PIPE)
-    #     output = process.stdout.readlines()
-    #     ### Note : watch for unintentionally long output ###
-    #     for line in output:
-    #         line = line.decode("utf-8").strip()
+        process = subprocess.Popen(["python", "-m", "cProfile", "-s", "time", "{0}".format(filename)], stdout=subprocess.PIPE)
+        output = process.stdout.readlines()
+        ### Note : watch for unintentionally long output ###
+        for line in output:
+            line = line.decode("utf-8").strip()
+            print(line)
     #         key_guess = any_key(fkeys, line)
     #         if key_guess[0]:
     #             ncalls = line.split()[0]
