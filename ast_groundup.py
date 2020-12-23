@@ -4,6 +4,8 @@ import json
 import subprocess
 import os
 import argparse
+import platform
+import re
 
 def parse_clargs():
     ap = argparse.ArgumentParser() 
@@ -24,9 +26,9 @@ class Profiler():
         self.filename = filename
         self.program_dict = program_dict
 
-    def __mem_trace(self):
-        ### kernprof -l -v quicksort_profile.py
-        def user_fdef_linenos():
+    def __userf_line_profile(self):
+        ### Note: check if line_profiler is installed
+        def get_user_fdefs():
             udef_lines = []
             fdef_dict = self.program_dict.get("fdefs")
             fdef_keys = fdef_dict.keys()
@@ -34,72 +36,124 @@ class Profiler():
                 udef_lines.append(fdef_dict[fdef_key]["lineno"])
             return udef_lines
         
-        udef_lines = user_fdef_linenos()
+        def make_pro_file(filename, lines, token):
+            f = open(filename, "r")
+            contents = f.readlines()
+            f.close()
 
-        f = open(self.filename, "r")
-        contents = f.readlines()
-        f.close()
+            profiled_lines = 0
 
-        profiled_lines = 0
+            for lineno in lines:
+                contents.insert((lineno-1) + profiled_lines, "{0}\n".format(token))
+                profiled_lines += 1
 
-        for lineno in udef_lines:
-            contents.insert((lineno-1) + profiled_lines, "@profile\n")
-            profiled_lines += 1
+            split_fname = filename.split(".")
+            pro_file = "{0}_profile.{1}".format(split_fname[0],split_fname[1])
+            f = open(pro_file, "w")
+            contents = "".join(contents)
+            f.write(contents)
+            f.close()
 
-        split_fname = self.filename.split(".")
-        pro_file = "{0}_profile.{1}".format(split_fname[0],split_fname[1])
-        f = open(pro_file, "w")
-        contents = "".join(contents)
-        f.write(contents)
-        f.close()
+            return pro_file
 
-        process = subprocess.Popen(["python", "-m", "memory_profiler", "{0}".format(pro_file)], stdout=subprocess.PIPE)
+        try:
+            import line_profiler
+        except ModuleNotFoundError:
+            print("Error: line_profiler module must be installed for line-by-line profiling!")
+            return
+
+        udef_lines = get_user_fdefs()
+        pro_token = "@profile"
+        pro_file = make_pro_file(self.filename, udef_lines, pro_token)
+
+        process = subprocess.Popen(["kernprof", "-l", "-v", "{0}".format(pro_file)], stdout=subprocess.PIPE)
         output = process.stdout.readlines()
+        func_name = None
+        
+        fdefs = self.program_dict["fdefs"]
+        fdef_keys = fdefs.keys()
 
-        with open(pro_file.split(".")[0]+'.txt', 'w') as outfile:
-            for line in output:
-                line = line.decode("utf-8")
-                outfile.write(line)
-
-    def __get_real_calls(self):
-        def any_key(keys, line):
-            for key in keys:
-                if fcalls[key]["name"] in line:
-                    return [True, fcalls[key]["name"], key]
-            return [False, None, None]
-
-        fcalls = self.program_dict.get("fcalls")
-        fkeys = fcalls.keys()
-        process = subprocess.Popen(["python", "-m", "cProfile", "-s", "time", "{0}".format(filename)], stdout=subprocess.PIPE)
-        output = process.stdout.readlines()
-        ### Note : watch for unintentionally long output ###
         for line in output:
             line = line.decode("utf-8").strip()
-            key_guess = any_key(fkeys, line)
-            if key_guess[0]:
-                ncalls = line.split()[0]
-                if ncalls == "ncalls":
-                    continue
-                ### add more info, or delete altogether!!!
-                fcalls[key_guess[2]]["real_calls"] = ncalls
+            split_line = line.split(maxsplit=5)
 
-    def __get_cpu_time(self):
-        ### if mac -> gtime, linux -> time ... --verbose python quicksort.py
+            try:
+                first_item, second_item = split_line[0], split_line[1]
+            except IndexError:
+                continue
+
+            if split_line[1] == "unit:":
+                time_unit = float(split_line[2])
+
+            if len(split_line) == 6 or first_item == "Total" or first_item == "Function:":
+                if first_item == "Total":
+                    total_time = 1
+                elif first_item == "Function:":
+                    fname = split_line[1]
+                    for fdef_key in fdef_keys:
+                        if fdefs[fdef_key]["name"] == fname:
+                            fdef_k = fdef_key 
+                            fdefs[fdef_k]["line_profile"] = {}
+                else:
+                    try:
+                        float(second_item)
+                        fnum = int(re.search(r'\d+', fdef_k).group())
+                        fdefs[fdef_k]["line_profile"]["line_{0}".format(int(split_line[0]) - fnum)] = {}
+                        line_info = fdefs[fdef_k]["line_profile"]["line_{0}".format(int(split_line[0]) - fnum)]
+                        line_info["hits"] = split_line[1]
+                        line_info["time"] = '%.2E' % (float(split_line[2]) * time_unit)
+                        line_info["time_per_hit"] = '%.2E' % (float(split_line[3]) * time_unit)
+                        line_info["%time"] = split_line[4]
+                        line_info["contents"] = split_line[5]
+                    except ValueError:
+                        continue
+            else:
+                continue
+
+            ### Line_Profiler output header => Line #: Hits: Time: Per Hit: % Time: Line Contents
+            
+
+    # def __get_real_calls(self):
+    #     def any_key(keys, line):
+    #         for key in keys:
+    #             if fcalls[key]["name"] in line:
+    #                 return [True, fcalls[key]["name"], key]
+    #         return [False, None, None]
+
+    #     fcalls = self.program_dict.get("fcalls")
+    #     fkeys = fcalls.keys()
+    #     process = subprocess.Popen(["python", "-m", "cProfile", "-s", "time", "{0}".format(filename)], stdout=subprocess.PIPE)
+    #     output = process.stdout.readlines()
+    #     ### Note : watch for unintentionally long output ###
+    #     for line in output:
+    #         line = line.decode("utf-8").strip()
+    #         key_guess = any_key(fkeys, line)
+    #         if key_guess[0]:
+    #             ncalls = line.split()[0]
+    #             if ncalls == "ncalls":
+    #                 continue
+    #             ### add more info, or delete altogether!!!
+    #             fcalls[key_guess[2]]["real_calls"] = ncalls
+
+    def __write_execution_stats(self):
+        time_cmd = "gtime" if platform.system() == "Darwin" else "time"
         prog_dict = self.program_dict
         dev_null = open(os.devnull, 'w')
-        process = subprocess.Popen(["time",  "-p", "python", "{0}".format(filename), "1>/dev/null"], stderr=subprocess.PIPE, stdout=dev_null)
+        process = subprocess.Popen([time_cmd,  "--verbose", "python", "{0}".format(filename), "1>/dev/null"], stderr=subprocess.PIPE, stdout=dev_null)
         dev_null.close()
         output = process.stderr.readlines()
         for line in output:
             line = line.decode("utf-8").strip()
-            split_line = line.split()
-            prog_dict["{0} time".format(str(split_line[0]))] = split_line[1]
+            split_line = line.split(": ")
+            try:
+                prog_dict["{0}".format(str(split_line[0]))] = float(split_line[1])
+            except ValueError:
+                pass
 
     def profile(self, mem):
-        self.__get_real_calls()
-        self.__get_cpu_time()
-        if mem:
-            self.__mem_trace()
+        #self.__get_real_calls()
+        self.__write_execution_stats()
+        self.__userf_line_profile()
         ### And so on ###    
 
 class AstTreeVisitor(ast.NodeVisitor):
@@ -192,7 +246,8 @@ class AstTreeVisitor(ast.NodeVisitor):
 
 args = parse_clargs()
 
-filename = input(str("Please enter the name of a file to parse: "))
+# filename = input(str("Please enter the name of a file to parse: "))
+filename = "quicksort.py"
 parsed_tree = ast.parse((open(filename)).read())
 
 ast_visitor = AstTreeVisitor()
