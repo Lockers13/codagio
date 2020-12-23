@@ -26,7 +26,7 @@ class Profiler():
         self.filename = filename
         self.program_dict = program_dict
 
-    def __userf_line_profile(self):
+    def __lprof(self):
         ### Note: check if line_profiler is installed
         def get_user_fdefs():
             udef_lines = []
@@ -56,6 +56,53 @@ class Profiler():
 
             return pro_file
 
+        def parse_pro_file(pro_file):
+            def write_lprofs():
+                float(second_item)
+                fdefs[fdef_k]["line_profile"]["line_{0}".format(int(split_line[0]) - fnum)] = {}
+                line_info = fdefs[fdef_k]["line_profile"]["line_{0}".format(int(split_line[0]) - fnum)]
+                line_info["hits"] = split_line[1]
+                line_info["time"] = '%.2E' % (float(split_line[2]) * time_unit)
+                line_info["time_per_hit"] = '%.2E' % (float(split_line[3]) * time_unit)
+                line_info["%time"] = split_line[4]
+                line_info["contents"] = split_line[5]
+
+            process = subprocess.Popen(["kernprof", "-l", "-v", "{0}".format(pro_file)], stdout=subprocess.PIPE)
+            output = process.stdout.readlines()
+            fdefs = self.program_dict["fdefs"]
+            fdef_keys = fdefs.keys()
+
+            for line in output:
+                line = line.decode("utf-8").strip()
+                split_line = line.split(maxsplit=5)
+
+                try:
+                    first_item, second_item = split_line[0], split_line[1]
+                except IndexError:
+                    continue
+
+                if split_line[1] == "unit:":
+                    time_unit = float(split_line[2])
+
+                if len(split_line) == 6 or first_item == "Total" or first_item == "Function:":
+                    if first_item == "Total":
+                        total_time = split_line[2]
+                    elif first_item == "Function:":
+                        fname = split_line[1]
+                        for fdef_key in fdef_keys:
+                            if fdefs[fdef_key]["name"] == fname:
+                                fdef_k = fdef_key 
+                                fdefs[fdef_k]["line_profile"] = {}
+                                fdefs[fdef_k]["total_time (lprof)"] = total_time
+                                fnum = int(re.search(r'\d+', fdef_k).group())
+                    else:
+                        try:
+                            write_lprofs()
+                        except ValueError:
+                            continue
+                else:
+                    continue
+        
         try:
             import line_profiler
         except ModuleNotFoundError:
@@ -65,55 +112,13 @@ class Profiler():
         udef_lines = get_user_fdefs()
         pro_token = "@profile"
         pro_file = make_pro_file(self.filename, udef_lines, pro_token)
-
-        process = subprocess.Popen(["kernprof", "-l", "-v", "{0}".format(pro_file)], stdout=subprocess.PIPE)
-        output = process.stdout.readlines()
-        func_name = None
-        
-        fdefs = self.program_dict["fdefs"]
-        fdef_keys = fdefs.keys()
-
-        for line in output:
-            line = line.decode("utf-8").strip()
-            split_line = line.split(maxsplit=5)
-
-            try:
-                first_item, second_item = split_line[0], split_line[1]
-            except IndexError:
-                continue
-
-            if split_line[1] == "unit:":
-                time_unit = float(split_line[2])
-
-            if len(split_line) == 6 or first_item == "Total" or first_item == "Function:":
-                if first_item == "Total":
-                    total_time = 1
-                elif first_item == "Function:":
-                    fname = split_line[1]
-                    for fdef_key in fdef_keys:
-                        if fdefs[fdef_key]["name"] == fname:
-                            fdef_k = fdef_key 
-                            fdefs[fdef_k]["line_profile"] = {}
-                else:
-                    try:
-                        float(second_item)
-                        fnum = int(re.search(r'\d+', fdef_k).group())
-                        fdefs[fdef_k]["line_profile"]["line_{0}".format(int(split_line[0]) - fnum)] = {}
-                        line_info = fdefs[fdef_k]["line_profile"]["line_{0}".format(int(split_line[0]) - fnum)]
-                        line_info["hits"] = split_line[1]
-                        line_info["time"] = '%.2E' % (float(split_line[2]) * time_unit)
-                        line_info["time_per_hit"] = '%.2E' % (float(split_line[3]) * time_unit)
-                        line_info["%time"] = split_line[4]
-                        line_info["contents"] = split_line[5]
-                    except ValueError:
-                        continue
-            else:
-                continue
+        parse_pro_file(pro_file)
 
             ### Line_Profiler output header => Line #: Hits: Time: Per Hit: % Time: Line Contents
             
 
-    # def __get_real_calls(self):
+    def __cprof(self):
+        pass
     #     def any_key(keys, line):
     #         for key in keys:
     #             if fcalls[key]["name"] in line:
@@ -135,11 +140,11 @@ class Profiler():
     #             ### add more info, or delete altogether!!!
     #             fcalls[key_guess[2]]["real_calls"] = ncalls
 
-    def __write_execution_stats(self):
+    def __gnu_time(self):
         time_cmd = "gtime" if platform.system() == "Darwin" else "time"
         prog_dict = self.program_dict
         dev_null = open(os.devnull, 'w')
-        process = subprocess.Popen([time_cmd,  "--verbose", "python", "{0}".format(filename), "1>/dev/null"], stderr=subprocess.PIPE, stdout=dev_null)
+        process = subprocess.Popen([time_cmd,  "--verbose", "python", "{0}".format(filename)], stderr=subprocess.PIPE, stdout=dev_null)
         dev_null.close()
         output = process.stderr.readlines()
         for line in output:
@@ -150,10 +155,10 @@ class Profiler():
             except ValueError:
                 pass
 
-    def profile(self, mem):
-        #self.__get_real_calls()
-        self.__write_execution_stats()
-        self.__userf_line_profile()
+    def profile(self):
+        self.__cprof()
+        self.__gnu_time()
+        self.__lprof()
         ### And so on ###    
 
 class AstTreeVisitor(ast.NodeVisitor):
@@ -245,7 +250,6 @@ class AstTreeVisitor(ast.NodeVisitor):
         self.generic_visit(node)
 
 args = parse_clargs()
-
 # filename = input(str("Please enter the name of a file to parse: "))
 filename = "quicksort.py"
 parsed_tree = ast.parse((open(filename)).read())
@@ -254,6 +258,6 @@ ast_visitor = AstTreeVisitor()
 ast_visitor.visit(parsed_tree)
 
 profiler = Profiler(filename, ast_visitor.program_dict)
-profiler.profile(args.get("m"))
+profiler.profile()
 
 rprint_dict(ast_visitor.program_dict)
