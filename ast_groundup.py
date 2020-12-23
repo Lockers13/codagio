@@ -25,6 +25,7 @@ class Profiler():
         self.program_dict = program_dict
 
     def __mem_trace(self):
+        ### kernprof -l -v quicksort_profile.py
         def user_fdef_linenos():
             udef_lines = []
             fdef_dict = self.program_dict.get("fdefs")
@@ -79,9 +80,11 @@ class Profiler():
                 ncalls = line.split()[0]
                 if ncalls == "ncalls":
                     continue
+                ### add more info, or delete altogether!!!
                 fcalls[key_guess[2]]["real_calls"] = ncalls
 
     def __get_cpu_time(self):
+        ### if mac -> gtime, linux -> time ... --verbose python quicksort.py
         prog_dict = self.program_dict
         dev_null = open(os.devnull, 'w')
         process = subprocess.Popen(["time",  "-p", "python", "{0}".format(filename), "1>/dev/null"], stderr=subprocess.PIPE, stdout=dev_null)
