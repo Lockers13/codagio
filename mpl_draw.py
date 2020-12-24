@@ -1,51 +1,77 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import matplotlib.cm as cm
-import matplotlib.image as mpimg
-import random
-# import cv2
+# import matplotlib.cm as cm
+# import matplotlib.image as mpimg
+# import random
+# # import cv2
 
 
 class SourceDrawer:
 
-    def __init__(self, outpath):
+    def __init__(self, outpath, prog_dict):
         self.outpath = outpath
-        self.countx = 0
-        self.county = 1
+        self.fdefs = prog_dict.get("fdefs")
+    
+    def dump_prof_data(self):
 
-    def fcall_draw(self, fcall_dict):
-        linenos = []
-        numargs = []
-        fnames = []
-        args = []
-        for key, value in fcall_dict.items():
-            try:
-                linenos.append(value["lineno"])
-                numargs.append(len(value["args"]))
-                fnames.append(value["name"])
-                args.append([])
-                for arg in value["args"]:
-                    args[argercount].append(arg)
-            except:
-                pass
-            # print(len(list(v["body"].keys())))
-            # print(np.linspace(0, len(list(v.keys())), 1))
 
-            self.county -= 0.2
+    def display_fdef_info(self):
+        for fdef_key in self.fdefs.keys():
+            fdef_dict = self.fdefs[fdef_key]
+            name = fdef_dict["name"]
+            tot_time = fdef_dict["tot_time"]
+            cum_time = fdef_dict["cum_time"]
+            lprof_dict = fdef_dict["line_profile"]
+            print("Function {0}: cum_time = {1}".format(name, cum_time))
+            for l_key in lprof_dict.keys():
+                l_dict = lprof_dict[l_key]
+                hits = l_dict["hits"]
+                time = l_dict["time"]
+                percent_time = l_dict["%time"]
+                contents = l_dict["contents"]
+                print("{0}: contents = {1} | hits = {2} | time = {3} | %time = {4}".format(
+                    l_key, contents, hits, time, percent_time))
             print()
-        all_poss=['.','o','v','^']
-        all_colors=['red', 'orange', 'green', 'purple']
 
 
-        for x in range(len(linenos)):
-            fstring = "{0}(".format(fnames[x])
-            fstring += ')'
-            y = random.random() * (numargs[x] + 0.1)
-            plt.plot(linenos[x],y,marker=all_poss[numargs[x]], markerfacecolor=all_colors[numargs[x]], markersize=23, markeredgecolor="black", label=fstring)
-            #plt.text(linenos[x]+0.5, y-0.5, fstring, horizontalalignment='left', size='medium', color='black', weight='semibold')
 
-        plt.axis('off')
-        plt.savefig(self.outpath)
+
+
+
+
+    # def fcall_draw(self, fcall_dict):
+    #     linenos = []
+    #     numargs = []
+    #     fnames = []
+    #     args = []
+    #     for key, value in fcall_dict.items():
+    #         try:
+    #             linenos.append(value["lineno"])
+    #             numargs.append(len(value["args"]))
+    #             fnames.append(value["name"])
+    #             args.append([])
+    #             for arg in value["args"]:
+    #                 args[argercount].append(arg)
+    #         except:
+    #             pass
+    #         # print(len(list(v["body"].keys())))
+    #         # print(np.linspace(0, len(list(v.keys())), 1))
+
+    #         self.county -= 0.2
+    #         print()
+    #     all_poss=['.','o','v','^']
+    #     all_colors=['red', 'orange', 'green', 'purple']
+
+
+    #     for x in range(len(linenos)):
+    #         fstring = "{0}(".format(fnames[x])
+    #         fstring += ')'
+    #         y = random.random() * (numargs[x] + 0.1)
+    #         plt.plot(linenos[x],y,marker=all_poss[numargs[x]], markerfacecolor=all_colors[numargs[x]], markersize=23, markeredgecolor="black", label=fstring)
+    #         #plt.text(linenos[x]+0.5, y-0.5, fstring, horizontalalignment='left', size='medium', color='black', weight='semibold')
+
+    #     plt.axis('off')
+    #     plt.savefig(self.outpath)
 
 
 

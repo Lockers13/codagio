@@ -2,6 +2,8 @@ import ast
 import argparse
 from ast_visitor import AstTreeVisitor
 from prog_profiler import Profiler
+import json
+# from mpl_draw import SourceDrawer
 
 def parse_clargs():
     ap = argparse.ArgumentParser() 
@@ -24,7 +26,13 @@ parsed_tree = ast.parse((open(filename)).read())
 ast_visitor = AstTreeVisitor()
 ast_visitor.visit(parsed_tree)
 
-profiler = Profiler(filename, ast_visitor.program_dict)
+prog_dict = ast_visitor.program_dict
+
+profiler = Profiler(filename, prog_dict)
 profiler.profile()
 
-rprint_dict(ast_visitor.program_dict)
+with open("analysis.json", 'w') as f:
+    f.write(json.dumps(prog_dict))
+
+#rprint_dict(ast_visitor.program_dict)
+
