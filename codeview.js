@@ -15,6 +15,7 @@ document.addEventListener("DOMContentLoaded", function(event){
                 ld.push(parseFloat(analysis["fdefs"][fdef_keys[j]]["line_profile"][line_no_keys[z]]["hits"]))
                 ld.push(parseFloat(analysis["fdefs"][fdef_keys[j]]["line_profile"][line_no_keys[z]]["time"]))
                 ld.push(parseFloat(analysis["fdefs"][fdef_keys[j]]["line_profile"][line_no_keys[z]]["%time"]))
+                ld.push(line_no_keys[z])
                 line_data.push(ld)
 
             }
@@ -24,13 +25,20 @@ document.addEventListener("DOMContentLoaded", function(event){
         for(let i = 0, k = 0; i < lines.length; i++) {
             let bg_colour = "white"
             let line = lines[i].replace(/\s/g, '&nbsp;')
-            if(line_data[k][0] == i){
-                bg_colour = line_data[k][3] < 50 ? (line_data[k][3] < 15 ? "#90ee90": "ffdfbf"): "#ff7f7f"
-                k++
+            try {
+                if(line_data[k][0] == i){
+                    bg_colour = line_data[k][3] < 50 ? (line_data[k][3] < 15 ? "#90ee90": "ffdfbf"): "#ff7f7f"
+                    k++
+                }
             }
-            code_block.innerHTML += "<p style='background-color:" + bg_colour + "'>" + line + "</p>"
+            catch {
+                ;
+            }
+            code_block.innerHTML += "<span style='background-color:" + bg_colour + "'>" + line + "</span><br>"
         }
     })
 
 })
+
+
 
