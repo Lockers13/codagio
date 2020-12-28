@@ -19,14 +19,13 @@ def rprint_dict(nested, indent=0):
 
 args = parse_clargs()
 # filename = input(str("Please enter the name of a file to parse: "))
-filename = "quicksort.py"
+filename = "tester.py"
 parsed_tree = ast.parse((open(filename)).read())
 
 ast_visitor = AstTreeVisitor()
 ast_visitor.visit(parsed_tree)
 
 prog_dict = ast_visitor.program_dict
-rprint_dict(prog_dict)
 print(ast_visitor.count_hash)
 
 profiler = Profiler(filename, prog_dict)

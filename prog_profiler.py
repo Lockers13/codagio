@@ -52,6 +52,7 @@ class Profiler():
             output = process.stdout.readlines()
             fdefs = self.program_dict["fdefs"]
             fdef_keys = fdefs.keys()
+ 
 
             for line in output:
                 line = line.decode("utf-8").strip()
@@ -74,7 +75,7 @@ class Profiler():
                     else:
                         try:
                             write_lprofs()
-                        except ValueError:
+                        except Exception as e:
                             continue
                 else:
                     continue
@@ -110,7 +111,7 @@ class Profiler():
                             fdefs[fdef_k]["ncalls"] = split_line[0]
                             fdefs[fdef_k]["tot_time"] = split_line[1]
                             fdefs[fdef_k]["cum_time"] = split_line[3]
-            except:
+            except Exception as e:
                 pass
             
     def __gnu_time_stats(self):
@@ -126,12 +127,11 @@ class Profiler():
             split_line = line.split(": ")
             try:
                 prog_dict["{0}".format(str(split_line[0]))] = float(split_line[1])
-            except ValueError:
+            except:
                 pass
 
     def profile(self, args):
         self.__cprof()
-        if args.get("g"):
-            self.__gnu_time_stats()
+        self.__gnu_time_stats()
         self.__lprof()
         ### And so on ###    
