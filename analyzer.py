@@ -28,6 +28,7 @@ ast_visitor.visit(parsed_tree)
 
 prog_dict = ast_visitor.program_dict
 rprint_dict(prog_dict)
+print(ast_visitor.count_hash)
 
 # profiler = Profiler(filename, prog_dict)
 # profiler.profile()
