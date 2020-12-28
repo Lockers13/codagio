@@ -70,12 +70,15 @@ class AstTreeVisitor(ast.NodeVisitor):
             else:
                 self.count_hash["ops"] += 1
                 self.program_dict["fdefs"][self.fdef_key]["num_ops"] += 1
+                if isinstance (body_node.value, ast.Call):
+                    self.__process_call(body_node.value, node_dict)
                 node_dict["op_{0}".format(self.count_hash["ops"])] = {
                     "type": type(body_node).__name__.lower(),
                     "lineno": body_node.lineno,
-                    "level": self.count_hash["level"]
+                    "level": self.count_hash["level"],
+                    "value": type(body_node.value).__name__.lower()
                 }
-                    
+                     
         self.count_hash["level"] -= 1
 
     def __process_binop(self, arg):

@@ -30,11 +30,11 @@ prog_dict = ast_visitor.program_dict
 rprint_dict(prog_dict)
 print(ast_visitor.count_hash)
 
-profiler = Profiler(filename, prog_dict)
-profiler.profile()
+# profiler = Profiler(filename, prog_dict)
+# profiler.profile()
 
-with open("analysis.json", 'w') as f:
-    f.write(json.dumps(prog_dict))
+# with open("analysis.json", 'w') as f:
+#     f.write(json.dumps(prog_dict))
 
-rprint_dict(ast_visitor.program_dict)
+# rprint_dict(ast_visitor.program_dict)
 
