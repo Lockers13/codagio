@@ -15,7 +15,7 @@ class AstTreeVisitor(ast.NodeVisitor):
         for pcat in self.__parse_categories:
             self.program_dict[pcat] = OrderedDict()
             self.count_hash[pcat] = 0
-        self.count_hash["level"] = 0
+        self.count_hash["level"] = -1
         self.count_hash["ops"] = 0
         self.fname = None
     
@@ -140,6 +140,7 @@ class AstTreeVisitor(ast.NodeVisitor):
         self.generic_visit(node)
 
     def visit_FunctionDef(self, node):
+        self.count_hash["level"] += 1
         fdef_dict = self.program_dict["fdefs"]
         self.count_hash["fdefs"] += 1
         fdef_key = "fdef_{0}".format(self.count_hash["fdefs"])
@@ -148,6 +149,7 @@ class AstTreeVisitor(ast.NodeVisitor):
 
         fdef_dict[fdef_key]["retval"] = node.returns
         fdef_dict[fdef_key]["lineno"] = node.lineno
+        fdef_dict[fdef_key]["level"] = self.count_hash["level"]
         fdef_dict[fdef_key]["args"] = []
         for arg in node.args.args:
             fdef_dict[fdef_key]["args"].append(arg.arg)
@@ -159,4 +161,5 @@ class AstTreeVisitor(ast.NodeVisitor):
         for cat in ["whiles", "fors", "ifs", "ops", "calls"]:
             self.program_dict["fdefs"][self.fdef_key]["num_{0}".format(cat)] = 0
         self.__process_body(node, body_dict)
+        self.count_hash["level"] -= 1
         self.generic_visit(node)
