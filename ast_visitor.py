@@ -67,6 +67,8 @@ class AstTreeVisitor(ast.NodeVisitor):
                     self.__process_call(body_node.value, node_dict)
                 else:
                     node_dict["expr"] = type(body_node.value).__name__
+            elif isinstance(body_node, ast.FunctionDef):
+                pass
             else:
                 self.count_hash["ops"] += 1
                 self.program_dict["fdefs"][self.fdef_key]["num_ops"] += 1

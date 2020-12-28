@@ -22,7 +22,8 @@ class Profiler():
             profiled_lines = 0
 
             for lineno in lines:
-                contents.insert((lineno-1) + profiled_lines, "{0}\n".format(token))
+                num_spaces = len(contents[lineno-1+profiled_lines]) - len(contents[lineno-1+profiled_lines].lstrip())
+                contents.insert((lineno-1) + profiled_lines, "{0}{1}\n".format(" "*num_spaces, token))
                 profiled_lines += 1
 
             split_fname = filename.split(".")
@@ -119,6 +120,7 @@ class Profiler():
         process = subprocess.Popen([time_cmd,  "--verbose", "python", "{0}".format(self.filename)], stderr=subprocess.PIPE, stdout=dev_null)
         dev_null.close()
         output = process.stderr.readlines()
+
         for line in output:
             line = line.decode("utf-8").strip()
             split_line = line.split(": ")
@@ -127,8 +129,9 @@ class Profiler():
             except ValueError:
                 pass
 
-    def profile(self):
+    def profile(self, args):
         self.__cprof()
-        self.__gnu_time_stats()
+        if args.get("g"):
+            self.__gnu_time_stats()
         self.__lprof()
         ### And so on ###    

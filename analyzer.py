@@ -3,11 +3,10 @@ import argparse
 from ast_visitor import AstTreeVisitor
 from prog_profiler import Profiler
 import json
-# from mpl_draw import SourceDrawer
 
 def parse_clargs():
     ap = argparse.ArgumentParser() 
-    ap.add_argument("-m", action="store_true")
+    ap.add_argument("-g", action="store_true")
     return vars(ap.parse_args())
 
 def rprint_dict(nested, indent=0):
@@ -30,11 +29,11 @@ prog_dict = ast_visitor.program_dict
 rprint_dict(prog_dict)
 print(ast_visitor.count_hash)
 
-# profiler = Profiler(filename, prog_dict)
-# profiler.profile()
+profiler = Profiler(filename, prog_dict)
+profiler.profile(args)
 
-# with open("analysis.json", 'w') as f:
-#     f.write(json.dumps(prog_dict))
+with open("analysis.json", 'w') as f:
+    f.write(json.dumps(prog_dict))
 
-# rprint_dict(ast_visitor.program_dict)
+rprint_dict(ast_visitor.program_dict)
 
