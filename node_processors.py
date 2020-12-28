@@ -5,24 +5,22 @@ bin_ops = {"Add": '+', "Sub": '-', "Mult": '*', "Div": '/', "FloorDiv": "//",
            "BitOr": '|', "BitXor": '^', "BitAnd": '&', "MatMult": '@', "Lt": '<', "Gt": '>'}
 
 def process_test(test, test_dict):
-    global bin_ops
-    test_dict[type(test).__name__.lower()] = []
-    tdict = vars(test)
-    for k,v in tdict.items():
-        try:
-            val_iter = iter(v)
-            test_dict[k] = []
-            for vv in val_iter:
-                if isinstance(vv, ast.Name):
-                    test_dict[k].append(vv.id)
-                else:
-                    test_dict[k].append(bin_ops[type(vv).__name__])
-        except:
-            if isinstance(v, ast.Name):
-                test_dict[k] = v.id
-            elif isinstance(v, ast.Subscript):
-                test_dict[k] = "{0}[{1}]".format(str(v.value.id), v.slice.value.id)
-    test_dict["brute_fields"] = tdict
+    test_dict[type(test).__name__.lower()] = ""
+    
+    #     try:
+    #         val_iter = iter(v)
+    #         test_dict[k] = []
+    #         for vv in val_iter:
+    #             if isinstance(vv, ast.Name):
+    #                 test_dict[k].append(vv.id)
+    #             else:
+    #                 test_dict[k].append(bin_ops[type(vv).__name__])
+    #     except:
+    #         if isinstance(v, ast.Name):
+    #             test_dict[k] = v.id
+    #         elif isinstance(v, ast.Subscript):
+    #             test_dict[k] = "{0}[{1}]".format(str(v.value.id), v.slice.value.id)
+    # test_dict["brute_fields"] = tdict
 
     # global bin_ops
     # test_vars = vars(test)
@@ -89,13 +87,11 @@ def process_for(node, node_dict):
                 node_dict["for"]["body"][k] = v
 
 def process_while(node, node_dict):
-    node_dict["while"] = {}
-    node_dict["while"]["test"] = {}
-    process_test(node.test, node_dict["while"]["test"])
-    node_dict["while"]["body"] = {}
-    inner_body_dict = node_dict["while"]["body"]
-    for i in node.body:
-        process_body(i, inner_body_dict)
+    while_id = "{0}_{1}".format(type(node).__name__, node.lineno)
+    node_dict[while_id] = {}
+    process_test(node.test, node_dict[while_id]["test"])
+    node_dict[while_id]["body"] = {}
+    
 
 def process_targets(node, node_dict):
     targ_list = []

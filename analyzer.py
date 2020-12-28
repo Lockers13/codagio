@@ -27,12 +27,13 @@ ast_visitor = AstTreeVisitor()
 ast_visitor.visit(parsed_tree)
 
 prog_dict = ast_visitor.program_dict
+rprint_dict(prog_dict)
 
-profiler = Profiler(filename, prog_dict)
-profiler.profile()
+# profiler = Profiler(filename, prog_dict)
+# profiler.profile()
 
-with open("analysis.json", 'w') as f:
-    f.write(json.dumps(prog_dict))
+# with open("analysis.json", 'w') as f:
+#     f.write(json.dumps(prog_dict))
 
 #rprint_dict(ast_visitor.program_dict)
 

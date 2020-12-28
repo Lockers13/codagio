@@ -15,7 +15,42 @@ class AstTreeVisitor(ast.NodeVisitor):
         for pcat in self.__parse_categories:
             self.program_dict[pcat] = OrderedDict()
             self.count_hash[pcat] = 0
-            
+
+    def __process_while(self, node, node_dict):
+        while_id = "{0}_{1}".format(type(node).__name__.lower(), node.lineno)
+        node_dict[while_id] = {}
+        node_dict[while_id]["body"] = {}
+        body_dict = node_dict[while_id]["body"]
+        body_dict["test_type"] = type(node.test).__name__.lower()
+        self.__process_body(node, body_dict)
+
+
+    def __process_if(self, node, node_dict):
+        if_id = "{0}_{1}".format(type(node).__name__.lower(), node.lineno)
+        node_dict[if_id] = {}
+        node_dict[if_id]["body"] = {}
+        body_dict = node_dict[if_id]["body"]
+        self.__process_body(node, body_dict)
+
+    def __process_for(self, node, node_dict):
+        for_id = "{0}_{1}".format(type(node).__name__.lower(), node.lineno)
+        node_dict[for_id] = {}
+        node_dict[for_id]["body"] = {}
+        body_dict = node_dict[for_id]["body"]
+        self.__process_body(node, body_dict)
+
+
+    def __process_body(self, node, node_dict):
+        for body_node in node.body:
+            if isinstance(body_node, ast.While):
+                self.__process_while(body_node, node_dict)
+            elif isinstance(body_node, ast.For):
+                self.__process_for(body_node, node_dict)
+            elif isinstance(body_node, ast.If):
+                self.__process_if(body_node, node_dict)
+
+
+
     def __process_binop(self, arg):
         binop_list = []
         for i in range(3):
@@ -45,6 +80,7 @@ class AstTreeVisitor(ast.NodeVisitor):
         else:
             call_dict[call_key]["name"] = node.func.attr
             call_dict[call_key]["lineno"] = node.func.lineno
+
 
     def __process_args(self, arg_node, call_dict):
         call_dict["args"] = []
@@ -86,5 +122,13 @@ class AstTreeVisitor(ast.NodeVisitor):
         for arg in node.args.args:
             fdef_dict[fdef_key]["args"].append(arg.arg)
         fdef_dict[fdef_key]["body"] = {}
+        body_dict = fdef_dict[fdef_key]["body"]
+
+        self.__process_body(node, body_dict)
+
+        
+        # FOR LOOPS
+        # print("ENDFUNC =>", node.body[-1]lineno)
         ### process body ###
         self.generic_visit(node)
+
