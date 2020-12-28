@@ -3,7 +3,7 @@ from collections import OrderedDict
 
 class AstTreeVisitor(ast.NodeVisitor):
 
-    __parse_categories = ["modules", "fdefs", "fcalls", "whiles", "ifs", "fors"]
+    __parse_categories = ["modules", "fdefs", "fcalls", "whiles", "ifs", "fors", "assigns", "aug_assigns", "calls"]
 
     __bin_ops = {"Add": '+', "Sub": '-', "Mult": '*', "Div": '/', "FloorDiv": "//",
            "Mod": '%', "Pow": "**", "LShift": "<<", "RShift": ">>",
@@ -16,36 +16,30 @@ class AstTreeVisitor(ast.NodeVisitor):
             self.program_dict[pcat] = OrderedDict()
             self.count_hash[pcat] = 0
         self.count_hash["level"] = 0
+        self.count_hash["ops"] = 0
+        self.fname = None
+    
+    def __prep_body_dict(self, node, node_dict, count_key):
+        identifier = "{0}_{1}".format(type(node).__name__.lower(), self.count_hash[count_key])
+        node_dict[identifier] = {}
+        node_dict[identifier]["lineno"] = node.lineno
+        node_dict[identifier]["level"] = self.count_hash["level"]
+        node_dict[identifier]["body"] = {}
+        return node_dict[identifier]["body"]
 
     def __process_while(self, node, node_dict, nested=False):
-        while_id = "{0}_{1}".format(type(node).__name__.lower(), self.count_hash["whiles"])
-        node_dict[while_id] = {}
-        node_dict[while_id]["lineno"] = node.lineno
-        node_dict[while_id]["level"] = self.count_hash["level"]
-        node_dict[while_id]["body"] = {}
-        body_dict = node_dict[while_id]["body"]
+        body_dict = self.__prep_body_dict(node, node_dict, "whiles")
         body_dict["test_type"] = type(node.test).__name__.lower()
         body_dict["nested"] = nested
         self.__process_body(node, body_dict)
 
-
     def __process_if(self, node, node_dict):
-        if_id = "{0}_{1}".format(type(node).__name__.lower(), self.count_hash["ifs"])
-        node_dict[if_id] = {}
-        node_dict[if_id]["lineno"] = node.lineno
-        node_dict[if_id]["level"] = self.count_hash["level"]
-        node_dict[if_id]["body"] = {}
-        body_dict = node_dict[if_id]["body"]
+        body_dict = self.__prep_body_dict(node, node_dict, "ifs")
         body_dict["test_type"] = type(node.test).__name__.lower()
         self.__process_body(node, body_dict)
 
     def __process_for(self, node, node_dict, nested=False):
-        for_id = "{0}_{1}".format(type(node).__name__.lower(), self.count_hash["fors"])
-        node_dict[for_id] = {}
-        node_dict[for_id]["lineno"] = node.lineno
-        node_dict[for_id]["level"] = self.count_hash["level"]
-        node_dict[for_id]["body"] = {}
-        body_dict = node_dict[for_id]["body"]
+        body_dict = self.__prep_body_dict(node, node_dict, "fors")
         body_dict["nested"] = nested
         self.__process_body(node, body_dict)
 
@@ -54,17 +48,34 @@ class AstTreeVisitor(ast.NodeVisitor):
         for body_node in node.body:
             if isinstance(body_node, ast.While):
                 self.count_hash["whiles"] += 1
+                self.program_dict["fdefs"][self.fdef_key]["num_whiles"] += 1
                 nested = True if isinstance(node, ast.While) or isinstance(node, ast.For) else False
                 self.__process_while(body_node, node_dict, nested)
             elif isinstance(body_node, ast.For):
                 self.count_hash["fors"] += 1
+                self.program_dict["fdefs"][self.fdef_key]["num_fors"] += 1
                 nested = True if isinstance(node, ast.While) or isinstance(node, ast.For) else False
                 self.__process_for(body_node, node_dict, nested)
             elif isinstance(body_node, ast.If):
                 self.count_hash["ifs"] += 1
+                self.program_dict["fdefs"][self.fdef_key]["num_ifs"] += 1
                 self.__process_if(body_node, node_dict)
+            elif isinstance(body_node, ast.Expr):
+                if isinstance(body_node.value, ast.Call):
+                    self.count_hash["calls"] += 1
+                    self.program_dict["fdefs"][self.fdef_key]["num_calls"] += 1
+                    self.__process_call(body_node.value, node_dict)
+                else:
+                    node_dict["expr"] = type(body_node.value).__name__
             else:
-                node_dict["op"] = type(body_node).__name__.lower()
+                self.count_hash["ops"] += 1
+                self.program_dict["fdefs"][self.fdef_key]["num_ops"] += 1
+                node_dict["op_{0}".format(self.count_hash["ops"])] = {
+                    "type": type(body_node).__name__.lower(),
+                    "lineno": body_node.lineno,
+                    "level": self.count_hash["level"]
+                }
+                    
         self.count_hash["level"] -= 1
 
     def __process_binop(self, arg):
@@ -88,7 +99,7 @@ class AstTreeVisitor(ast.NodeVisitor):
         self.count_hash["fcalls"] += 1
         call_key = "fcall_{0}".format(self.count_hash["fcalls"])
         call_dict[call_key] = {}
-        call_dict[call_key]["parent"] = parent
+        call_dict[call_key]["param_caller"] = parent
         self.__process_args(node.args, call_dict[call_key])
         if isinstance(node.func, ast.Name):
             call_dict[call_key]["name"] = node.func.id
@@ -97,14 +108,13 @@ class AstTreeVisitor(ast.NodeVisitor):
             call_dict[call_key]["name"] = node.func.attr
             call_dict[call_key]["lineno"] = node.func.lineno
 
-
     def __process_args(self, arg_node, call_dict):
-        call_dict["args"] = []
+        call_dict["params"] = []
         for arg in arg_node:
             if isinstance(arg, ast.Num):
-                call_dict["args"].append(arg.n)
+                call_dict["params"].append(arg.n)
             elif isinstance(arg, ast.Name):
-                call_dict["args"].append(arg.id)
+                call_dict["params"].append(arg.id)
             elif isinstance(arg, ast.Call):
                 arg_func = "arg_func_{0}".format(self.count_hash["fcalls"])
                 call_dict[arg_func] = {}
@@ -112,10 +122,10 @@ class AstTreeVisitor(ast.NodeVisitor):
             elif isinstance(arg, ast.BinOp):
                 l, op, r = self.__process_binop(arg)
                 bin_op_str = "{0} {1} {2}".format(l, op, r)
-                call_dict["args"].append(bin_op_str)
+                call_dict["params"].append(bin_op_str)
             elif isinstance(arg, ast.Str):
                 str_message = "\"" + arg.s + "\""
-                call_dict["args"].append(str_message)
+                call_dict["params"].append(str_message)
 
     def visit_Call(self, node):
         self.__process_call(node, self.program_dict["fcalls"])
@@ -132,18 +142,18 @@ class AstTreeVisitor(ast.NodeVisitor):
         fdef_key = "fdef_{0}".format(self.count_hash["fdefs"])
         fdef_dict[fdef_key] = {}
         fdef_dict[fdef_key]["name"] = node.name
+
         fdef_dict[fdef_key]["retval"] = node.returns
         fdef_dict[fdef_key]["lineno"] = node.lineno
         fdef_dict[fdef_key]["args"] = []
         for arg in node.args.args:
             fdef_dict[fdef_key]["args"].append(arg.arg)
         fdef_dict[fdef_key]["body"] = {}
-        body_dict = fdef_dict[fdef_key]["body"]
-
-        self.__process_body(node, body_dict)
-
         
-        # FOR LOOPS
-        # print("ENDFUNC =>", node.body[-1]lineno)
-        ### process body ###
+        body_dict = fdef_dict[fdef_key]["body"]
+        fdef_dict = fdef_dict[fdef_key]
+        self.fdef_key = fdef_key
+        for cat in ["whiles", "fors", "ifs", "ops", "calls"]:
+            self.program_dict["fdefs"][self.fdef_key]["num_{0}".format(cat)] = 0
+        self.__process_body(node, body_dict)
         self.generic_visit(node)
