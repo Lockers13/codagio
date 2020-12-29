@@ -72,6 +72,7 @@ class Profiler():
                 ### viz. real_time_per_line = %time in line (lprof) * total cumulative function time (cProf)
 
                 float(second_item)
+                print("HEYOOO: ", int(split_line[0]), fnum)
                 fdefs[fdef_k]["line_profile"]["line_{0}".format(int(split_line[0]) - fnum)] = {}
                 tot_time = fdefs[fdef_k]["tot_time"]
                 cum_time = fdefs[fdef_k]["cum_time"]
@@ -104,6 +105,7 @@ class Profiler():
                         fname = split_line[1]
                         fdef_k = self.udef_info[fname][0]   
                         fdefs[fdef_k]["line_profile"] = {}
+                        # get function number from fdef_key => needed for offsetting line number due to addition of '@profile' decorators
                         fnum = int(re.search(r'\d+', fdef_k).group())
                     else:
                         # if we are inside the function stats, try to write results to appropriate fdef subdict
