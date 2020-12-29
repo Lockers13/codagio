@@ -8,9 +8,12 @@ class Profiler():
     def __init__(self, filename, program_dict):
         self.filename = filename
         self.program_dict = program_dict
-        self.udef_info = [(self.program_dict["fdefs"][fdef_key]["name"], \
-            self.program_dict["fdefs"][fdef_key]["lineno"]) \
-                  for fdef_key in self.program_dict.get("fdefs").keys()]
+        self.udef_info = self.__get_udef_info()
+
+    def __get_udef_info(self):
+        fdefs = self.program_dict["fdefs"]
+        return {fdefs[fdef_key]["name"]: [fdef_key, fdefs[fdef_key]["lineno"]] \
+            for fdef_key in fdefs.keys()}
 
     def __lprof(self):
         ### Note: check if line_profiler is installed
@@ -51,9 +54,7 @@ class Profiler():
             process = subprocess.Popen(["kernprof", "-l", "-v", "{0}".format(pro_file)], stdout=subprocess.PIPE)
             output = process.stdout.readlines()
             fdefs = self.program_dict["fdefs"]
-            fdef_keys = fdefs.keys()
  
-
             for line in output:
                 line = line.decode("utf-8").strip()
                 split_line = line.split(maxsplit=5)
@@ -64,14 +65,11 @@ class Profiler():
                     continue
 
                 if len(split_line) == 6 or first_item == "Total" or first_item == "Function:":
-
                     if first_item == "Function:":
                         fname = split_line[1]
-                        for fdef_key in fdef_keys:
-                            if fdefs[fdef_key]["name"] == fname:
-                                fdef_k = fdef_key 
-                                fdefs[fdef_k]["line_profile"] = {}
-                                fnum = int(re.search(r'\d+', fdef_k).group())
+                        fdef_k = self.udef_info[fname][0]   
+                        fdefs[fdef_k]["line_profile"] = {}
+                        fnum = int(re.search(r'\d+', fdef_k).group())
                     else:
                         try:
                             write_lprofs()
@@ -86,7 +84,7 @@ class Profiler():
             print("Error: line_profiler module must be installed for line-by-line profiling!")
             return
 
-        udef_lines = [fdef[1] for fdef in self.udef_info]
+        udef_lines = [self.udef_info[fdef_name][1] for fdef_name in self.udef_info.keys()]
         pro_token = "@profile"
         pro_file = make_pro_file(self.filename, udef_lines, pro_token)
         parse_pro_file(pro_file)
@@ -96,7 +94,8 @@ class Profiler():
     def __cprof(self):
         process = subprocess.Popen(["python", "-m", "cProfile", "-s", "time", "{0}".format(self.filename)], stdout=subprocess.PIPE)
         output = process.stdout.readlines()
-        udef_names = [fdef[0] for fdef in self.udef_info]
+
+        udef_names = self.udef_info.keys()
         fdefs = self.program_dict.get("fdefs")
         ### Note : watch for unintentionally long output ###
         for line in output:
@@ -105,12 +104,10 @@ class Profiler():
                 u_fname = re.search('\(([^)]+)', line.split()[5]).group(1)
                 if u_fname in udef_names:
                     split_line = line.split()
-                    for fdef_key in fdefs.keys():
-                        if fdefs[fdef_key]["name"] == u_fname:
-                            fdef_k = fdef_key 
-                            fdefs[fdef_k]["ncalls"] = split_line[0]
-                            fdefs[fdef_k]["tot_time"] = split_line[1]
-                            fdefs[fdef_k]["cum_time"] = split_line[3]
+                    fdef_k = self.udef_info[u_fname][0]
+                    fdefs[fdef_k]["ncalls"] = split_line[0]
+                    fdefs[fdef_k]["tot_time"] = split_line[1]
+                    fdefs[fdef_k]["cum_time"] = split_line[3]
             except Exception as e:
                 pass
             
@@ -132,6 +129,7 @@ class Profiler():
 
     def profile(self, args):
         self.__cprof()
-        self.__gnu_time_stats()
+        if args.get("g"):
+            self.__gnu_time_stats()
         self.__lprof()
         ### And so on ###    

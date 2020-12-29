@@ -17,22 +17,24 @@ def rprint_dict(nested, indent=0):
         else:
             print("{0}{1}: {2}".format("    " * indent, k, v))
 
-args = parse_clargs()
-# filename = input(str("Please enter the name of a file to parse: "))
-filename = "tester.py"
-parsed_tree = ast.parse((open(filename)).read())
+def main():
+    args = parse_clargs()
+    # filename = input(str("Please enter the name of a file to parse: "))
+    filename = "quicksort.py"
+    parsed_tree = ast.parse((open(filename)).read())
 
-ast_visitor = AstTreeVisitor()
-ast_visitor.visit(parsed_tree)
+    ast_visitor = AstTreeVisitor()
+    ast_visitor.visit(parsed_tree)
 
-prog_dict = ast_visitor.program_dict
-print(ast_visitor.count_hash)
+    prog_dict = ast_visitor.program_dict
+    print(ast_visitor.count_hash)
 
-profiler = Profiler(filename, prog_dict)
-profiler.profile(args)
+    profiler = Profiler(filename, prog_dict)
+    profiler.profile(args)
 
-with open("analysis.json", 'w') as f:
-    f.write(json.dumps(prog_dict))
+    with open("analysis.json", 'w') as f:
+        f.write(json.dumps(prog_dict))
 
-rprint_dict(ast_visitor.program_dict)
+    rprint_dict(ast_visitor.program_dict)
 
+main()
