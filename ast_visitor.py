@@ -2,7 +2,7 @@ import ast
 from collections import OrderedDict
 
 class AstTreeVisitor(ast.NodeVisitor):
-    """Class for visiting ast tree"""
+    """Class for visiting AST tree"""
 
     # private instance var determining what entries to create in prog dict
     __parse_categories = ["modules", "fdefs", "fcalls", "whiles", "ifs", "fors", "assigns", "aug_assigns", "calls"]
@@ -14,7 +14,8 @@ class AstTreeVisitor(ast.NodeVisitor):
 
     def __init__(self):
         self.program_dict = OrderedDict()
-        self.count_hash = {}
+        self.program_dict["count_hash"] = {}
+        self.count_hash = self.program_dict["count_hash"]
         for pcat in self.__parse_categories:
             self.program_dict[pcat] = OrderedDict()
             self.count_hash[pcat] = 0
@@ -29,7 +30,7 @@ class AstTreeVisitor(ast.NodeVisitor):
 
         Returns initialized body dict"""
 
-        # create unique identifier key for any body elem
+        # create unique identifier key for any body node
         identifier = "{0}_{1}".format(type(node).__name__.lower(), self.count_hash[count_key])
         node_dict[identifier] = OrderedDict()
         node_dict[identifier]["lineno"] = node.lineno
@@ -187,7 +188,7 @@ class AstTreeVisitor(ast.NodeVisitor):
     def visit_FunctionDef(self, node):
         """AST visitor in-built method, executed whenever a function def is encountered in AST tree visit.
 
-        Returns None; must call self.generic_visit(node)"""
+        Returns None; must call self.generic_visit(node) as last statement"""
 
         self.count_hash["level"] += 1
         fdef_dict = self.program_dict["fdefs"]
