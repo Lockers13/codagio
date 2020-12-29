@@ -2,9 +2,12 @@ import ast
 from collections import OrderedDict
 
 class AstTreeVisitor(ast.NodeVisitor):
+    """Class for visiting ast tree"""
 
+    # private instance var determining what entries to create in prog dict
     __parse_categories = ["modules", "fdefs", "fcalls", "whiles", "ifs", "fors", "assigns", "aug_assigns", "calls"]
 
+    # binary operation hash map, needed for translating AST's binop objects to more readable form
     __bin_ops = {"Add": '+', "Sub": '-', "Mult": '*', "Div": '/', "FloorDiv": "//",
            "Mod": '%', "Pow": "**", "LShift": "<<", "RShift": ">>",
            "BitOr": '|', "BitXor": '^', "BitAnd": '&', "MatMult": '@', "Lt": '<', "Gt": '>'}
@@ -15,35 +18,65 @@ class AstTreeVisitor(ast.NodeVisitor):
         for pcat in self.__parse_categories:
             self.program_dict[pcat] = OrderedDict()
             self.count_hash[pcat] = 0
+        # count var to record indentation level
         self.count_hash["level"] = -1
+        # count var to record num ops
         self.count_hash["ops"] = 0
         self.fname = None
     
     def __prep_body_dict(self, node, node_dict, count_key):
+        """Utility method to initialize body_dict.
+
+        Returns initialized body dict"""
+
+        # create unique identifier key for any body elem
         identifier = "{0}_{1}".format(type(node).__name__.lower(), self.count_hash[count_key])
-        node_dict[identifier] = {}
+        node_dict[identifier] = OrderedDict()
         node_dict[identifier]["lineno"] = node.lineno
         node_dict[identifier]["level"] = self.count_hash["level"]
         node_dict[identifier]["body"] = {}
         return node_dict[identifier]["body"]
 
     def __process_while(self, node, node_dict, nested=False):
+        """Utility method to recursively process any 'while' constructs encountered in AST tree,
+        where by 'process' we mean => write pertinent info to appropriate place in prog dict.
+        Note: all such helper methods call '__process_body()' for the purposes of exploiting 
+        the intrinsically recursive nature of the AST tree.
+
+        Returns None"""
+
         body_dict = self.__prep_body_dict(node, node_dict, "whiles")
         body_dict["test_type"] = type(node.test).__name__.lower()
         body_dict["nested"] = nested
         self.__process_body(node, body_dict)
 
     def __process_if(self, node, node_dict):
+        """Utility method to recursively process any 'if' constructs encountered in AST tree.
+
+        Returns None"""
+
         body_dict = self.__prep_body_dict(node, node_dict, "ifs")
         body_dict["test_type"] = type(node.test).__name__.lower()
         self.__process_body(node, body_dict)
 
     def __process_for(self, node, node_dict, nested=False):
+        """Utility method to recursively process any 'for' constructs encountered in AST tree.
+
+        Returns None"""
+
         body_dict = self.__prep_body_dict(node, node_dict, "fors")
         body_dict["nested"] = nested
         self.__process_body(node, body_dict)
 
     def __process_body(self, node, node_dict):
+        """Utility method to recursively process the body of any given AST construct containing a body. 
+        At the highest level, we start by processing the body of function definitions, then the bodies 
+        of any while/for/if, etc., nodes encountered therein, and so on and so forth, until we reach a node with no body, 
+        in which case we simply write the name of the node ('type(node).__name__'), and some other basic info.,
+        to our prog dict and return None.
+        
+        Returns None"""
+
         self.count_hash["level"] += 1
         for body_node in node.body:
             if isinstance(body_node, ast.While):
@@ -91,6 +124,10 @@ class AstTreeVisitor(ast.NodeVisitor):
         self.count_hash["level"] -= 1
 
     def __process_binop(self, arg):
+        """Utility method to make AST BinOp constructs more readable.
+
+        Returns binop_list => e.g. ['a', '**', '2']"""
+
         binop_list = []
         for i in range(3):
             vargs = list(vars(arg).values())
@@ -108,6 +145,10 @@ class AstTreeVisitor(ast.NodeVisitor):
         return binop_list
 
     def __process_call(self, node, call_dict, parent=None):
+        """Utility method to recursively process any 'call' constructs encountered in AST tree.
+
+        Returns None"""
+
         self.count_hash["fcalls"] += 1
         call_key = "fcall_{0}".format(self.count_hash["fcalls"])
         call_dict[call_key] = {}
@@ -121,6 +162,10 @@ class AstTreeVisitor(ast.NodeVisitor):
             call_dict[call_key]["lineno"] = node.func.lineno
 
     def __process_args(self, arg_node, call_dict):
+        """Utility method for processing encountered function or method parameters/args.
+
+        Returns None"""
+
         call_dict["params"] = []
         for arg in arg_node:
             if isinstance(arg, ast.Num):
@@ -139,16 +184,11 @@ class AstTreeVisitor(ast.NodeVisitor):
                 str_message = "\"" + arg.s + "\""
                 call_dict["params"].append(str_message)
 
-    def visit_Call(self, node):
-        self.__process_call(node, self.program_dict["fcalls"])
-        self.generic_visit(node)
-
-    def visit_Module(self, node):
-        mod_dict = self.program_dict["modules"]
-        self.count_hash["modules"] += 1
-        self.generic_visit(node)
-
     def visit_FunctionDef(self, node):
+        """AST visitor in-built method, executed whenever a function def is encountered in AST tree visit.
+
+        Returns None; must call self.generic_visit(node)"""
+
         self.count_hash["level"] += 1
         fdef_dict = self.program_dict["fdefs"]
         self.count_hash["fdefs"] += 1
