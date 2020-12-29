@@ -60,8 +60,8 @@ class Profiler():
             
             Returns None"""
 
-            def parse_lprof_out(output):
-                """Helper function for parsing the bytes output piped in from kernprof.
+            def process_lprof_out(output):
+                """Helper function for processing the bytes output piped in from kernprof.
 
                 Returns None"""
 
@@ -88,7 +88,6 @@ class Profiler():
                     line_info["contents"] = split_line[5]
                 
                 fdefs = self.program_dict["fdefs"]
-
                 for line in output:
                     # received bytes need decoding
                     line = line.decode("utf-8").strip()
@@ -119,7 +118,7 @@ class Profiler():
             process = subprocess.Popen(["kernprof", "-l", "-v", "{0}".format(pro_file)], stdout=subprocess.PIPE)
             # crucially, readlines() is blocking for pipes
             output = process.stdout.readlines()
-            parse_lprof_out(output)
+            process_lprof_out(output)
 
         # check that line profiler is installed for kernprof
         try:
@@ -140,28 +139,35 @@ class Profiler():
         """Method which writes cProfile stats (function by function, rather than line by line) to appropriate fdef subdicts.
 
         Returns None"""
-        
+
+        def process_cprof_out(output):
+            """Helper function for processing the bytes output piped in from cProfile.
+
+            Returns None"""
+            
+            udef_names = self.udef_info.keys()
+            fdefs = self.program_dict.get("fdefs")
+
+            # parse output of external cProfile program and write all pertinent results to appropriate fdef subdict
+            for line in output:
+                line = line.decode("utf-8").strip()
+                try:
+                    u_fname = re.search('\(([^)]+)', line.split()[5]).group(1)
+                    if u_fname in udef_names:
+                        split_line = line.split()
+                        fdef_k = self.udef_info[u_fname][0]
+                        fdefs[fdef_k]["ncalls"] = split_line[0]
+                        fdefs[fdef_k]["tot_time"] = split_line[1]
+                        fdefs[fdef_k]["cum_time"] = split_line[3]
+                except Exception as e:
+                    pass
+
         # call cProfile as subprocess, redirecting stdout to pipe, and read results, as before
         process = subprocess.Popen(["python", "-m", "cProfile", "-s", "time", "{0}".format(self.filename)], stdout=subprocess.PIPE)
         output = process.stdout.readlines()
 
-        udef_names = self.udef_info.keys()
-        fdefs = self.program_dict.get("fdefs")
+        process_cprof_out(output)
 
-        # again parse output of external profiling program and write all pertinent results to appropriate fdef subdict
-        for line in output:
-            line = line.decode("utf-8").strip()
-            try:
-                u_fname = re.search('\(([^)]+)', line.split()[5]).group(1)
-                if u_fname in udef_names:
-                    split_line = line.split()
-                    fdef_k = self.udef_info[u_fname][0]
-                    fdefs[fdef_k]["ncalls"] = split_line[0]
-                    fdefs[fdef_k]["tot_time"] = split_line[1]
-                    fdefs[fdef_k]["cum_time"] = split_line[3]
-            except Exception as e:
-                pass
-            
     def __gnu_time_stats(self):
         """Method which writes global program performance stats to program dict.
 
