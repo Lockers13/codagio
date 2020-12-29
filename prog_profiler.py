@@ -27,7 +27,7 @@ class Profiler():
         def make_pro_file(filename, lines, token):
             """Internal helper function; creates file to be profiled by kernprof by inserting 
             
-            '@profile' decorators at appropriate points in original source file. Returns file to be profiled"""
+            '@profile' decorators at appropriate points in original source file. Returns name of file to be profiled"""
 
             f = open(filename, "r")
             contents = f.readlines()
@@ -60,60 +60,67 @@ class Profiler():
             
             Returns None"""
 
-            def write_lprofs():
-                """Helper method for actual writing of lprof results to appropriate subdicts
+            def parse_lprof_out(output):
+                """Helper function for parsing the bytes output piped in from kernprof.
 
                 Returns None"""
-                
-                ### NB: The times recorded by lprof tool are  misleading due to the overhead incurred by the 
-                ### operation of the tool itself. However, lprof also records a propotional measure of time spent 
-                ### inside a function (%time). So we use this latter, in conjunction with the results returned by cProfile
-                ### to get a more accurate estimate of real time spent executing each line.
-                ### viz. real_time_per_line = %time in line (lprof) * total cumulative function time (cProf)
 
-                float(second_item)
-                print("HEYOOO: ", int(split_line[0]), fnum)
-                fdefs[fdef_k]["line_profile"]["line_{0}".format(int(split_line[0]) - fnum)] = {}
-                tot_time = fdefs[fdef_k]["tot_time"]
-                cum_time = fdefs[fdef_k]["cum_time"]
-                line_info = fdefs[fdef_k]["line_profile"]["line_{0}".format(int(split_line[0]) - fnum)]
-                line_info["hits"] = split_line[1]
-                line_info["time"] = '%.2E' % ((float(split_line[4])/100) * float(cum_time))
-                line_info["time_per_hit"] = '%.2E' % (float(line_info["time"]) / float(line_info["hits"]))
-                line_info["%time"] = split_line[4]
-                line_info["contents"] = split_line[5]
+                def write_lprofs():
+                    """Helper function for actual writing of lprof results to appropriate subdicts
+
+                    Returns None"""
+                    
+                    ### NB: The times recorded by lprof tool are  misleading due to the overhead incurred by the 
+                    ### operation of the tool itself. However, lprof also records a propotional measure of time spent 
+                    ### inside a function (%time). So we use this latter, in conjunction with the results returned by cProfile
+                    ### to get a more accurate estimate of real time spent executing each line.
+                    ### viz. real_time_per_line = %time in line (lprof) * total cumulative function time (cProf)
+
+                    float(second_item)
+                    fdefs[fdef_k]["line_profile"]["line_{0}".format(int(split_line[0]) - fnum)] = {}
+                    tot_time = fdefs[fdef_k]["tot_time"]
+                    cum_time = fdefs[fdef_k]["cum_time"]
+                    line_info = fdefs[fdef_k]["line_profile"]["line_{0}".format(int(split_line[0]) - fnum)]
+                    line_info["hits"] = split_line[1]
+                    line_info["time"] = '%.2E' % ((float(split_line[4])/100) * float(cum_time))
+                    line_info["time_per_hit"] = '%.2E' % (float(line_info["time"]) / float(line_info["hits"]))
+                    line_info["%time"] = split_line[4]
+                    line_info["contents"] = split_line[5]
+                
+                fdefs = self.program_dict["fdefs"]
+
+                for line in output:
+                    # received bytes need decoding
+                    line = line.decode("utf-8").strip()
+                    split_line = line.split(maxsplit=5)
+
+                    try:
+                        first_item, second_item = split_line[0], split_line[1]
+                    except IndexError:
+                        continue
+
+                    if len(split_line) == 6 or first_item == "Total" or first_item == "Function:":
+                        # if we are on a function, get the fname, and then its corresponding key from self.udef_info
+                        if first_item == "Function:":
+                            fname = split_line[1]
+                            fdef_k = self.udef_info[fname][0]   
+                            fdefs[fdef_k]["line_profile"] = {}
+                            # get function number from fdef_key => needed for offsetting line number due to addition of '@profile' decorators
+                            fnum = int(re.search(r'\d+', fdef_k).group())
+                        else:
+                            # if we are inside the function stats, try to write results to appropriate fdef subdict
+                            try:
+                                write_lprofs()
+                            except Exception as e:
+                                continue
+
             
             # call kernprof as subprocess, redirecting stdout to pipe, and read results
             process = subprocess.Popen(["kernprof", "-l", "-v", "{0}".format(pro_file)], stdout=subprocess.PIPE)
             # crucially, readlines() is blocking for pipes
             output = process.stdout.readlines()
-            fdefs = self.program_dict["fdefs"]
- 
-            for line in output:
-                # received bytes need decoding
-                line = line.decode("utf-8").strip()
-                split_line = line.split(maxsplit=5)
+            parse_lprof_out(output)
 
-                try:
-                    first_item, second_item = split_line[0], split_line[1]
-                except IndexError:
-                    continue
-
-                if len(split_line) == 6 or first_item == "Total" or first_item == "Function:":
-                    # if we are on a function, get the fname, and then its corresponding key from self.udef_info
-                    if first_item == "Function:":
-                        fname = split_line[1]
-                        fdef_k = self.udef_info[fname][0]   
-                        fdefs[fdef_k]["line_profile"] = {}
-                        # get function number from fdef_key => needed for offsetting line number due to addition of '@profile' decorators
-                        fnum = int(re.search(r'\d+', fdef_k).group())
-                    else:
-                        # if we are inside the function stats, try to write results to appropriate fdef subdict
-                        try:
-                            write_lprofs()
-                        except Exception as e:
-                            continue
-        
         # check that line profiler is installed for kernprof
         try:
             import line_profiler
@@ -190,4 +197,3 @@ class Profiler():
         if args.get("g"):
             self.__gnu_time_stats()
         self.__lprof()
-  
