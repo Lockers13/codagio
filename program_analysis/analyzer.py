@@ -29,7 +29,7 @@ def main():
     # get arg dict
     args = parse_clargs()
     # script to be parsed
-    filename = "quicksort.py"
+    filename = "ast_visitor.py"
     # parse script using AST module
     parsed_tree = ast.parse((open(filename)).read())
     # initialise ast tree visitor instance
@@ -42,7 +42,7 @@ def main():
     # initialise profiler instance, passing original script name and prog_dict for further writing of profiling info
     profiler = Profiler(filename, prog_dict)
 
-    profiler.profile(args)
+    #profiler.profile(args)
 
     # write prog_dict to disk in json format
     with open("analysis.json", 'w') as f:

@@ -202,4 +202,4 @@ class Profiler():
         self.__cprof()
         if args.get("g"):
             self.__gnu_time_stats()
-        self.__lprof()
+        #self.__lprof()
