@@ -29,7 +29,7 @@ def main():
     # get arg dict
     args = parse_clargs()
     # script to be parsed
-    filename = "ast_visitor.py"
+    filename = "quicksort.py"
     # parse script using AST module
     parsed_tree = ast.parse((open(filename)).read())
     # initialise ast tree visitor instance
@@ -37,7 +37,7 @@ def main():
     # visit ast-parsed script
     ast_visitor.visit(parsed_tree)
     # get populated prog_dict
-    prog_dict = ast_visitor.program_dict
+    prog_dict = ast_visitor.get_program_dict()
     # print(ast_visitor.count_hash)
     # initialise profiler instance, passing original script name and prog_dict for further writing of profiling info
     profiler = Profiler(filename, prog_dict)
@@ -48,6 +48,6 @@ def main():
     with open("analysis.json", 'w') as f:
         f.write(json.dumps(prog_dict))
     # recursively print prog dict using helper function defined above
-    rprint_dict(ast_visitor.program_dict)
+    rprint_dict(prog_dict)
 
 main()
