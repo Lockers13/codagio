@@ -34,7 +34,7 @@ class AstTreeVisitor(ast.NodeVisitor):
     """
 
     # private instance var determining what entries to initialize in global program dict
-    __parse_categories = ["modules", "fdefs", "fcalls", "whiles", "ifs", "fors", "assigns", "aug_assigns", "calls"]
+    __node_types = ["fdefs", "whiles", "ifs", "fors", "assigns", "aug_assigns", "fcalls", "calls"]
 
     # binary operation hash map, needed for translating AST's binop objects to more readable form
     # see '__process_binop()' below for usage
@@ -49,14 +49,17 @@ class AstTreeVisitor(ast.NodeVisitor):
         self.program_dict["count_hash"] = {}
         # get simple instance reference to count hash map
         self.count_hash = self.program_dict["count_hash"]
+        
+        self.program_dict["fdefs"] = OrderedDict()
         # initialize sub dicts
-        for pcat in self.__parse_categories:
-            self.program_dict[pcat] = OrderedDict()
-            self.count_hash[pcat] = 0
+        for n_type in self.__node_types:
+            self.count_hash[n_type] = 0
         # initialize count var to record indentation level [important!]
         self.count_hash["level"] = -1
         # count var to record number of primitive operations (e.g. assign, aug_assign, etc.)
         self.count_hash["ops"] = 0
+        self.count_hash["assigns"] = 0
+        self.count_hash["aug_assigns"] = 0
         self.count_hash["elses"] = 0
         self.fname = None
     
@@ -78,16 +81,23 @@ class AstTreeVisitor(ast.NodeVisitor):
         self.program_dict["fdefs"][self.fdef_key]["num_ops"] += 1
         op_key = "op_{0}".format(self.count_hash["ops"])
         node_dict[op_key] = {}
+        
+        op_type = type(node).__name__.lower()
+        if op_type == "assign":
+            self.count_hash["assigns"] += 1
+        elif op_type == "augassign":
+            self.count_hash["aug_assigns"] += 1
+
         try:
-            value = node.value
+            value = type(node.value).__name__.lower()
             if isinstance(value, ast.Call):
                 self.__process_call(value, node_dict)
         except:
-            value = "Complex AST Object"
+            value = None
 
         node_dict[op_key] = {
-                "value": type(value).__name__.lower(),
-                "type": type(node).__name__.lower(),
+                "value": value,
+                "type": op_type,
                 "lineno": node.lineno,
                 "level": self.count_hash["level"]
         }
@@ -188,10 +198,8 @@ class AstTreeVisitor(ast.NodeVisitor):
             elif isinstance(body_node, ast.FunctionDef):
                 pass
             else:
-                self.count_hash["ops"] += 1
-                self.program_dict["fdefs"][self.fdef_key]["num_ops"] += 1
                 self.__process_simple_op(body_node, node_dict)
-                
+
         # decrement indentation level count upon exiting any node body            
         self.count_hash["level"] -= 1
 
