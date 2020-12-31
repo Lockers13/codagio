@@ -129,11 +129,10 @@ class AstTreeVisitor(ast.NodeVisitor):
         # process body of node
         self.__process_body(node, body_dict)
 
-        ### Todo: functionalize simple op processing, e.g. => __process_op 
-        ### also => coubnt_hash["assigns"] & count_hash["augassigns"] ++
         else_subcount = 0
         for cond_or_op in node.orelse:
             if isinstance(cond_or_op, ast.If):
+                node_dict = node_dict if else_subcount < 1 else else_dict
                 self.__count_hash["ifs"] += 1
                 self.__program_dict["fdefs"][self.fdef_key]["num_ifs"] += 1
                 self.__process_conditional(cond_or_op, node_dict, elseif=True)
@@ -141,9 +140,7 @@ class AstTreeVisitor(ast.NodeVisitor):
                 else_subcount += 1
                 if else_subcount == 1:
                     else_dict["lineno"] = cond_or_op.lineno - 1
-                self.__count_hash["level"] += 1
-                self.__process_simple_op(cond_or_op, else_dict)
-                self.__count_hash["level"] -= 1
+                self.__process_body(cond_or_op, else_dict)
         
     def __process_loop(self, node, node_dict, nested=False):
         """Utility method to recursively process any 'while', 'for' or 'if' node encountered in a function def,
@@ -192,29 +189,31 @@ class AstTreeVisitor(ast.NodeVisitor):
 
         # increment indentation level count before entering any node body
         self.__count_hash["level"] += 1
-
-        for body_node in node.body:
-            if isinstance(body_node, ast.While) or isinstance(body_node, ast.For):
-                body_node_type = type(body_node).__name__.lower()
-                self.__count_hash["{0}s".format(body_node_type)] += 1
-                self.__program_dict["fdefs"][self.fdef_key]["num_{0}s".format(body_node_type)] += 1
-                nested = True if isinstance(node, ast.While) or isinstance(node, ast.For) else False
-                self.__process_loop(body_node, node_dict, nested)
-            elif isinstance(body_node, ast.If):
-                self.__count_hash["ifs"] += 1
-                self.__program_dict["fdefs"][self.fdef_key]["num_ifs"] += 1
-                self.__process_conditional(body_node, node_dict)
-            elif isinstance(body_node, ast.Expr):
-                if isinstance(body_node.value, ast.Call):
-                    self.__count_hash["calls"] += 1
-                    self.__program_dict["fdefs"][self.fdef_key]["num_calls"] += 1
-                    self.__process_call(body_node.value, node_dict)
+        try:
+            for body_node in node.body:
+                if isinstance(body_node, ast.While) or isinstance(body_node, ast.For):
+                    body_node_type = type(body_node).__name__.lower()
+                    self.__count_hash["{0}s".format(body_node_type)] += 1
+                    self.__program_dict["fdefs"][self.fdef_key]["num_{0}s".format(body_node_type)] += 1
+                    nested = True if isinstance(node, ast.While) or isinstance(node, ast.For) else False
+                    self.__process_loop(body_node, node_dict, nested)
+                elif isinstance(body_node, ast.If):
+                    self.__count_hash["ifs"] += 1
+                    self.__program_dict["fdefs"][self.fdef_key]["num_ifs"] += 1
+                    self.__process_conditional(body_node, node_dict)
+                elif isinstance(body_node, ast.Expr):
+                    if isinstance(body_node.value, ast.Call):
+                        self.__count_hash["calls"] += 1
+                        self.__program_dict["fdefs"][self.fdef_key]["num_calls"] += 1
+                        self.__process_call(body_node.value, node_dict)
+                    else:
+                        node_dict["expr"] = type(body_node.value).__name__
+                elif isinstance(body_node, ast.FunctionDef):
+                    pass
                 else:
-                    node_dict["expr"] = type(body_node.value).__name__
-            elif isinstance(body_node, ast.FunctionDef):
-                pass
-            else:
-                self.__process_simple_op(body_node, node_dict)
+                    self.__process_simple_op(body_node, node_dict)
+        except AttributeError:
+            self.__process_simple_op(node, node_dict)
 
         # decrement indentation level count upon exiting any node body            
         self.__count_hash["level"] -= 1
