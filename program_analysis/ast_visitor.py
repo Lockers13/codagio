@@ -34,7 +34,7 @@ class AstTreeVisitor(ast.NodeVisitor):
     """
 
     # private instance var determining what entries to initialize in global program dict
-    __node_types = ["fdefs", "whiles", "ifs", "fors", "assigns", "aug_assigns", "fcalls", "calls", "ops", "elses"]
+    __node_types = ["fdefs", "whiles", "ifs", "fors", "assigns", "aug_assigns", "fcalls", "calls", "ops", "elses", "trys", "exc_handlers"]
 
     # binary operation hash map, needed for translating AST's binop objects to more readable form
     # see '__process_binop()' below for usage
@@ -105,10 +105,9 @@ class AstTreeVisitor(ast.NodeVisitor):
         }
         
     def __process_conditional(self, node, node_dict, elseif=False):
-        # get type of node
+        
         node_type = type(node).__name__.lower()
         cond_id = "if_{0}".format(self.__count_hash["ifs"])
-        # get body dict for node
         body_dict = self.__prep_body_dict(node, node_dict, "{0}s".format(node_type))
         # try to record test type
         try:
@@ -118,30 +117,36 @@ class AstTreeVisitor(ast.NodeVisitor):
 
         node_dict[cond_id]["elif"] = elseif
 
-        # check for occurrence of else clauses
-        if any(not isinstance(cond, ast.If) for cond in node.orelse):
-            self.__count_hash["elses"] += 1
-            self.__program_dict["fdefs"][self.fdef_key]["num_elses"] += 1
-            node_dict["else_{0}".format(self.__count_hash["elses"])] = {}
-            else_dict = node_dict["else_{0}".format(self.__count_hash["elses"])]
-            else_dict["level"] = self.__count_hash["level"]
-
-        # process body of node
         self.__process_body(node, body_dict)
-
-        else_subcount = 0
-        for cond_or_op in node.orelse:
-            if isinstance(cond_or_op, ast.If):
-                node_dict = node_dict if else_subcount < 1 else else_dict
+        
+        try:
+            if isinstance(node.orelse[0], ast.If):
+                if isinstance(node, ast.If):
+                    elseif = True
                 self.__count_hash["ifs"] += 1
                 self.__program_dict["fdefs"][self.fdef_key]["num_ifs"] += 1
-                self.__process_conditional(cond_or_op, node_dict, elseif=True)
+                self.__process_conditional(node.orelse[0], node_dict, elseif)
             else:
-                else_subcount += 1
-                if else_subcount == 1:
-                    else_dict["lineno"] = cond_or_op.lineno - 1
-                self.__process_body(cond_or_op, else_dict)
-        
+                self.__count_hash["elses"] += 1
+                self.__program_dict["fdefs"][self.fdef_key]["num_elses"] += 1
+                node_dict["else_{0}".format(self.__count_hash["elses"])] = {}
+                else_dict = node_dict["else_{0}".format(self.__count_hash["elses"])]
+                else_dict["level"] = self.__count_hash["level"]
+                for body_node in node.orelse:
+                    if isinstance(body_node, ast.If):
+                        self.__process_conditional(body_node, else_dict)
+                    else:
+                        self.__process_body(body_node, else_dict)
+        except Exception as e:
+            print("CONDITIONAL EXCEPTION :", str(e))
+
+    def __process_try(self, node, node_dict):
+        node_type = type(node).__name__.lower()
+        body_dict = self.__prep_body_dict(node, node_dict, "{0}s".format(node_type))
+        self.__process_body(node, body_dict)
+        # for handler in node.handlers:
+            
+
     def __process_loop(self, node, node_dict, nested=False):
         """Utility method to recursively process any 'while', 'for' or 'if' node encountered in a function def,
         where by 'process' we mean => write pertinent info to appropriate place in prog dict.
@@ -201,6 +206,7 @@ class AstTreeVisitor(ast.NodeVisitor):
                     self.__count_hash["ifs"] += 1
                     self.__program_dict["fdefs"][self.fdef_key]["num_ifs"] += 1
                     self.__process_conditional(body_node, node_dict)
+                    elseif = False
                 elif isinstance(body_node, ast.Expr):
                     if isinstance(body_node.value, ast.Call):
                         self.__count_hash["calls"] += 1
@@ -208,6 +214,9 @@ class AstTreeVisitor(ast.NodeVisitor):
                         self.__process_call(body_node.value, node_dict)
                     else:
                         node_dict["expr"] = type(body_node.value).__name__
+                elif isinstance(body_node, ast.Try):
+                    self.__count_hash["trys"] += 1
+                    self.__process_try(body_node, node_dict)
                 elif isinstance(body_node, ast.FunctionDef):
                     pass
                 else:
