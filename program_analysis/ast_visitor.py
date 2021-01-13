@@ -154,8 +154,8 @@ class AstTreeVisitor(ast.NodeVisitor):
             node_dict["exc_handler_{0}".format(self.__count_hash["exc_handlers"])] = {}
             except_dict = node_dict["exc_handler_{0}".format(self.__count_hash["exc_handlers"])]
 
-            # note: do iteration 'for i in handler.body' if more detail needed
-            self.__process_body(handler.body[0], except_dict)
+            for body in handler.body:
+                self.__process_body(body, except_dict)
 
     def __process_loop(self, node, node_dict, nested=False):
         """Utility method to recursively process any 'while', 'for' or 'if' node encountered in a function def,

@@ -11,6 +11,11 @@ def find_root(num, tol):
 def main():
     tolerance = .1
     number = 388
+    try:
+        3+3 == 6
+    except:
+        eek = 4
+        print("hello!")
 
     square_root = find_root(number, tolerance)
     if abs(number - square_root ** 2) < tolerance:
