@@ -42,7 +42,7 @@ def main():
     # initialise profiler instance, passing original script name and prog_dict for further writing of profiling info
     profiler = Profiler(filename, prog_dict)
 
-    #profiler.profile(args)
+    profiler.profile(args)
 
     # write prog_dict to disk in json format
     with open("{0}_analysis.json".format(filename.split(".")[0]), 'w') as f:
