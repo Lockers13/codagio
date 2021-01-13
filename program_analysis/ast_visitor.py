@@ -61,6 +61,8 @@ class AstTreeVisitor(ast.NodeVisitor):
         self.__count_hash["nest_level"] = -1
         self.__fname = None
         self.__reverse_class_dict = {}
+        self.__program_dict["nested_fdefs"] = {}
+        self.__nested_fdefs = self.__program_dict["nested_fdefs"]
     
     def get_program_dict(self):
         return self.__program_dict
@@ -108,7 +110,6 @@ class AstTreeVisitor(ast.NodeVisitor):
         }
         
     def __process_conditional(self, node, node_dict, elseif=False):
-        
         node_type = type(node).__name__.lower()
         cond_id = "if_{0}".format(self.__count_hash["ifs"])
         body_dict = self.__prep_body_dict(node, node_dict, "{0}s".format(node_type))
@@ -188,10 +189,8 @@ class AstTreeVisitor(ast.NodeVisitor):
        
         # process body of node
         self.__process_body(node, body_dict)
-
         self.__count_hash["nest_level"] -= 1
     
-
     def __process_body(self, node, node_dict):
 
         """Utility method to recursively process the body of any given AST construct containing a body. 
@@ -221,7 +220,7 @@ class AstTreeVisitor(ast.NodeVisitor):
             elif isinstance(body_node, ast.Try):
                 self.__process_try(body_node, node_dict)
             elif isinstance(body_node, ast.FunctionDef):
-                pass
+                self.__nested_fdefs[self.__fname].append(body_node.name)
             else:
                 self.__process_simple_op(body_node, node_dict)
 
@@ -303,6 +302,7 @@ class AstTreeVisitor(ast.NodeVisitor):
         """AST visitor in-built method, executed whenever a function def is encountered in AST tree visit.
 
         Returns None; must call self.generic_visit(node) as last statement"""
+        
 
         self.__count_hash["level"] += 1
         fdef_dict = self.__program_dict["fdefs"]
@@ -329,11 +329,12 @@ class AstTreeVisitor(ast.NodeVisitor):
         for arg in node.args.args:
             fdef_dict[fdef_key]["args"].append(arg.arg)
         fdef_dict[fdef_key]["body"] = {}
-        
+
         body_dict = fdef_dict[fdef_key]["body"]
         fdef_dict = fdef_dict[fdef_key]
         self.fdef_key = fdef_key
         self.__fname = node.name
+        self.__nested_fdefs[self.__fname] = []
         for cat in ["whiles", "fors", "ifs", "ops", "calls", "elses", "assigns", "augassigns", "trys", "returns"]:
             self.__program_dict["fdefs"][self.fdef_key]["num_{0}".format(cat)] = 0
         self.__process_body(node, body_dict)
