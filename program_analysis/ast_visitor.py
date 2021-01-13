@@ -34,7 +34,7 @@ class AstTreeVisitor(ast.NodeVisitor):
     """
 
     # private instance var determining what entries to initialize in global program dict
-    __node_types = ["fdefs", "whiles", "ifs", "fors", "assigns", "aug_assigns", "fcalls", "calls", "ops", "elses", "trys", "exc_handlers"]
+    __node_types = ["fdefs", "whiles", "ifs", "fors", "assigns", "augassigns", "fcalls", "calls", "ops", "elses", "trys", "exc_handlers", "returns"]
 
     # binary operation hash map, needed for translating AST's binop objects to more readable form
     # see '__process_binop()' below for usage
@@ -65,6 +65,13 @@ class AstTreeVisitor(ast.NodeVisitor):
     def get_program_dict(self):
         return self.__program_dict
 
+    def __increment_counts(self, node):
+        node_type = type(node).__name__.lower()
+        pl_id = "{0}s".format(node_type)
+        self.__count_hash[pl_id] += 1
+        self.__program_dict["fdefs"][self.fdef_key]["num_{0}".format(pl_id)] += 1
+
+
     def __prep_body_dict(self, node, node_dict, count_key):
         """Utility method to initialize body_dict.
 
@@ -85,10 +92,6 @@ class AstTreeVisitor(ast.NodeVisitor):
         node_dict[op_key] = {}
         
         op_type = type(node).__name__.lower()
-        if op_type == "assign":
-            self.__count_hash["assigns"] += 1
-        elif op_type == "augassign":
-            self.__count_hash["aug_assigns"] += 1
 
         try:
             value = type(node.value).__name__.lower()
@@ -149,8 +152,9 @@ class AstTreeVisitor(ast.NodeVisitor):
             self.__count_hash["exc_handlers"] += 1
             node_dict["exc_handler_{0}".format(self.__count_hash["exc_handlers"])] = {}
             except_dict = node_dict["exc_handler_{0}".format(self.__count_hash["exc_handlers"])]
+
+            # note: do iteration 'for i in handler.body' if more detail needed
             self.__process_body(handler.body[0], except_dict)
-            
 
     def __process_loop(self, node, node_dict, nested=False):
         """Utility method to recursively process any 'while', 'for' or 'if' node encountered in a function def,
@@ -182,13 +186,11 @@ class AstTreeVisitor(ast.NodeVisitor):
             }
             self.__nested_loops.append(nest_dict)
        
-        
         # process body of node
         self.__process_body(node, body_dict)
 
         self.__count_hash["nest_level"] -= 1
-
-
+    
 
     def __process_body(self, node, node_dict):
 
@@ -201,26 +203,22 @@ class AstTreeVisitor(ast.NodeVisitor):
         Returns None"""
 
         def do_body(body_node, node_dict):
+            try:
+                self.__increment_counts(body_node)
+            except Exception as e:
+                print(str(e))
             if isinstance(body_node, ast.While) or isinstance(body_node, ast.For):
-                body_node_type = type(body_node).__name__.lower()
-                self.__count_hash["{0}s".format(body_node_type)] += 1
-                self.__program_dict["fdefs"][self.fdef_key]["num_{0}s".format(body_node_type)] += 1
                 nested = True if isinstance(node, ast.While) or isinstance(node, ast.For) else False
                 self.__process_loop(body_node, node_dict, nested)
             elif isinstance(body_node, ast.If):
-                self.__count_hash["ifs"] += 1
-                self.__program_dict["fdefs"][self.fdef_key]["num_ifs"] += 1
                 self.__process_conditional(body_node, node_dict)
                 elseif = False
             elif isinstance(body_node, ast.Expr):
                 if isinstance(body_node.value, ast.Call):
-                    self.__count_hash["calls"] += 1
-                    self.__program_dict["fdefs"][self.fdef_key]["num_calls"] += 1
                     self.__process_call(body_node.value, node_dict)
                 else:
                     node_dict["expr"] = type(body_node.value).__name__
             elif isinstance(body_node, ast.Try):
-                self.__count_hash["trys"] += 1
                 self.__process_try(body_node, node_dict)
             elif isinstance(body_node, ast.FunctionDef):
                 pass
@@ -229,6 +227,7 @@ class AstTreeVisitor(ast.NodeVisitor):
 
         # increment indentation level count before entering any node body
         self.__count_hash["level"] += 1
+        # if there are multiple body elems, iterate through them; else process single body elem
         try:
             for body_node in node.body:
                 do_body(body_node, node_dict)
@@ -265,7 +264,7 @@ class AstTreeVisitor(ast.NodeVisitor):
 
         Returns None"""
 
-        self.__count_hash["fcalls"] += 1
+        self.__increment_counts(node)
         call_key = "fcall_{0}".format(self.__count_hash["fcalls"])
         call_dict[call_key] = {}
         call_dict[call_key]["param_caller"] = parent
@@ -335,7 +334,7 @@ class AstTreeVisitor(ast.NodeVisitor):
         fdef_dict = fdef_dict[fdef_key]
         self.fdef_key = fdef_key
         self.__fname = node.name
-        for cat in ["whiles", "fors", "ifs", "ops", "calls", "elses"]:
+        for cat in ["whiles", "fors", "ifs", "ops", "calls", "elses", "assigns", "augassigns", "trys", "returns"]:
             self.__program_dict["fdefs"][self.fdef_key]["num_{0}".format(cat)] = 0
         self.__process_body(node, body_dict)
         self.__count_hash["level"] -= 1
