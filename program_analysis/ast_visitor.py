@@ -138,13 +138,18 @@ class AstTreeVisitor(ast.NodeVisitor):
                     else:
                         self.__process_body(body_node, else_dict)
         except Exception as e:
-            print("CONDITIONAL EXCEPTION :", str(e))
+            pass
 
     def __process_try(self, node, node_dict):
         node_type = type(node).__name__.lower()
         body_dict = self.__prep_body_dict(node, node_dict, "{0}s".format(node_type))
         self.__process_body(node, body_dict)
-        # for handler in node.handlers:
+
+        for handler in node.handlers:
+            self.__count_hash["exc_handlers"] += 1
+            node_dict["exc_handler_{0}".format(self.__count_hash["exc_handlers"])] = {}
+            except_dict = node_dict["exc_handler_{0}".format(self.__count_hash["exc_handlers"])]
+            self.__process_body(handler.body[0], except_dict)
             
 
     def __process_loop(self, node, node_dict, nested=False):
@@ -183,7 +188,10 @@ class AstTreeVisitor(ast.NodeVisitor):
 
         self.__count_hash["nest_level"] -= 1
 
+
+
     def __process_body(self, node, node_dict):
+
         """Utility method to recursively process the body of any given AST construct containing a body. 
         At the highest level, we start by processing the body of function definitions, then the bodies 
         of any while/for/if, etc., nodes encountered therein, and so on and so forth, until we reach a node with no body, 
@@ -192,37 +200,40 @@ class AstTreeVisitor(ast.NodeVisitor):
         
         Returns None"""
 
+        def do_body(body_node, node_dict):
+            if isinstance(body_node, ast.While) or isinstance(body_node, ast.For):
+                body_node_type = type(body_node).__name__.lower()
+                self.__count_hash["{0}s".format(body_node_type)] += 1
+                self.__program_dict["fdefs"][self.fdef_key]["num_{0}s".format(body_node_type)] += 1
+                nested = True if isinstance(node, ast.While) or isinstance(node, ast.For) else False
+                self.__process_loop(body_node, node_dict, nested)
+            elif isinstance(body_node, ast.If):
+                self.__count_hash["ifs"] += 1
+                self.__program_dict["fdefs"][self.fdef_key]["num_ifs"] += 1
+                self.__process_conditional(body_node, node_dict)
+                elseif = False
+            elif isinstance(body_node, ast.Expr):
+                if isinstance(body_node.value, ast.Call):
+                    self.__count_hash["calls"] += 1
+                    self.__program_dict["fdefs"][self.fdef_key]["num_calls"] += 1
+                    self.__process_call(body_node.value, node_dict)
+                else:
+                    node_dict["expr"] = type(body_node.value).__name__
+            elif isinstance(body_node, ast.Try):
+                self.__count_hash["trys"] += 1
+                self.__process_try(body_node, node_dict)
+            elif isinstance(body_node, ast.FunctionDef):
+                pass
+            else:
+                self.__process_simple_op(body_node, node_dict)
+
         # increment indentation level count before entering any node body
         self.__count_hash["level"] += 1
         try:
             for body_node in node.body:
-                if isinstance(body_node, ast.While) or isinstance(body_node, ast.For):
-                    body_node_type = type(body_node).__name__.lower()
-                    self.__count_hash["{0}s".format(body_node_type)] += 1
-                    self.__program_dict["fdefs"][self.fdef_key]["num_{0}s".format(body_node_type)] += 1
-                    nested = True if isinstance(node, ast.While) or isinstance(node, ast.For) else False
-                    self.__process_loop(body_node, node_dict, nested)
-                elif isinstance(body_node, ast.If):
-                    self.__count_hash["ifs"] += 1
-                    self.__program_dict["fdefs"][self.fdef_key]["num_ifs"] += 1
-                    self.__process_conditional(body_node, node_dict)
-                    elseif = False
-                elif isinstance(body_node, ast.Expr):
-                    if isinstance(body_node.value, ast.Call):
-                        self.__count_hash["calls"] += 1
-                        self.__program_dict["fdefs"][self.fdef_key]["num_calls"] += 1
-                        self.__process_call(body_node.value, node_dict)
-                    else:
-                        node_dict["expr"] = type(body_node.value).__name__
-                elif isinstance(body_node, ast.Try):
-                    self.__count_hash["trys"] += 1
-                    self.__process_try(body_node, node_dict)
-                elif isinstance(body_node, ast.FunctionDef):
-                    pass
-                else:
-                    self.__process_simple_op(body_node, node_dict)
+                do_body(body_node, node_dict)
         except AttributeError:
-            self.__process_simple_op(node, node_dict)
+            do_body(node, node_dict)
 
         # decrement indentation level count upon exiting any node body            
         self.__count_hash["level"] -= 1

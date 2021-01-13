@@ -29,7 +29,7 @@ def main():
     # get arg dict
     args = parse_clargs()
     # script to be parsed
-    filename = "ast_visitor.py"
+    filename = "tol_sqrt.py"
     # parse script using AST module
     parsed_tree = ast.parse((open(filename)).read())
     # initialise ast tree visitor instance
@@ -45,7 +45,7 @@ def main():
     #profiler.profile(args)
 
     # write prog_dict to disk in json format
-    with open("analysis.json", 'w') as f:
+    with open("{0}_analysis.json".format(filename.split(".")[0]), 'w') as f:
         f.write(json.dumps(prog_dict))
     # recursively print prog dict using helper function defined above
     rprint_dict(prog_dict)
