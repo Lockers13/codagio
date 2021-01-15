@@ -11,9 +11,11 @@ class Verifier:
 
     def __gen_sub_hashes(self):
         sub_hashes = []
+        # Note: number adjustable based on number of hash samples available
         for i in range(3):
             try:
-                process = subprocess.Popen(["python", "{0}".format(self.__filename), "{0}_input{1}.txt".format(self.__filename.split(".")[0], i+1)], stdout=subprocess.PIPE)
+                process = subprocess.Popen(["python", "{0}".format(self.__filename), "{0}_input{1}.txt".format(self.__filename.split(".")[0], i+1)], \
+                     stdout=subprocess.PIPE)
             except Exception as e:
                 print("Exception in verify_output, program processing stage:", str(e))
 

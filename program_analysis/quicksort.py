@@ -6,9 +6,6 @@ def partition(arr, low, high):
     def take_ages():
         list(range(10000))
     
-    for x in arr:
-        print("{0}".format(x), end=" ")
-    print()
     #take_ages()
     pivot = arr[(high+low)//2]
     i = low - 1

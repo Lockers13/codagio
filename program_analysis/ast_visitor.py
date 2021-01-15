@@ -205,7 +205,7 @@ class AstTreeVisitor(ast.NodeVisitor):
             try:
                 self.__increment_counts(body_node)
             except Exception as e:
-                print(str(e))
+                pass
             if isinstance(body_node, ast.While) or isinstance(body_node, ast.For):
                 nested = True if isinstance(node, ast.While) or isinstance(node, ast.For) else False
                 self.__process_loop(body_node, node_dict, nested)
