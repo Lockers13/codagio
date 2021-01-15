@@ -6,10 +6,10 @@ def partition(arr, low, high):
     def take_ages():
         list(range(10000))
     
-    # for x in arr:
-    #     print("{0}".format(x), end=" ")
-    # print()
-    take_ages()
+    for x in arr:
+        print("{0}".format(x), end=" ")
+    print()
+    #take_ages()
     pivot = arr[(high+low)//2]
     i = low - 1
     j = high + 1 
@@ -33,11 +33,14 @@ def quickSort(arr, low, high):
         quickSort(arr, pi+1, high)
 
 def init_arr_from_file():
-    return [random.randint(0,100) for i in range(5000)]
+    return [5,2,12,66,777,823,4536,23,22,67,145,1]
 
 def main():
     arr = init_arr_from_file()
     size = len(arr)
     quickSort(arr, 0, size - 1)
+    for x in arr:
+        print("{0}".format(x), end=" ")
+    print()
 
 main()
