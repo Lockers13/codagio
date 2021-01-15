@@ -2,8 +2,8 @@ import ast
 import argparse
 from ast_visitor import AstTreeVisitor
 from prog_profiler import Profiler
-import json
 from output_verifier import Verifier
+import json
 
 def parse_clargs():
     """Helper function to parse command line args.
@@ -43,8 +43,10 @@ def main():
     # print(ast_visitor.count_hash)
     # initialise profiler instance, passing original script name and prog_dict for further writing of profiling info
     profiler = Profiler(filename, prog_dict)
+
     verifier = Verifier(filename)
-    verifier.verify_output()
+    score = verifier.verify_output()
+    print(score)
 
     profiler.profile(args)
 

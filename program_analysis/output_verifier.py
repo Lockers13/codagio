@@ -1,5 +1,6 @@
 import hashlib 
 import subprocess
+import sys
 
 class Verifier:
 
@@ -7,7 +8,6 @@ class Verifier:
         self.__filename = filename
         self.__sample_hashes = self.__get_sample_hashes()
         self.__sub_hashes = self.__gen_sub_hashes()
-
 
     def __gen_sub_hashes(self):
         sub_hashes = []
@@ -18,6 +18,7 @@ class Verifier:
                      stdout=subprocess.PIPE)
             except Exception as e:
                 print("Exception in verify_output, program processing stage:", str(e))
+                sys.exit(1)
 
             output = process.stdout.read()
             stripped_sub = output.decode("utf-8").replace('\n', '').replace(' ', '')
@@ -39,8 +40,4 @@ class Verifier:
         for sub_hash, samp_hash in zip(self.__sub_hashes, self.__sample_hashes):
             if sub_hash == samp_hash:
                 score += 1
-        return "You scored: {0}%".format(round(score/len(self.__sample_hashes), 2) * 100)
-
-vfy = Verifier('quicksort.py')
-
-print(vfy.verify_output())
+        return "You scored: {0}%".format(round(score/len(self.__sample_hashes), 4) * 100)
