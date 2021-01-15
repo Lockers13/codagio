@@ -11,19 +11,20 @@ def parse_clargs():
 
     ap = argparse.ArgumentParser() 
     ap.add_argument("-g", action="store_true")
+    ap.add_argument("-l", action="store_true")
     return vars(ap.parse_args())
 
-def rprint_dict(nested, indent=0):
-    """Helper function to recursively print nested dicts.
+# def rprint_dict(nested, indent=0):
+#     """Helper function to recursively print nested dicts.
 
-    Returns None"""
+#     Returns None"""
 
-    for k, v in nested.items():
-        if isinstance(v, dict):
-            print("{0}{1}:".format("    " * indent, k))
-            rprint_dict(v, indent+1)
-        else:
-            print("{0}{1}: {2}".format("    " * indent, k, v))
+#     for k, v in nested.items():
+#         if isinstance(v, dict):
+#             print("{0}{1}:".format("    " * indent, k))
+#             rprint_dict(v, indent+1)
+#         else:
+#             print("{0}{1}: {2}".format("    " * indent, k, v))
 
 def main():
     # get arg dict
@@ -48,6 +49,6 @@ def main():
     with open("{0}_analysis.json".format(filename.split(".")[0]), 'w') as f:
         f.write(json.dumps(prog_dict))
     # recursively print prog dict using helper function defined above
-    rprint_dict(prog_dict)
+    # rprint_dict(prog_dict)
 
 main()

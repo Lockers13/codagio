@@ -204,6 +204,8 @@ class Profiler():
         Return None, all results are written to dict."""
 
         self.__cprof()
+
         if args.get("g"):
             self.__gnu_time_stats()
-        self.__lprof()
+        if args.get("l"):
+            self.__lprof()

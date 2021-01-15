@@ -33,7 +33,13 @@ def quickSort(arr, low, high):
         quickSort(arr, pi+1, high)
 
 def init_arr_from_file():
-    return [5,2,12,66,777,823,4536,23,22,67,145,1]
+    try:
+        with open(sys.argv[1], 'r') as f:
+            contents = f.read().strip('\n').split(',')
+        return [int(x) for x in contents]
+    except IndexError:
+        print("Error: Please ensure correct input has been supplied")
+        sys.exit()
 
 def main():
     arr = init_arr_from_file()
