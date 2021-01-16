@@ -1,6 +1,7 @@
 import sys
 import random
 import time
+import json
 
 def partition(arr, low, high):
     def take_ages():
@@ -32,8 +33,8 @@ def quickSort(arr, low, high):
 def init_arr_from_file():
     try:
         with open(sys.argv[1], 'r') as f:
-            contents = f.read().strip('\n').split(',')
-        return [int(x) for x in contents]
+            contents = json.loads(f.read())
+        return contents[int(sys.argv[2])]
     except IndexError:
         print("Error: Please ensure correct input has been supplied")
         sys.exit()
