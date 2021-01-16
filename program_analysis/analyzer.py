@@ -31,7 +31,7 @@ def main():
     # get arg dict
     args = parse_clargs()
     # script to be parsed
-    filename = "quicksort.py"
+    filename = "prime_checker.py"
     # parse script using AST module
     parsed_tree = ast.parse((open(filename)).read())
     # initialise ast tree visitor instance
