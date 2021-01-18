@@ -5,6 +5,7 @@ from prog_profiler import Profiler
 from output_verifier import Verifier
 import json
 import sys
+import os
 
 def parse_clargs():
     """Helper function to parse command line args.
@@ -13,7 +14,9 @@ def parse_clargs():
 
     ap = argparse.ArgumentParser()
     ap.add_argument("-s", "--script", type=str, required=True,
-                help="name of script to be analyzed") 
+                help="name of script to be analyzed")
+    ap.add_argument("-t", "--type", type=str, required=True,
+                help="submission or sample") 
     ap.add_argument("-g", action="store_true")
     ap.add_argument("-l", action="store_true")
     return vars(ap.parse_args())
@@ -33,10 +36,14 @@ def rprint_dict(nested, indent=0):
 def main():
     # get arg dict
     args = parse_clargs()
-    print(args)
-    # script to be parsed
+    upload_type = "submissions" if args.get("type") == "submission" else "sample_problems" if args.get("type") == "sample" else None
+
+    if upload_type is None:
+        sys.exit(1)
+
+    # script to be analyzed
     try:
-        filename = "sample_problems/{0}/{1}.py".format(args.get("script"), args.get("script"))
+        filename = os.path.join(upload_type, args.get("script"), "{0}.py".format(args.get("script")))  
     except:
         print("Error: incorrect clargs!")
         sys.exit(1)
@@ -54,9 +61,9 @@ def main():
 
     verifier = Verifier(filename)
     score = verifier.verify_output()
-    print(score)
 
     profiler.profile(args)
+    prog_dict["score"] = score
 
     # write prog_dict to disk in json format
     with open("{0}_analysis.json".format(filename.split(".")[0]), 'w') as f:
