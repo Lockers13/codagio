@@ -7,6 +7,9 @@ import json
 import sys
 import os
 
+# submission call : python analyzer.py -s prime_checker -t submission -l
+# sample call : python analyzer.py -s quicksort -t sample -l
+
 def parse_clargs():
     """Helper function to parse command line args.
 
@@ -47,6 +50,7 @@ def main():
     except:
         print("Error: incorrect clargs!")
         sys.exit(1)
+    
     # parse script using AST module
     parsed_tree = ast.parse((open(filename)).read())
     # initialise ast tree visitor instance

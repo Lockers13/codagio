@@ -7,7 +7,8 @@ class Profiler():
 
     def __init__(self, filename, program_dict):
         self.filename = filename
-        self.input_path = os.path.join("sample_problems", os.path.basename(filename).split(".")[0], "{0}_input.json".format(os.path.basename(filename).split(".")[0]))
+        self.__simple_basename = os.path.basename(self.filename).split(".")[0]
+        self.__data_path = os.path.join("sample_problems", self.__simple_basename, self.__simple_basename)
         self.program_dict = program_dict
         self.udef_info = self.__get_udef_info()
 
@@ -116,7 +117,7 @@ class Profiler():
 
             
             # call kernprof as subprocess, redirecting stdout to pipe, and read results
-            process = subprocess.Popen(["kernprof", "-l", "-v", "{0}".format(pro_file), self.input_path, "1"], stdout=subprocess.PIPE)
+            process = subprocess.Popen(["kernprof", "-l", "-v", "{0}".format(pro_file), "{0}_input.json".format(self.__data_path), "1"], stdout=subprocess.PIPE)
             # crucially, readlines() is blocking for pipes
             output = process.stdout.readlines()
             process_lprof_out(output)
@@ -167,7 +168,7 @@ class Profiler():
                     pass
 
         # call cProfile as subprocess, redirecting stdout to pipe, and read results, as before
-        process = subprocess.Popen(["python", "-m", "cProfile", "-s", "time", "{0}".format(self.filename), self.input_path, "1"], stdout=subprocess.PIPE)
+        process = subprocess.Popen(["python", "-m", "cProfile", "-s", "time", "{0}".format(self.filename), "{0}_input.json".format(self.__data_path), "1"], stdout=subprocess.PIPE)
         output = process.stdout.readlines()
 
         process_cprof_out(output)
