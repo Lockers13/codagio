@@ -6,18 +6,18 @@ import re
 class Profiler():
 
     def __init__(self, filename, program_dict):
-        self.filename = filename
-        self.__simple_basename = os.path.basename(self.filename).split(".")[0]
+        self.__filename = filename
+        self.__simple_basename = os.path.basename(self.__filename).split(".")[0]
         self.__data_path = os.path.join("sample_problems", self.__simple_basename, self.__simple_basename)
-        self.program_dict = program_dict
-        self.udef_info = self.__get_udef_info()
+        self.__program_dict = program_dict
+        self.__udef_info = self.__get_udef_info()
 
     def __get_udef_info(self):
         """Utility method to make user function defintiion info collected by ast visitor more easily accessible.
 
         Called once from __init__ : returns dict having elements of form {fname: [fdef_key, lineno]}"""
 
-        fdefs = self.program_dict["fdefs"]
+        fdefs = self.__program_dict["fdefs"]
         return {fdefs[fdef_key]["name"]: [fdef_key, fdefs[fdef_key]["lineno"]] \
             for fdef_key in fdefs.keys()}
 
@@ -89,7 +89,7 @@ class Profiler():
                     line_info["%time"] = split_line[4]
                     line_info["contents"] = split_line[5]
                 
-                fdefs = self.program_dict["fdefs"]
+                fdefs = self.__program_dict["fdefs"]
                 for line in output:
                     # received bytes need decoding
                     line = line.decode("utf-8").strip()
@@ -104,7 +104,7 @@ class Profiler():
                         # if we are on a function, get the fname, and then its corresponding key from self.udef_info
                         if first_item == "Function:":
                             fname = split_line[1]
-                            fdef_k = self.udef_info[fname][0]   
+                            fdef_k = self.__udef_info[fname][0]   
                             fdefs[fdef_k]["line_profile"] = {}
                             # get function number from fdef_key => needed for offsetting line number due to addition of '@profile' decorators
                             fnum = int(re.search(r'\d+', fdef_k).group())
@@ -133,9 +133,9 @@ class Profiler():
             return
 
         # get udef linenos from self.udef_info as defined above
-        udef_lines = [self.udef_info[fdef_name][1] for fdef_name in self.udef_info.keys()]
+        udef_lines = [self.__udef_info[fdef_name][1] for fdef_name in self.__udef_info.keys()]
         pro_token = "@profile"
-        pro_file = make_pro_file(self.filename, udef_lines, pro_token)
+        pro_file = make_pro_file(self.__filename, udef_lines, pro_token)
         do_profile(pro_file)
 
         ### Note: Line_Profiler output header => Line #: Hits: Time: Per Hit: % Time: Line Contents
@@ -150,8 +150,8 @@ class Profiler():
 
             Returns None"""
             
-            udef_names = self.udef_info.keys()
-            fdefs = self.program_dict.get("fdefs")
+            udef_names = self.__udef_info.keys()
+            fdefs = self.__program_dict.get("fdefs")
 
             # parse output of external cProfile program and write all pertinent results to appropriate fdef subdict
             for line in output:
@@ -160,7 +160,7 @@ class Profiler():
                     u_fname = re.search('\(([^)]+)', line.split()[5]).group(1)
                     if u_fname in udef_names:
                         split_line = line.split()
-                        fdef_k = self.udef_info[u_fname][0]
+                        fdef_k = self.__udef_info[u_fname][0]
                         fdefs[fdef_k]["ncalls"] = split_line[0]
                         fdefs[fdef_k]["tot_time"] = split_line[1]
                         fdefs[fdef_k]["cum_time"] = split_line[3]
@@ -168,7 +168,7 @@ class Profiler():
                     pass
 
         # call cProfile as subprocess, redirecting stdout to pipe, and read results, as before
-        process = subprocess.Popen(["python", "-m", "cProfile", "-s", "time", "{0}".format(self.filename), "{0}_input.json".format(self.__data_path), "1"], stdout=subprocess.PIPE)
+        process = subprocess.Popen(["python", "-m", "cProfile", "-s", "time", "{0}".format(self.__filename), "{0}_input.json".format(self.__data_path), "1"], stdout=subprocess.PIPE)
         output = process.stdout.readlines()
 
         process_cprof_out(output)
@@ -180,11 +180,11 @@ class Profiler():
 
         # check for underlying OS
         time_cmd = "gtime" if platform.system() == "Darwin" else "time"
-        prog_dict = self.program_dict
+        prog_dict = self.__program_dict
         # open devnull, to redirect stdout to oblivion, since with gnu time, the important output is written to stderr
         dev_null = open(os.devnull, 'w')
         # call gnu time as subprocess, redirecting stdout to /dev/null and stderr to pipe, and read results, as before
-        process = subprocess.Popen([time_cmd,  "--verbose", "python", "{0}".format(self.filename)], stderr=subprocess.PIPE, stdout=dev_null)
+        process = subprocess.Popen([time_cmd,  "--verbose", "python", "{0}".format(self.__filename)], stderr=subprocess.PIPE, stdout=dev_null)
         dev_null.close()
         output = process.stderr.readlines()
 
