@@ -4,13 +4,16 @@ from ast_visitor import AstTreeVisitor
 from prog_profiler import Profiler
 from output_verifier import Verifier
 import json
+import sys
 
 def parse_clargs():
     """Helper function to parse command line args.
 
     Returns arg dict"""
 
-    ap = argparse.ArgumentParser() 
+    ap = argparse.ArgumentParser()
+    ap.add_argument("-s", "--script", type=str, required=True,
+                help="name of script to be analyzed") 
     ap.add_argument("-g", action="store_true")
     ap.add_argument("-l", action="store_true")
     return vars(ap.parse_args())
@@ -30,8 +33,13 @@ def rprint_dict(nested, indent=0):
 def main():
     # get arg dict
     args = parse_clargs()
+    print(args)
     # script to be parsed
-    filename = "prime_checker.py"
+    try:
+        filename = "sample_problems/{0}/{1}.py".format(args.get("script"), args.get("script"))
+    except:
+        print("Error: incorrect clargs!")
+        sys.exit(1)
     # parse script using AST module
     parsed_tree = ast.parse((open(filename)).read())
     # initialise ast tree visitor instance

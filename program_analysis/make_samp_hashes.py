@@ -3,7 +3,7 @@ import subprocess
 import hashlib
 
 try:
-    prog_name = sys.argv[1]
+    prog_name = "sample_problems/{0}/{1}.py".format(sys.argv[1], sys.argv[1])
 except IndexError:
     print("Error: incorrect number of clargs supplied")
     sys.exit(1)

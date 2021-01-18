@@ -85,7 +85,7 @@ class AstTreeVisitor(ast.NodeVisitor):
         node_dict[identifier]["lineno"] = node.lineno
         node_dict[identifier]["level"] = self.__count_hash["level"]
         node_dict[identifier]["body"] = {}
-        return node_dict[identifier]["body"]
+        return identifier, node_dict[identifier]["body"]
 
     def __process_simple_op(self, node, node_dict):
         self.__count_hash["ops"] += 1
@@ -112,7 +112,7 @@ class AstTreeVisitor(ast.NodeVisitor):
     def __process_conditional(self, node, node_dict, elseif=False):
         node_type = type(node).__name__.lower()
         cond_id = "if_{0}".format(self.__count_hash["ifs"])
-        body_dict = self.__prep_body_dict(node, node_dict, "{0}s".format(node_type))
+        _, body_dict = self.__prep_body_dict(node, node_dict, "{0}s".format(node_type))
         # try to record test type
         try:
             node_dict[cond_id]["test_type"] = type(node.test).__name__.lower()
@@ -146,7 +146,7 @@ class AstTreeVisitor(ast.NodeVisitor):
 
     def __process_try(self, node, node_dict):
         node_type = type(node).__name__.lower()
-        body_dict = self.__prep_body_dict(node, node_dict, "{0}s".format(node_type))
+        _, body_dict = self.__prep_body_dict(node, node_dict, "{0}s".format(node_type))
         self.__process_body(node, body_dict)
 
         for handler in node.handlers:
@@ -169,15 +169,16 @@ class AstTreeVisitor(ast.NodeVisitor):
         # get type of node
         node_type = type(node).__name__.lower()
         # get body dict for node
-        body_dict = self.__prep_body_dict(node, node_dict, "{0}s".format(node_type))
+        identifier, body_dict = self.__prep_body_dict(node, node_dict, "{0}s".format(node_type))
+  
         # try to record test type
         try:
             body_dict["test_type"] = type(node.test).__name__.lower()
         except:
             pass
         # record whether nested or not (default => False)
-        body_dict["nested"] = nested
-        body_dict["nest_level"] = self.__count_hash["nest_level"]
+        node_dict[identifier]["nested"] = nested
+        node_dict[identifier]["nest_level"] = self.__count_hash["nest_level"]
         if self.__count_hash["nest_level"] > 0:
             nest_dict = {
                 "type": node_type,
