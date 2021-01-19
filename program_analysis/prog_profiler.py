@@ -123,7 +123,7 @@ class Profiler():
             process_lprof_out(output)
             # clean up
             os.remove(pro_file)
-            os.remove("./{0}.lprof".format(pro_file.split("/")[-1]))
+            os.remove("{0}.lprof".format(os.path.basename(pro_file)))
     
         # check that line profiler is installed for kernprof
         try:
