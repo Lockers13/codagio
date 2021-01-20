@@ -6,9 +6,14 @@ import re
 class Profiler():
 
     def __init__(self, filename, program_dict):
+        # actual path to executable
         self.__filename = filename
+        # basename of executable, stripped of extension
         self.__simple_basename = os.path.basename(self.__filename).split(".")[0]
+        # abridged data path => e.g. 'sample_problems/prime_checker/prime_checker'
+        # we can append '_input.json' or '_hashes.txt', etc.
         self.__data_path = os.path.join("sample_problems", self.__simple_basename, self.__simple_basename)
+
         self.__program_dict = program_dict
         self.__udef_info = self.__get_udef_info()
 
@@ -121,8 +126,11 @@ class Profiler():
             # crucially, readlines() is blocking for pipes
             output = process.stdout.readlines()
             process_lprof_out(output)
-            # clean up
+
+            ### clean up ###
+            # remove file with '@profile' 
             os.remove(pro_file)
+            # remove auto generated lprof output file
             os.remove("{0}.lprof".format(os.path.basename(pro_file)))
     
         # check that line profiler is installed for kernprof

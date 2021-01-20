@@ -2,6 +2,8 @@ import sys
 import subprocess
 import hashlib
 
+### Quick utility script to generate sample output hashes for a sample script specified on command line ###
+
 try:
     prog_name = "sample_problems/{0}/{1}.py".format(sys.argv[1], sys.argv[1])
 except IndexError:
