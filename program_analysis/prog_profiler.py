@@ -6,9 +6,7 @@ import re
 class Profiler():
 
     def __init__(self, analyzer):
-        self.__filename = analyzer._filename
-        self.__simple_basename = analyzer._simple_basename
-        self.__data_path = analyzer._data_path
+        self.__filename, self.__simple_basename, self.__data_path = analyzer.get_paths()
         self.__program_dict = analyzer.get_prog_dict()
         self.__udef_info = self.__get_udef_info()
 
@@ -21,7 +19,7 @@ class Profiler():
         return {fdefs[fdef_key]["name"]: [fdef_key, fdefs[fdef_key]["lineno"]] \
             for fdef_key in fdefs.keys()}
 
-    def __lprof(self):
+    def lprof(self):
         """Line by line profiling method.
 
         Returns None, writes output to global program dict"""
@@ -143,7 +141,7 @@ class Profiler():
 
         ### Note: Line_Profiler output header => Line #: Hits: Time: Per Hit: % Time: Line Contents
             
-    def __cprof(self):
+    def cprof(self):
         """Method which writes cProfile stats (function by function, rather than line by line) to appropriate fdef subdicts.
 
         Returns None"""
@@ -176,7 +174,7 @@ class Profiler():
 
         process_cprof_out(output)
 
-    def __gnu_time_stats(self):
+    def gnu_time_stats(self):
         """Method which writes global program performance stats to program dict.
 
         Returns None"""
@@ -199,17 +197,3 @@ class Profiler():
                 prog_dict["{0}".format(str(split_line[0]))] = float(split_line[1])
             except:
                 pass
-
-    def profile(self, args):
-        """Public method used to perform profiling.
-        Note: cprof must be called before lprof, as the latter uses results of the former.
-        gnu_time_stats() is only called if '-g' flag is called, to reduce time taken in profiling.
-
-        Return None, all results are written to dict."""
-
-        self.__cprof()
-
-        if args.get("g"):
-            self.__gnu_time_stats()
-        if args.get("l"):
-            self.__lprof()

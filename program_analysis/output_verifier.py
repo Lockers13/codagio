@@ -10,9 +10,7 @@ class Verifier:
     previously generated via the relevant sample paragon program"""
 
     def __init__(self, analyzer):
-        self.__filename = analyzer._filename
-        self.__simple_basename = analyzer._simple_basename
-        self.__data_path = analyzer._data_path
+        self.__filename, self.__simple_basename, self.__data_path = analyzer.get_paths()
         self.__program_dict = analyzer.get_prog_dict()
         
     def __gen_sub_hashes(self):

@@ -7,15 +7,19 @@ import sys
 import os
 
 class Analyzer:
-    def __init__(self, filename, args):
-        self._program_dict = {}
-        self._filename = filename
-        self._simple_basename = os.path.basename(self._filename).split(".")[0]
-        self._data_path = self.__data_path = os.path.join("sample_problems", self._simple_basename, self._simple_basename)
-        self._args = args
 
+    def __init__(self, filename, args):
+        self.__program_dict = {}
+        self.__filename = filename
+        self.__simple_basename = os.path.basename(self.__filename).split(".")[0]
+        self.__data_path = os.path.join("sample_problems", self.__simple_basename, self.__simple_basename)
+        self.__args = args
+    
     def get_prog_dict(self):
-        return self._program_dict
+        return self.__program_dict
+    
+    def get_paths(self):
+        return self.__filename, self.__simple_basename, self.__data_path
 
     def rprint_dict(self, nested, indent=0):
         """Helper function to recursively print nested program_dict.
@@ -30,11 +34,11 @@ class Analyzer:
                 print("{0}{1}: {2}".format("    " * indent, k, v))
     
     def write_to_json(self):
-        with open("{0}_analysis.json".format(self._filename.split(".")[0]), 'w') as f:
+        with open("{0}_analysis.json".format(self.__filename.split(".")[0]), 'w') as f:
             f.write(json.dumps(self.get_prog_dict()))
     
     def visit_ast(self):
-        parsed_tree = ast.parse((open(self._filename)).read())
+        parsed_tree = ast.parse((open(self.__filename)).read())
         # initialise ast tree visitor instance
         atv = AstTreeVisitor(self)
         # visit ast-parsed script
@@ -46,4 +50,13 @@ class Analyzer:
 
     def profile(self):
         profiler = Profiler(self)
-        profiler.profile(self._args)
+        
+        ### Note : cprof must be called before lprof as the latter's results depend on the former's 
+        ### ^ This needs to be fixed for multiprocessing purposes
+
+        profiler.cprof()
+
+        if self.__args.get("l"):
+            profiler.lprof()
+        if self.__args.get("g"):
+            profiler.gnu_time_stats()

@@ -41,7 +41,7 @@ class AstTreeVisitor(ast.NodeVisitor):
 
     def __init__(self, analyzer):
         # create glboal program dict [important!]
-        self.__program_dict = analyzer._program_dict
+        self.__program_dict = analyzer.get_prog_dict()
         # create global hash map to keep count of occurrence of given types of nodes (see __parse_categories)
         self.__program_dict["count_hash"] = {}
         # get simple instance reference to count hash map
