@@ -5,16 +5,11 @@ import re
 
 class Profiler():
 
-    def __init__(self, filename, program_dict):
-        # actual path to executable
-        self.__filename = filename
-        # basename of executable, stripped of extension
-        self.__simple_basename = os.path.basename(self.__filename).split(".")[0]
-        # abridged data path => e.g. 'sample_problems/prime_checker/prime_checker'
-        # we can append '_input.json' or '_hashes.txt', etc.
-        self.__data_path = os.path.join("sample_problems", self.__simple_basename, self.__simple_basename)
-
-        self.__program_dict = program_dict
+    def __init__(self, analyzer):
+        self.__filename = analyzer._filename
+        self.__simple_basename = analyzer._simple_basename
+        self.__data_path = analyzer._data_path
+        self.__program_dict = analyzer.get_prog_dict()
         self.__udef_info = self.__get_udef_info()
 
     def __get_udef_info(self):

@@ -1,7 +1,4 @@
 import ast
-from collections import OrderedDict
-
-### Note: remember to catch elifs, elses, etc....'node.orelse'
 
 class AstTreeVisitor(ast.NodeVisitor):
     """Class for visiting AST tree. We vist only function definitions, adding each entry to our global program dict,
@@ -42,16 +39,16 @@ class AstTreeVisitor(ast.NodeVisitor):
            "Mod": '%', "Pow": "**", "LShift": "<<", "RShift": ">>",
            "BitOr": '|', "BitXor": '^', "BitAnd": '&', "MatMult": '@', "Lt": '<', "Gt": '>'}
 
-    def __init__(self):
+    def __init__(self, analyzer):
         # create glboal program dict [important!]
-        self.__program_dict = OrderedDict()
+        self.__program_dict = analyzer._program_dict
         # create global hash map to keep count of occurrence of given types of nodes (see __parse_categories)
         self.__program_dict["count_hash"] = {}
         # get simple instance reference to count hash map
         self.__count_hash = self.__program_dict["count_hash"]
         self.__program_dict["nested_loops"] = []
         self.__nested_loops = self.__program_dict["nested_loops"]
-        self.__program_dict["fdefs"] = OrderedDict()
+        self.__program_dict["fdefs"] = {}
         # initialize sub dicts
         for n_type in self.__node_types:
             self.__count_hash[n_type] = 0
@@ -81,7 +78,7 @@ class AstTreeVisitor(ast.NodeVisitor):
 
         # create unique identifier key for any given node
         identifier = "{0}_{1}".format(type(node).__name__.lower(), self.__count_hash[count_key])
-        node_dict[identifier] = OrderedDict()
+        node_dict[identifier] = {}
         node_dict[identifier]["lineno"] = node.lineno
         node_dict[identifier]["level"] = self.__count_hash["level"]
         node_dict[identifier]["body"] = {}

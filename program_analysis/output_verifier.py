@@ -9,14 +9,11 @@ class Verifier:
 
     previously generated via the relevant sample paragon program"""
 
-    def __init__(self, filename):
-        # path to actual executable, may be either sample or submission
-        self.__filename = filename
-        # basename of executable, stripped of extension
-        self.__simple_basename = os.path.basename(self.__filename).split(".")[0]
-        # abridged data path => e.g. 'sample_problems/prime_checker/prime_checker'
-        # we can append '_input.json' or '_hashes.txt', etc.
-        self.__data_path = os.path.join("sample_problems", self.__simple_basename, self.__simple_basename)
+    def __init__(self, analyzer):
+        self.__filename = analyzer._filename
+        self.__simple_basename = analyzer._simple_basename
+        self.__data_path = analyzer._data_path
+        self.__program_dict = analyzer.get_prog_dict()
         
     def __gen_sub_hashes(self):
         """Private utility method to make hashes from output of provided submission program.
@@ -65,4 +62,5 @@ class Verifier:
         for sub_hash, samp_hash in zip(sub_hashes, sample_hashes):
             if sub_hash == samp_hash:
                 score += 1
-        return "{0}%".format(round(score/len(sample_hashes), 4) * 100)
+                
+        self.__program_dict["score"] = "{0}%".format(round(score/len(sample_hashes), 4) * 100)

@@ -56,7 +56,8 @@ def compare_analyses(sub, samp):
             if fdefs[key]['name'] in stock_functions:
                 fdefs.pop(key, None)
         return fdefs
-    def print_global_func_stats_parallel(sub, samp):
+
+    def print_func_stats_parallel(sub, samp):
         print("Submission\t|\tSample\n-----------------------------------")
         for key1, key2 in zip(sub.keys(), samp.keys()):
             if not isinstance (sub[key1], dict) and not isinstance (samp[key2], dict):
@@ -66,7 +67,7 @@ def compare_analyses(sub, samp):
     fdefs_sub_keys, fdefs_samp_keys = fdefs_sub.keys(), fdefs_samp.keys()
     
     for fkey in fdefs_sub_keys:
-        print_global_func_stats_parallel(fdefs_sub[fkey], fdefs_samp[fkey])
+        print_func_stats_parallel(fdefs_sub[fkey], fdefs_samp[fkey])
         
 
 
