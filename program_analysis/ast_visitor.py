@@ -45,6 +45,7 @@ class AstTreeVisitor(ast.NodeVisitor):
         self.__stock_functions = ["main", "prep_input"]
         # create global hash map to keep count of occurrence of given types of nodes (see __parse_categories)
         self.__program_dict["count_hash"] = {}
+        self.__program_dict["line_indents"] = {}
         # get simple instance reference to count hash map
         self.__count_hash = self.__program_dict["count_hash"]
         self.__program_dict["nested_loops"] = []
@@ -59,7 +60,7 @@ class AstTreeVisitor(ast.NodeVisitor):
         self.__count_hash["nest_level"] = -1
         self.__fname = None
         self.__reverse_class_dict = {}
-        self.__program_dict["nested_fdefs"] = {}
+        self.__program_dict["nested_fdefs"] = []
         self.__nested_fdefs = self.__program_dict["nested_fdefs"]
     
     def get_program_dict(self):
@@ -82,6 +83,7 @@ class AstTreeVisitor(ast.NodeVisitor):
         node_dict[identifier] = {}
         node_dict[identifier]["lineno"] = node.lineno
         node_dict[identifier]["level"] = self.__count_hash["level"]
+        self.__program_dict["line_indents"]["line_{0}".format(node.lineno)] = self.__count_hash["level"]
         node_dict[identifier]["body"] = {}
         return identifier, node_dict[identifier]["body"]
 
@@ -106,6 +108,7 @@ class AstTreeVisitor(ast.NodeVisitor):
                 "lineno": node.lineno,
                 "level": self.__count_hash["level"]
         }
+        self.__program_dict["line_indents"]["line_{0}".format(node.lineno)] = self.__count_hash["level"]
         
     def __process_conditional(self, node, node_dict, elseif=False):
         node_type = type(node).__name__.lower()
@@ -130,6 +133,8 @@ class AstTreeVisitor(ast.NodeVisitor):
                 self.__process_conditional(node.orelse[0], node_dict, elseif)
             else:
                 self.__count_hash["elses"] += 1
+   
+                self.__program_dict["line_indents"]["line_{0}".format(node.orelse[0].lineno-1)] = self.__count_hash["level"]
                 self.__program_dict["fdefs"][self.fdef_key]["num_elses"] += 1
                 node_dict["else_{0}".format(self.__count_hash["elses"])] = {}
                 else_dict = node_dict["else_{0}".format(self.__count_hash["elses"])]
@@ -219,7 +224,8 @@ class AstTreeVisitor(ast.NodeVisitor):
             elif isinstance(body_node, ast.Try):
                 self.__process_try(body_node, node_dict)
             elif isinstance(body_node, ast.FunctionDef):
-                self.__nested_fdefs[self.__fname].append(body_node.name)
+                self.__nested_fdefs.append(body_node.name)
+
             else:
                 self.__process_simple_op(body_node, node_dict)
 
@@ -263,6 +269,7 @@ class AstTreeVisitor(ast.NodeVisitor):
         Returns None"""
 
         self.__increment_counts(node)
+        self.__program_dict["line_indents"]["line_{0}".format(node.lineno)] = self.__count_hash["level"]
         call_key = "fcall_{0}".format(self.__count_hash["fcalls"])
         call_dict[call_key] = {}
         call_dict[call_key]["param_caller"] = parent
@@ -303,7 +310,8 @@ class AstTreeVisitor(ast.NodeVisitor):
         Returns None; must call self.generic_visit(node) as last statement"""
         
         if node.name not in self.__stock_functions:
-            self.__count_hash["level"] += 1
+            f_indent = 2 if node.name in self.__nested_fdefs else 1
+            self.__count_hash["level"] += f_indent
             fdef_dict = self.__program_dict["fdefs"]
             self.__count_hash["fdefs"] += 1
             fdef_key = "fdef_{0}".format(self.__count_hash["fdefs"])
@@ -316,7 +324,7 @@ class AstTreeVisitor(ast.NodeVisitor):
                 self.__count_hash["level"] += 1
             else:
                 parent_class = None
-                if self.__count_hash["level"] > 0:
+                if self.__count_hash["level"] > 0 and node.name not in self.__nested_fdefs:
                     self.__count_hash["level"] -= 1
 
             fdef_dict[fdef_key]["class_method"] = cls_method
@@ -324,6 +332,7 @@ class AstTreeVisitor(ast.NodeVisitor):
             fdef_dict[fdef_key]["retval"] = node.returns
             fdef_dict[fdef_key]["lineno"] = node.lineno
             fdef_dict[fdef_key]["level"] = self.__count_hash["level"]
+            self.__program_dict["line_indents"]["line_{0}".format(node.lineno)] = self.__count_hash["level"]
             fdef_dict[fdef_key]["args"] = []
             for arg in node.args.args:
                 fdef_dict[fdef_key]["args"].append(arg.arg)
@@ -333,7 +342,6 @@ class AstTreeVisitor(ast.NodeVisitor):
             fdef_dict = fdef_dict[fdef_key]
             self.fdef_key = fdef_key
             self.__fname = node.name
-            self.__nested_fdefs[self.__fname] = []
             for cat in ["whiles", "fors", "ifs", "ops", "calls", "elses", "assigns", "augassigns", "trys", "returns"]:
                 self.__program_dict["fdefs"][self.fdef_key]["num_{0}".format(cat)] = 0
             self.__process_body(node, body_dict)
