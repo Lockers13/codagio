@@ -3,7 +3,7 @@ import os
 import platform
 import re
 
-class Profiler():
+class Profiler:
 
     def __init__(self, analyzer):
         self.__filename, self.__simple_basename, self.__data_path = analyzer.get_paths()

@@ -42,6 +42,7 @@ class AstTreeVisitor(ast.NodeVisitor):
     def __init__(self, analyzer):
         # create glboal program dict [important!]
         self.__program_dict = analyzer.get_prog_dict()
+        self.__stock_functions = ["main", "prep_input"]
         # create global hash map to keep count of occurrence of given types of nodes (see __parse_categories)
         self.__program_dict["count_hash"] = {}
         # get simple instance reference to count hash map
@@ -301,42 +302,42 @@ class AstTreeVisitor(ast.NodeVisitor):
 
         Returns None; must call self.generic_visit(node) as last statement"""
         
-
-        self.__count_hash["level"] += 1
-        fdef_dict = self.__program_dict["fdefs"]
-        self.__count_hash["fdefs"] += 1
-        fdef_key = "fdef_{0}".format(self.__count_hash["fdefs"])
-        fdef_dict[fdef_key] = {}
-        fdef_dict[fdef_key]["name"] = node.name
-        
-        if self.__reverse_class_dict.get(node.name):
-            cls_method = True
-            parent_class = self.__reverse_class_dict.get(node.name)
+        if node.name not in self.__stock_functions:
             self.__count_hash["level"] += 1
-        else:
-            parent_class = None
-            if self.__count_hash["level"] > 0:
-                self.__count_hash["level"] -= 1
+            fdef_dict = self.__program_dict["fdefs"]
+            self.__count_hash["fdefs"] += 1
+            fdef_key = "fdef_{0}".format(self.__count_hash["fdefs"])
+            fdef_dict[fdef_key] = {}
+            fdef_dict[fdef_key]["name"] = node.name
+            
+            if self.__reverse_class_dict.get(node.name):
+                cls_method = True
+                parent_class = self.__reverse_class_dict.get(node.name)
+                self.__count_hash["level"] += 1
+            else:
+                parent_class = None
+                if self.__count_hash["level"] > 0:
+                    self.__count_hash["level"] -= 1
 
-        fdef_dict[fdef_key]["class_method"] = cls_method
-        fdef_dict[fdef_key]["parent_class"] = parent_class
-        fdef_dict[fdef_key]["retval"] = node.returns
-        fdef_dict[fdef_key]["lineno"] = node.lineno
-        fdef_dict[fdef_key]["level"] = self.__count_hash["level"]
-        fdef_dict[fdef_key]["args"] = []
-        for arg in node.args.args:
-            fdef_dict[fdef_key]["args"].append(arg.arg)
-        fdef_dict[fdef_key]["body"] = {}
+            fdef_dict[fdef_key]["class_method"] = cls_method
+            fdef_dict[fdef_key]["parent_class"] = parent_class
+            fdef_dict[fdef_key]["retval"] = node.returns
+            fdef_dict[fdef_key]["lineno"] = node.lineno
+            fdef_dict[fdef_key]["level"] = self.__count_hash["level"]
+            fdef_dict[fdef_key]["args"] = []
+            for arg in node.args.args:
+                fdef_dict[fdef_key]["args"].append(arg.arg)
+            fdef_dict[fdef_key]["body"] = {}
 
-        body_dict = fdef_dict[fdef_key]["body"]
-        fdef_dict = fdef_dict[fdef_key]
-        self.fdef_key = fdef_key
-        self.__fname = node.name
-        self.__nested_fdefs[self.__fname] = []
-        for cat in ["whiles", "fors", "ifs", "ops", "calls", "elses", "assigns", "augassigns", "trys", "returns"]:
-            self.__program_dict["fdefs"][self.fdef_key]["num_{0}".format(cat)] = 0
-        self.__process_body(node, body_dict)
-        self.__count_hash["level"] -= 1
+            body_dict = fdef_dict[fdef_key]["body"]
+            fdef_dict = fdef_dict[fdef_key]
+            self.fdef_key = fdef_key
+            self.__fname = node.name
+            self.__nested_fdefs[self.__fname] = []
+            for cat in ["whiles", "fors", "ifs", "ops", "calls", "elses", "assigns", "augassigns", "trys", "returns"]:
+                self.__program_dict["fdefs"][self.fdef_key]["num_{0}".format(cat)] = 0
+            self.__process_body(node, body_dict)
+            self.__count_hash["level"] -= 1
         self.generic_visit(node)
 
     def visit_ClassDef(self, node):

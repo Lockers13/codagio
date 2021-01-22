@@ -30,7 +30,7 @@ def quickSort(arr, low, high):
         quickSort(arr, low, pi)
         quickSort(arr, pi+1, high)
 
-def init_arr_from_file():
+def prep_input():
     try:
         with open(sys.argv[1], 'r') as f:
             contents = json.loads(f.read())
@@ -40,7 +40,7 @@ def init_arr_from_file():
         sys.exit()
 
 def main():
-    arr = init_arr_from_file()
+    arr = prep_input()
     size = len(arr)
     quickSort(arr, 0, size - 1)
     for x in arr:
