@@ -16,19 +16,18 @@ class Comparer:
     def __compare_fdef_stats(self):
         def ziplist_stats(sub, samp):
             fdef_comp_stats = []
-            for key1, key2 in zip(sub.keys(), samp.keys()):
-                if not isinstance (sub[key1], dict) and not isinstance (samp[key2], dict):
+            for (k1, v1), (k2, v2) in zip(sub.items(), samp.items()):
+                if not isinstance(v1, dict) and not isinstance(v2, dict):
                     inner_comp = []
-                    inner_comp.append("{0} : {1}".format(key1, sub[key1]))
-                    inner_comp.append("{0} : {1}".format(key2, samp[key2]))
+                    inner_comp.append("{0} : {1}".format(k1, v1))
+                    inner_comp.append("{0} : {1}".format(k2, v2))
                     fdef_comp_stats.append(inner_comp)
             return fdef_comp_stats
 
         sub_fdefs, samp_fdefs = self.__sub_analysis["fdefs"], self.__samp_analysis["fdefs"]
-        sub_fdef_keys, samp_fdef_keys = list(sub_fdefs.keys()), list(samp_fdefs.keys())
         fdef_comp = []
-        for key1, key2 in zip(sub_fdef_keys, samp_fdef_keys):
-            fdef_comp.append(ziplist_stats(sub_fdefs[key1], samp_fdefs[key2]))
+        for (k1, v1), (k2, v2) in zip(sub_fdefs.items(), samp_fdefs.items()):
+            fdef_comp.append(ziplist_stats(v1, v2))
         return fdef_comp
 
     def compare(self):
