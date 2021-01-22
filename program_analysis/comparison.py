@@ -14,6 +14,10 @@ class Comparer:
         return samp_analysis
     
     def __compare_fdef_stats(self):
+        """
+
+        Returns a list of lists containing pairwise comparison stats.
+        """
         def ziplist_stats(sub, samp):
             fdef_comp_stats = []
             for (k1, v1), (k2, v2) in zip(sub.items(), samp.items()):
@@ -31,4 +35,5 @@ class Comparer:
         return fdef_comp
 
     def compare(self):
-        return self.__compare_fdef_stats()
+        self.__sub_analysis["fcomp_overview_stats"] = self.__compare_fdef_stats()
+        return self.__sub_analysis

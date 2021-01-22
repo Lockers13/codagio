@@ -38,12 +38,9 @@ def main():
     analyzer.visit_ast()
     analyzer.verify()
     analyzer.profile()
+    analyzer.compare()
     analyzer.write_to_json()
     analyzer.rprint_dict(analyzer.get_prog_dict())
-    print()
-    for i in analyzer.compare():
-        for j in i:
-            print(j)
 
 if __name__ == "__main__":
     main()
