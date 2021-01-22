@@ -40,7 +40,10 @@ def main():
     analyzer.profile()
     analyzer.write_to_json()
     analyzer.rprint_dict(analyzer.get_prog_dict())
-    analyzer.rprint_dict(analyzer.compare())
+    print()
+    for i in analyzer.compare():
+        for j in i:
+            print(j)
 
 if __name__ == "__main__":
     main()
