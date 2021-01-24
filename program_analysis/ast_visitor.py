@@ -62,6 +62,7 @@ class AstTreeVisitor(ast.NodeVisitor):
         self.__reverse_class_dict = {}
         self.__program_dict["nested_fdefs"] = []
         self.__nested_fdefs = self.__program_dict["nested_fdefs"]
+        self.__args = analyzer.get_args()
     
     def get_program_dict(self):
         return self.__program_dict
@@ -108,19 +109,25 @@ class AstTreeVisitor(ast.NodeVisitor):
                 "lineno": node.lineno,
                 "level": self.__count_hash["level"]
         }
+        self.__fdef_dict["skeleton"].append("{0}{1} {2}".format("    " * self.__count_hash["level"], op_type, value))
+
         self.__program_dict["line_indents"]["line_{0}".format(node.lineno)] = self.__count_hash["level"]
         
     def __process_conditional(self, node, node_dict, elseif=False):
+        
         node_type = type(node).__name__.lower()
         cond_id = "if_{0}".format(self.__count_hash["ifs"])
         _, body_dict = self.__prep_body_dict(node, node_dict, "{0}s".format(node_type))
         # try to record test type
         try:
-            node_dict[cond_id]["test_type"] = type(node.test).__name__.lower()
+            test_type = type(node.test).__name__.lower()
+            node_dict[cond_id]["test_type"] = test_type
         except:
             pass
 
         node_dict[cond_id]["elif"] = elseif
+        conditional = "elif" if elseif else "if"
+        self.__fdef_dict["skeleton"].append("{0}{1} {2}:".format("    " * self.__count_hash["level"], conditional, test_type))
 
         self.__process_body(node, body_dict)
         
@@ -139,6 +146,8 @@ class AstTreeVisitor(ast.NodeVisitor):
                 node_dict["else_{0}".format(self.__count_hash["elses"])] = {}
                 else_dict = node_dict["else_{0}".format(self.__count_hash["elses"])]
                 else_dict["level"] = self.__count_hash["level"]
+                self.__fdef_dict["skeleton"].append("{0}{1}:".format("    " * self.__count_hash["level"], "else"))
+
                 for body_node in node.orelse:
                     if isinstance(body_node, ast.If):
                         self.__process_conditional(body_node, else_dict)
@@ -149,6 +158,7 @@ class AstTreeVisitor(ast.NodeVisitor):
 
     def __process_try(self, node, node_dict):
         node_type = type(node).__name__.lower()
+        self.__fdef_dict["skeleton"].append("{0}{1}:".format("    " * self.__count_hash["level"], node_type))
         _, body_dict = self.__prep_body_dict(node, node_dict, "{0}s".format(node_type))
         self.__process_body(node, body_dict)
 
@@ -156,6 +166,8 @@ class AstTreeVisitor(ast.NodeVisitor):
             self.__count_hash["exc_handlers"] += 1
             node_dict["exc_handler_{0}".format(self.__count_hash["exc_handlers"])] = {}
             except_dict = node_dict["exc_handler_{0}".format(self.__count_hash["exc_handlers"])]
+            self.__fdef_dict["skeleton"].append("{0}{1}:".format("    " * self.__count_hash["level"], type(handler).__name__.lower()))
+
 
             for body in handler.body:
                 self.__process_body(body, except_dict)
@@ -176,9 +188,13 @@ class AstTreeVisitor(ast.NodeVisitor):
   
         # try to record test type
         try:
-            body_dict["test_type"] = type(node.test).__name__.lower()
+            node_dict[identifier]["test_type"] = type(node.test).__name__.lower()
         except:
             pass
+        test_type = node_dict[identifier].get("test_type", "loop")
+
+        self.__fdef_dict["skeleton"].append("{0}{1} {2}:".format("    " * self.__count_hash["level"], node_type, test_type))
+
         # record whether nested or not (default => False)
         node_dict[identifier]["nested"] = nested
         node_dict[identifier]["nest_level"] = self.__count_hash["nest_level"]
@@ -273,28 +289,34 @@ class AstTreeVisitor(ast.NodeVisitor):
         call_key = "fcall_{0}".format(self.__count_hash["fcalls"])
         call_dict[call_key] = {}
         call_dict[call_key]["param_caller"] = parent
-        self.__process_args(node.args, call_dict[call_key])
+        params = self.__process_args(node.args, call_dict[call_key])
         if isinstance(node.func, ast.Name):
             call_dict[call_key]["name"] = node.func.id
             call_dict[call_key]["lineno"] = node.func.lineno
         else:
             call_dict[call_key]["name"] = node.func.attr
             call_dict[call_key]["lineno"] = node.func.lineno
+        if not parent:
+            self.__fdef_dict["skeleton"].append("{0}{1}({2})".format("    " * self.__count_hash["level"], call_dict[call_key]["name"], ', '.join(params)))
+        else:
+            pass
+
 
     def __process_args(self, arg_node, call_dict):
         """Utility method for processing encountered function or method parameters/args.
 
-        Returns None"""
+        Returns list of params."""
 
         call_dict["params"] = []
         for arg in arg_node:
             if isinstance(arg, ast.Num):
-                call_dict["params"].append(arg.n)
+                call_dict["params"].append(str(arg.n))
             elif isinstance(arg, ast.Name):
-                call_dict["params"].append(arg.id)
+                call_dict["params"].append(str(arg.id))
             elif isinstance(arg, ast.Call):
                 arg_func = "arg_func_{0}".format(self.__count_hash["fcalls"])
                 call_dict[arg_func] = {}
+                call_dict["params"] = [arg.func.id]
                 self.__process_call(arg, call_dict[arg_func], "{0}".format(self.__count_hash["fcalls"]))
             elif isinstance(arg, ast.BinOp):
                 l, op, r = self.__process_binop(arg)
@@ -303,6 +325,7 @@ class AstTreeVisitor(ast.NodeVisitor):
             elif isinstance(arg, ast.Str):
                 str_message = "\"" + arg.s + "\""
                 call_dict["params"].append(str_message)
+        return call_dict["params"]
 
     def visit_FunctionDef(self, node, cls_method=False):
         """AST visitor in-built method, executed whenever a function def is encountered in AST tree visit.
@@ -342,6 +365,10 @@ class AstTreeVisitor(ast.NodeVisitor):
             fdef_dict = fdef_dict[fdef_key]
             self.fdef_key = fdef_key
             self.__fname = node.name
+            self.__fdef_dict = fdef_dict
+            signature = "def {0}({1}):".format(node.name, ', '.join(fdef_dict["args"]))
+            self.__fdef_dict["skeleton"] = []
+            self.__fdef_dict["skeleton"].append(signature)
             for cat in ["whiles", "fors", "ifs", "ops", "calls", "elses", "assigns", "augassigns", "trys", "returns"]:
                 self.__program_dict["fdefs"][self.fdef_key]["num_{0}".format(cat)] = 0
             self.__process_body(node, body_dict)

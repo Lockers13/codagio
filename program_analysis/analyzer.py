@@ -19,6 +19,9 @@ class Analyzer:
     def get_prog_dict(self):
         return self.__program_dict
     
+    def get_args(self):
+        return self.__args
+    
     def get_paths(self):
         return self.__filename, self.__simple_basename, self.__data_path
 
