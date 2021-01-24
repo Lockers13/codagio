@@ -38,7 +38,8 @@ def main():
     analyzer.visit_ast()
     analyzer.verify()
     analyzer.profile()
-    analyzer.compare()
+    if args.get("type") == "submission":
+        analyzer.compare()
     analyzer.write_to_json()
     analyzer.rprint_dict(analyzer.get_prog_dict())
 

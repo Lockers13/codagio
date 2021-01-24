@@ -34,7 +34,7 @@ class Profiler:
                 for line, (k, v) in zip(skeleton[1:], lprof_dict.items()):
                     inner_skel = []
                     inner_skel.append(line)
-                    inner_skel.append("{0} : {1}%".format("time", v["%time"]))
+                    inner_skel.append("{0}".format(v["%time"]))
                     new_skel.append(inner_skel)
                 self.__program_dict["fdefs"][fdef_key]["skeleton"] = new_skel
 
@@ -92,12 +92,12 @@ class Profiler:
 
                     float(second_item)
                     fdefs[fdef_k]["line_profile"]["line_{0}".format(int(split_line[0]) - fnum)] = {}
-                    tot_time = fdefs[fdef_k]["tot_time"]
-                    cum_time = fdefs[fdef_k]["cum_time"]
+                    # tot_time = fdefs[fdef_k]["tot_time"]
+                    # cum_time = fdefs[fdef_k]["cum_time"]
                     line_info = fdefs[fdef_k]["line_profile"]["line_{0}".format(int(split_line[0]) - fnum)]
                     line_info["hits"] = split_line[1]
-                    line_info["time"] = '%.2E' % ((float(split_line[4])/100) * float(cum_time))
-                    line_info["time_per_hit"] = '%.2E' % (float(line_info["time"]) / float(line_info["hits"]))
+                    # line_info["time"] = '%.2E' % ((float(split_line[4])/100) * float(cum_time))
+                    # line_info["time_per_hit"] = '%.2E' % (float(line_info["time"]) / float(line_info["hits"]))
                     line_info["%time"] = split_line[4]
                     line_info["contents"] = split_line[5]
                 
@@ -155,7 +155,7 @@ class Profiler:
         pro_file = make_pro_file(self.__filename, udef_lines, pro_token)
         do_profile(pro_file)
 
-        if self.__args.get("type") == "sample":
+        if self.__args.get("l") or self.__args.get("type") == "sample":
             delineate_fskeletons()
 
 

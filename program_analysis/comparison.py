@@ -15,21 +15,21 @@ class Comparer:
         return samp_analysis
     
     def __display_skeleton(self):
-        samp_fdefs = self.__samp_analysis["fdefs"]
-        for k, v in samp_fdefs.items():
-            fname = samp_fdefs[k]["name"]
-            skeleton = samp_fdefs[k]["skeleton"]
-            if self.__args.get("l"):
+        def print_skel(fdef_dict):
+            for k, v in fdef_dict.items():
+                cum_time = float(fdef_dict[k]["cum_time"])
+                skeleton = fdef_dict[k]["skeleton"]
                 print(skeleton[0][0])
                 for skel in skeleton[1:]:
-                    print("{0} ({1})".format(skel[0], skel[1]))
-                print()
-            else:
-                print(skeleton[0])
-                for skel in skeleton[1:]:
-                    print("{0}".format(skel))
+                    print("{0} (%time : {1}%) (real time : {2}s)".format(skel[0], skel[1], '%.2E' % ((float(skel[1])/100) * cum_time)))
                 print()
 
+        samp_fdefs = self.__samp_analysis["fdefs"]
+        sub_fdefs = self.__sub_analysis["fdefs"]
+        print("Displaying sample skeleton:\n------------------------------------------")
+        print_skel(samp_fdefs)
+        print("\nDisplaying submission skeleton:\n------------------------------------------")
+        print_skel(sub_fdefs)
 
     def __compare_fdef_stats(self):
         """
