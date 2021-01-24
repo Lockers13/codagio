@@ -13,6 +13,15 @@ class Comparer:
             samp_analysis = json.loads(f.read())
         return samp_analysis
     
+    def __display_skeleton(self):
+        samp_fdefs = self.__samp_analysis["fdefs"]
+        for k, v in samp_fdefs.items():
+            fname = samp_fdefs[k]["name"]
+            skeleton = samp_fdefs[k]["skeleton"]
+            for line in skeleton:
+                print(line)
+            print()
+
     def __compare_fdef_stats(self):
         """
 
@@ -36,4 +45,5 @@ class Comparer:
 
     def compare(self):
         self.__sub_analysis["fcomp_overview_stats"] = self.__compare_fdef_stats()
+        self.__display_skeleton()
         return self.__sub_analysis

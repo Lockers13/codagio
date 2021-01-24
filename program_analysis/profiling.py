@@ -9,6 +9,7 @@ class Profiler:
         self.__filename, self.__simple_basename, self.__data_path = analyzer.get_paths()
         self.__program_dict = analyzer.get_prog_dict()
         self.__udef_info = self.__get_udef_info()
+        self.__args = analyzer.get_args()
 
     def __get_udef_info(self):
         """Utility method to make user function defintiion info collected by ast visitor more easily accessible.
@@ -23,6 +24,16 @@ class Profiler:
         """Line by line profiling method.
 
         Returns None, writes output to global program dict"""
+
+        def delineate_fskeletons():
+            for fdef_key in self.__program_dict["fdefs"].keys():
+                skeleton = self.__program_dict["fdefs"][fdef_key]["skeleton"]
+                lprof_dict = self.__program_dict["fdefs"][fdef_key]["line_profile"]
+                new_skel = []
+                new_skel.append(skeleton[0])
+                for line, (k, v) in zip(skeleton[1:], lprof_dict.items()):
+                    new_skel.append(line + "\t|\t{0}: {1}%".format("time", v["%time"]))
+                self.__program_dict["fdefs"][fdef_key]["skeleton"] = new_skel
 
         def make_pro_file(filename, lines, token):
             """Internal helper function; creates file to be profiled by kernprof by inserting 
@@ -109,6 +120,8 @@ class Profiler:
                         else:
                             # if we are inside the function stats, try to write results to appropriate fdef subdict
                             try:
+                                if split_line[5] == "@profile":
+                                    continue
                                 write_lprofs()
                             except Exception as e:
                                 continue
@@ -138,6 +151,10 @@ class Profiler:
         pro_token = "@profile"
         pro_file = make_pro_file(self.__filename, udef_lines, pro_token)
         do_profile(pro_file)
+
+        if self.__args.get("type") == "sample":
+            delineate_fskeletons()
+
 
         ### Note: Line_Profiler output header => Line #: Hits: Time: Per Hit: % Time: Line Contents
             
