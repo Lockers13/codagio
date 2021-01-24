@@ -55,11 +55,7 @@ class Analyzer:
     def profile(self):
         profiler = Profiler(self)
         
-        ### Note : cprof must be called before lprof as the latter's results depend on the former's 
-        ### ^ This needs to be fixed for multiprocessing purposes
-
         profiler.cprof()
-
         if self.__args.get("l") or self.__args.get("type") == "sample":
             profiler.lprof()
         if self.__args.get("g"):
