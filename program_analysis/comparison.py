@@ -7,6 +7,7 @@ class Comparer:
         self.__filename, self.__simple_basename, self.__data_path = analyzer.get_paths()
         self.__sub_analysis = analyzer.get_prog_dict()
         self.__samp_analysis = self.__get_sample_analysis()
+        self.__args = analyzer.get_args()
 
     def __get_sample_analysis(self):
         with open("{0}_analysis.json".format(self.__data_path), 'r') as f:
@@ -18,9 +19,17 @@ class Comparer:
         for k, v in samp_fdefs.items():
             fname = samp_fdefs[k]["name"]
             skeleton = samp_fdefs[k]["skeleton"]
-            for line in skeleton:
-                print(line)
-            print()
+            if self.__args.get("l"):
+                print(skeleton[0][0])
+                for skel in skeleton[1:]:
+                    print("{0} ({1})".format(skel[0], skel[1]))
+                print()
+            else:
+                print(skeleton[0])
+                for skel in skeleton[1:]:
+                    print("{0}".format(skel))
+                print()
+
 
     def __compare_fdef_stats(self):
         """
