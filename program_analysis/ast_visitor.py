@@ -298,8 +298,9 @@ class AstTreeVisitor(ast.NodeVisitor):
             call_dict[call_key]["lineno"] = node.func.lineno
         if not parent:
             self.__fdef_dict["skeleton"].append("{0}{1}({2})".format("    " * self.__count_hash["level"], call_dict[call_key]["name"], ', '.join(params)))
-        else:
-            pass
+
+
+
 
 
     def __process_args(self, arg_node, call_dict):
@@ -316,7 +317,7 @@ class AstTreeVisitor(ast.NodeVisitor):
             elif isinstance(arg, ast.Call):
                 arg_func = "arg_func_{0}".format(self.__count_hash["fcalls"])
                 call_dict[arg_func] = {}
-                call_dict["params"] = [arg.func.id]
+                call_dict["params"].append(arg.func.id)
                 self.__process_call(arg, call_dict[arg_func], "{0}".format(self.__count_hash["fcalls"]))
             elif isinstance(arg, ast.BinOp):
                 l, op, r = self.__process_binop(arg)

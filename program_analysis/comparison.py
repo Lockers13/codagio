@@ -21,7 +21,7 @@ class Comparer:
         def ziplist_stats(sub, samp):
             fdef_comp_stats = []
             for (k1, v1), (k2, v2) in zip(sub.items(), samp.items()):
-                if not isinstance(v1, dict) and not isinstance(v2, dict):
+                if not isinstance(v1, dict) and not isinstance(v2, dict) and (k1 != "skeleton" and k2 != "skeleton"):
                     inner_comp = []
                     inner_comp.append("{0} : {1}".format(k1, v1))
                     inner_comp.append("{0} : {1}".format(k2, v2))
