@@ -221,6 +221,7 @@ class AstTreeVisitor(ast.NodeVisitor):
         
         Returns None"""
 
+
         def do_body(body_node, node_dict):
             try:
                 self.__increment_counts(body_node)
@@ -234,14 +235,17 @@ class AstTreeVisitor(ast.NodeVisitor):
                 elseif = False
             elif isinstance(body_node, ast.Expr):
                 if isinstance(body_node.value, ast.Call):
-                    self.__process_call(body_node.value, node_dict)
+                    func = body_node.value.func
+                    func_name = func.id if isinstance(func, ast.Name) else func.attr
                 else:
-                    node_dict["expr"] = type(body_node.value).__name__
+                    func_name = ""
+                node_type = type(body_node.value).__name__.lower()
+                node_dict["expr"] = "{0} {1}".format(node_type, func_name)
+                self.__fdef_dict["skeleton"].append("{0}{1} {2}".format("    " * self.__count_hash["level"], node_type, func_name))
             elif isinstance(body_node, ast.Try):
                 self.__process_try(body_node, node_dict)
             elif isinstance(body_node, ast.FunctionDef):
                 self.__nested_fdefs.append(body_node.name)
-
             else:
                 self.__process_simple_op(body_node, node_dict)
 
@@ -279,30 +283,6 @@ class AstTreeVisitor(ast.NodeVisitor):
                     binop_list.append(str(vargs[i]))
         return binop_list
 
-    def __process_call(self, node, call_dict, parent=None):
-        """Utility method to recursively process any 'call' constructs encountered in AST fdefs.
-
-        Returns None"""
-
-        self.__increment_counts(node)
-        self.__program_dict["line_indents"]["line_{0}".format(node.lineno)] = self.__count_hash["level"]
-        call_key = "fcall_{0}".format(self.__count_hash["fcalls"])
-        call_dict[call_key] = {}
-        call_dict[call_key]["param_caller"] = parent
-        params = self.__process_args(node.args, call_dict[call_key])
-        if isinstance(node.func, ast.Name):
-            call_dict[call_key]["name"] = node.func.id
-            call_dict[call_key]["lineno"] = node.func.lineno
-        else:
-            call_dict[call_key]["name"] = node.func.attr
-            call_dict[call_key]["lineno"] = node.func.lineno
-        if not parent:
-            self.__fdef_dict["skeleton"].append("{0}{1}({2})".format("    " * self.__count_hash["level"], call_dict[call_key]["name"], ', '.join(params)))
-
-
-
-
-
     def __process_args(self, arg_node, call_dict):
         """Utility method for processing encountered function or method parameters/args.
 
@@ -314,11 +294,11 @@ class AstTreeVisitor(ast.NodeVisitor):
                 call_dict["params"].append(str(arg.n))
             elif isinstance(arg, ast.Name):
                 call_dict["params"].append(str(arg.id))
-            elif isinstance(arg, ast.Call):
-                arg_func = "arg_func_{0}".format(self.__count_hash["fcalls"])
-                call_dict[arg_func] = {}
-                call_dict["params"].append(arg.func.id)
-                self.__process_call(arg, call_dict[arg_func], "{0}".format(self.__count_hash["fcalls"]))
+            # elif isinstance(arg, ast.Call):
+            #     arg_func = "arg_func_{0}".format(self.__count_hash["fcalls"])
+            #     call_dict[arg_func] = {}
+            #     call_dict["params"].append(arg.func.id)
+            #     self.__process_call(arg, call_dict[arg_func], "{0}".format(self.__count_hash["fcalls"]))
             elif isinstance(arg, ast.BinOp):
                 l, op, r = self.__process_binop(arg)
                 bin_op_str = "{0} {1} {2}".format(l, op, r)

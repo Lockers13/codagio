@@ -4,14 +4,10 @@ import time
 import json
 
 def partition(arr, low, high):
-    def take_ages():
-        list(range(10000))
-    
-    #take_ages()
     pivot = arr[(high+low)//2]
     i = low - 1
     j = high + 1 
-
+    
     while True:
         i += 1
         while arr[i] < pivot:
