@@ -15,13 +15,18 @@ class Comparer:
         return samp_analysis
     
     def __display_skelprof(self):
-        def print_skelprof(fdef_dict, sub=False):
+        def print_skelprof(fdef_dict, sub=False): 
             for k, v in fdef_dict.items():
+                lprof_dict = fdef_dict[k]["line_profile"]
+                # Note: we need to normalise percentages due to overhead introduced by profiling in case they do not total to 100%, or some value near enough
+                percentage_time = sum([float(val["%time"]) for val in lprof_dict.values()])
                 cum_time = float(fdef_dict[k]["cum_time"])
                 skeleton = fdef_dict[k]["skeleton"]
                 print(skeleton[0][0])
                 for skel in skeleton[1:]:
-                    print("{0} (%time : {1}%) (real time : {2}s)".format(skel[0], skel[1], '%.2E' % ((float(skel[1])/100) * cum_time)))
+                    # see: normalisation note above
+                    p_time = (float(skel[1])/percentage_time) * 100 if abs(percentage_time - 100) > 1 else float(skel[1]) 
+                    print("{0} (%time : {1}%) (real time : {2}s)".format(skel[0], skel[1], '%.2E' % ((p_time/100) * cum_time)))
                 if sub:
                     print("\nCorrectness of Output Score = {0}\n".format(self.__sub_analysis["score"]))
             
