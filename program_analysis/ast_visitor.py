@@ -73,7 +73,6 @@ class AstTreeVisitor(ast.NodeVisitor):
         self.__count_hash[pl_id] += 1
         self.__program_dict["fdefs"][self.fdef_key]["num_{0}".format(pl_id)] += 1
 
-
     def __prep_body_dict(self, node, node_dict, count_key):
         """Utility method to initialize body_dict.
 
@@ -102,6 +101,10 @@ class AstTreeVisitor(ast.NodeVisitor):
                 self.__process_call(value, node_dict)
         except:
             value = None
+        if isinstance(node.value, ast.Call):
+            example_string = "[e.g. var = function(params)]"
+        else:
+            example_string = ""
 
         node_dict[op_key] = {
                 "value": value,
@@ -109,8 +112,7 @@ class AstTreeVisitor(ast.NodeVisitor):
                 "lineno": node.lineno,
                 "level": self.__count_hash["level"]
         }
-        self.__fdef_dict["skeleton"].append("{0}{1} {2}".format("    " * self.__count_hash["level"], op_type, value))
-
+        self.__fdef_dict["skeleton"].append("{0}{1} {2} {3}".format("    " * self.__count_hash["level"], op_type, value, example_string))
         self.__program_dict["line_indents"]["line_{0}".format(node.lineno)] = self.__count_hash["level"]
         
     def __process_conditional(self, node, node_dict, elseif=False):
@@ -128,7 +130,6 @@ class AstTreeVisitor(ast.NodeVisitor):
         node_dict[cond_id]["elif"] = elseif
         conditional = "elif" if elseif else "if"
         self.__fdef_dict["skeleton"].append("{0}{1} {2}:".format("    " * self.__count_hash["level"], conditional, test_type))
-
         self.__process_body(node, body_dict)
         
         try:
@@ -167,7 +168,6 @@ class AstTreeVisitor(ast.NodeVisitor):
             node_dict["exc_handler_{0}".format(self.__count_hash["exc_handlers"])] = {}
             except_dict = node_dict["exc_handler_{0}".format(self.__count_hash["exc_handlers"])]
             self.__fdef_dict["skeleton"].append("{0}{1}:".format("    " * self.__count_hash["level"], type(handler).__name__.lower()))
-
 
             for body in handler.body:
                 self.__process_body(body, except_dict)
@@ -210,7 +210,7 @@ class AstTreeVisitor(ast.NodeVisitor):
         # process body of node
         self.__process_body(node, body_dict)
         self.__count_hash["nest_level"] -= 1
-    
+
     def __process_body(self, node, node_dict):
 
         """Utility method to recursively process the body of any given AST construct containing a body. 
@@ -220,7 +220,6 @@ class AstTreeVisitor(ast.NodeVisitor):
         to our prog dict and return None.
         
         Returns None"""
-
 
         def do_body(body_node, node_dict):
             try:
@@ -241,7 +240,7 @@ class AstTreeVisitor(ast.NodeVisitor):
                     func_name = ""
                 node_type = type(body_node.value).__name__.lower()
                 node_dict["expr"] = "{0} {1}".format(node_type, func_name)
-                self.__fdef_dict["skeleton"].append("{0}{1} {2}".format("    " * self.__count_hash["level"], node_type, func_name))
+                self.__fdef_dict["skeleton"].append("{0}{1} to '{2}'".format("    " * self.__count_hash["level"], node_type, func_name))
             elif isinstance(body_node, ast.Try):
                 self.__process_try(body_node, node_dict)
             elif isinstance(body_node, ast.FunctionDef):

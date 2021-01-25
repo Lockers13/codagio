@@ -32,7 +32,7 @@ class Comparer:
                     print("{0} (%time : {1}%) (real time : {2}s)".format(skel[0], skel[1], '%.2E' % ((p_time/100) * cum_time)))
                     accumulator += (p_time/100) * cum_time
                 if sub:
-                    print("\nCorrectness of Output Score = {0}\n".format(self.__sub_analysis["score"]))
+                    print("\nCorrectness of Output Score = {0}".format(self.__sub_analysis["score"]))
                 print("\nCprof cum time : {0} vs. Calculated cum time : {1}".format(cum_time, accumulator))
             
 
