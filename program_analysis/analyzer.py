@@ -63,4 +63,4 @@ class Analyzer:
 
     def compare(self):
         comparer = Comparer(self)
-        return comparer.compare()
+        comparer.compare()

@@ -68,4 +68,3 @@ class Comparer:
         self.__sub_analysis["fcomp_overview_stats"] = self.__compare_fdef_stats()
         if self.__args.get("l"):
             self.__display_skelprof()
-        return self.__sub_analysis
