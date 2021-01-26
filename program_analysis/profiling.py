@@ -31,12 +31,14 @@ class Profiler:
                 lprof_dict = self.__program_dict["fdefs"][fdef_key]["line_profile"]
                 new_skel = []
                 new_skel.append([skeleton[0]])
+
                 for line, (k, v) in zip(skeleton[1:], lprof_dict.items()):
                     inner_skel = []
                     inner_skel.append(line)
                     inner_skel.append("{0}".format(v["%time"]))
                     new_skel.append(inner_skel)
                 self.__program_dict["fdefs"][fdef_key]["skeleton"] = new_skel
+                
 
         def make_pro_file(filename, lines, token):
             """Internal helper function; creates file to be profiled by kernprof by inserting 

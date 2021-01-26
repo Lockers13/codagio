@@ -37,11 +37,14 @@ class AstTreeVisitor(ast.NodeVisitor):
         # create glboal program dict [important!]
         self.__program_dict = analyzer.get_prog_dict()
         self.__stock_functions = ["main", "prep_input"]
+        self.__args = analyzer.get_args()
         # create global hash map to keep count of occurrence of given types of nodes (see __parse_categories)
         self.__program_dict["count_hash"] = {}
-        self.__program_dict["line_indents"] = {}
-        # get simple instance reference to count hash map
         self.__count_hash = self.__program_dict["count_hash"]
+        self.__program_dict["line_indents"] = {}
+        self.__program_dict["nested_fdefs"] = []
+        self.__nested_fdefs = self.__program_dict["nested_fdefs"]
+        # get simple instance reference to count hash map
         self.__program_dict["nested_loops"] = []
         self.__nested_loops = self.__program_dict["nested_loops"]
         self.__program_dict["fdefs"] = {}
@@ -52,12 +55,8 @@ class AstTreeVisitor(ast.NodeVisitor):
         self.__count_hash["level"] = -1
         # count var to record number of primitive operations (e.g. assign, aug_assign, etc.)
         self.__count_hash["nest_level"] = -1
-        self.__fname = None
-        # self.__reverse_class_dict = {}
-        self.__program_dict["nested_fdefs"] = []
-        self.__nested_fdefs = self.__program_dict["nested_fdefs"]
-        self.__args = analyzer.get_args()
-    
+        
+        
     def get_program_dict(self):
         return self.__program_dict
 
@@ -72,7 +71,6 @@ class AstTreeVisitor(ast.NodeVisitor):
         self.__fdef_dict["num_ops"] += 1
 
         op_type = type(node).__name__.lower()
-
         try:
             value = type(node.value).__name__.lower()
         except:
@@ -87,40 +85,34 @@ class AstTreeVisitor(ast.NodeVisitor):
         self.__fdef_dict["skeleton"].append("{0}{1} {2} {3}".format("    " * self.__count_hash["level"], op_type, value, example_string))
         self.__program_dict["line_indents"]["line_{0}".format(node.lineno)] = self.__count_hash["level"]
         
+    def __process_orelse(self, node, orelse):
+        if isinstance(orelse, ast.If):
+            if isinstance(node, ast.If):
+                elseif = True
+            self.__increment_counts(orelse)
+            self.__process_conditional(orelse, elseif)
+        else:
+            self.__fdef_dict["skeleton"].append("{0}{1}".format("    " * self.__count_hash["level"], "else:"))
+            self.__program_dict["line_indents"]["line_{0}".format(orelse.lineno-1)] = self.__count_hash["level"]
+            self.__process_body(orelse)
+
     def __process_conditional(self, node, elseif=False):
         node_type = type(node).__name__.lower()
         self.__program_dict["line_indents"]["line_{0}".format(node.lineno)] = self.__count_hash["level"]
-
         # try to record test type
         try:
             test_type = type(node.test).__name__.lower()
         except:
-            pass
+            test_type = None
 
         conditional_type = "elif" if elseif else "if"
         self.__fdef_dict["skeleton"].append("{0}{1} {2}:".format("    " * self.__count_hash["level"], conditional_type, test_type))
+
         self.__process_body(node)
-        
         try:
-            if isinstance(node.orelse[0], ast.If):
-                if isinstance(node, ast.If):
-                    elseif = True
-                self.__count_hash["ifs"] += 1
-                self.__fdef_dict["num_ifs"] += 1
-                self.__process_conditional(node.orelse[0], elseif)
-            else:
-                self.__count_hash["elses"] += 1
-
-                self.__program_dict["line_indents"]["line_{0}".format(node.orelse[0].lineno-1)] = self.__count_hash["level"]
-                self.__fdef_dict["num_elses"] += 1
-                self.__fdef_dict["skeleton"].append("{0}{1}:".format("    " * self.__count_hash["level"], "else"))
-
-                for body_node in node.orelse:
-                    if isinstance(body_node, ast.If):
-                        self.__process_conditional(body_node)
-                    else:
-                        self.__process_body(body_node)
-        except Exception as e:
+            orelse = node.orelse[0]
+            self.__process_orelse(node, orelse)
+        except IndexError:
             pass
 
     def __process_try(self, node, node_dict):
@@ -195,14 +187,16 @@ class AstTreeVisitor(ast.NodeVisitor):
                 self.__process_conditional(body_node)
                 elseif = False
             elif isinstance(body_node, ast.Expr):
-                if isinstance(body_node.value, ast.Call):
-                    self.__increment_counts(body_node.value)
-                    self.__program_dict["line_indents"]["line_{0}".format(body_node.value.lineno)] = self.__count_hash["level"]
-                    func = body_node.value.func
+                value = body_node.value
+
+                if isinstance(value, ast.Call):
+                    self.__increment_counts(value)
+                    self.__program_dict["line_indents"]["line_{0}".format(value.lineno)] = self.__count_hash["level"]
+                    func = value.func
                     func_name = func.id if isinstance(func, ast.Name) else func.attr
                 else:
                     func_name = ""
-                node_type = type(body_node.value).__name__.lower()
+                node_type = type(value).__name__.lower()
                 self.__fdef_dict["skeleton"].append("{0}{1} to '{2}'".format("    " * self.__count_hash["level"], node_type, func_name))
             elif isinstance(body_node, ast.Try):
                 self.__process_try(body_node)
@@ -217,7 +211,7 @@ class AstTreeVisitor(ast.NodeVisitor):
         try:
             for body_node in node.body:
                 do_body(body_node)
-        except AttributeError:
+        except AttributeError as e:
             do_body(node)
 
         # decrement indentation level count upon exiting any node body            
@@ -233,20 +227,19 @@ class AstTreeVisitor(ast.NodeVisitor):
             fdef_dict = self.__program_dict["fdefs"]
             self.__count_hash["fdefs"] += 1
             fdef_key = "fdef_{0}".format(self.__count_hash["fdefs"])
+            self.__fname = node.name
             fdef_dict[fdef_key] = {}
-            fdef_dict[fdef_key]["name"] = node.name
-            fdef_dict[fdef_key]["retval"] = node.returns
-            fdef_dict[fdef_key]["lineno"] = node.lineno
-            fdef_dict[fdef_key]["level"] = self.__count_hash["level"]
+            self.__fdef_dict = fdef_dict[fdef_key]
+            self.__fdef_dict["name"] = node.name
+            self.__fdef_dict["retval"] = node.returns
+            self.__fdef_dict["lineno"] = node.lineno
+            self.__fdef_dict["level"] = self.__count_hash["level"]
             self.__program_dict["line_indents"]["line_{0}".format(node.lineno)] = self.__count_hash["level"]
-            fdef_dict[fdef_key]["args"] = []
+            self.__fdef_dict["args"] = []
 
             for arg in node.args.args:
-                fdef_dict[fdef_key]["args"].append(arg.arg)
- 
-            fdef_dict = fdef_dict[fdef_key]
-            self.__fname = node.name
-            self.__fdef_dict = fdef_dict
+                self.__fdef_dict["args"].append(arg.arg)
+
             signature = "def {0}({1}):".format(node.name, ', '.join(self.__fdef_dict["args"]))
             self.__fdef_dict["skeleton"] = []
             self.__fdef_dict["skeleton"].append(signature)
@@ -254,4 +247,5 @@ class AstTreeVisitor(ast.NodeVisitor):
                 self.__fdef_dict["num_{0}".format(cat)] = 0
             self.__process_body(node)
             self.__count_hash["level"] -= 1
+
         self.generic_visit(node)
