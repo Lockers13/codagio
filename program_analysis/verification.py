@@ -14,7 +14,8 @@ class Verifier:
         self.__filename, self.__simple_basename, self.__data_path = analyzer.get_paths()
         self.__program_dict = analyzer.get_prog_dict()
         self.__args = analyzer.get_args()
-        self.__num_tests = 3
+        self.__test_stats = self.__detail_inputs("{0}_input.json".format(self.__data_path))
+        self.__num_tests = self.__test_stats[0]
         
     def __gen_sub_hashes(self):
         """Private utility method to make hashes from output of provided submission program.
@@ -68,7 +69,7 @@ class Verifier:
         sub_hashes = self.__gen_sub_hashes()
         self.__program_dict["scores"] = {}
         scores = self.__program_dict["scores"]
-        test_stats = self.__detail_inputs("{0}_input.json".format(self.__data_path))
+        test_stats = self.__test_stats
 
         overall_score = 0
         for count, (sub_hash, samp_hash) in enumerate(zip(sub_hashes, sample_hashes)):
