@@ -32,7 +32,7 @@ class Comparer:
                     print("{0} (%time : {1}%) (real time : {2}s)".format(skel[0], skel[1], '%.2E' % ((p_time/100) * cum_time)))
                     accumulator += (p_time/100) * cum_time
                 if sub:
-                    print("\nCorrectness of Output Score = {0}".format(self.__sub_analysis["score"]))
+                    print("\nCorrectness of Output Score = {0}".format(self.__sub_analysis["scores"]["overall_score"]))
                 print("\nCprof cum time : {0} vs. Calculated cum time : {1}".format(cum_time, accumulator))
             
 
@@ -42,6 +42,17 @@ class Comparer:
         print_skelprof(samp_fdefs)
         print("\nDisplaying submission skelprof:\n------------------------------------------")
         print_skelprof(sub_fdefs, sub=True)
+
+    def __print_test_stats(self):
+        scores = self.__sub_analysis["scores"]
+        print("\nTest stats breakdown\n------------------------------------------")
+        for k, v in scores.items():
+            if k == "overall_score":
+                continue
+            print("\n{0}:\n".format(k.capitalize()))
+            print("Status => {0}".format(v["status"]))
+            print("Input Length => {0}".format(v["input_length"]))
+            print("Input Type => {0}".format(v["input_type"]))
 
     def __compare_fdef_stats(self):
         """
@@ -73,3 +84,5 @@ class Comparer:
         self.__sub_analysis["fcomp_overview_stats"] = self.__compare_fdef_stats()
         if self.__args.get("l"):
             self.__display_skelprof()
+        if self.__args.get("type") == "submission":
+            self.__print_test_stats()
