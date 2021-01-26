@@ -31,8 +31,7 @@ class Comparer:
                     p_time = (float(skel[1])/percentage_time) * 100 if abs(percentage_time - 100) > 1 else float(skel[1]) 
                     print("{0} (%time : {1}%) (real time : {2}s)".format(skel[0], skel[1], '%.2E' % ((p_time/100) * cum_time)))
                     accumulator += (p_time/100) * cum_time
-                if sub:
-                    print("\nCorrectness of Output Score = {0}".format(self.__sub_analysis["scores"]["overall_score"]))
+
                 print("\nCprof cum time : {0} vs. Calculated cum time : {1}".format(cum_time, accumulator))
             
 
@@ -52,7 +51,8 @@ class Comparer:
             print("\n{0}:\n".format(k.capitalize()))
             print("Status => {0}".format(v["status"]))
             print("Input Length => {0}".format(v["input_length"]))
-            print("Input Type => {0}".format(v["input_type"]))
+            print("Input Type => {0}".format(v["input_type"]))          
+        print("\nOverall Score = {0}".format(self.__sub_analysis["scores"]["overall_score"]))
 
     def __compare_fdef_stats(self):
         """

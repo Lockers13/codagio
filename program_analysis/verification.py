@@ -72,12 +72,15 @@ class Verifier:
 
         overall_score = 0
         for count, (sub_hash, samp_hash) in enumerate(zip(sub_hashes, sample_hashes)):
-            status = "success" if sub_hash == samp_hash else "failure"
+            if sub_hash == samp_hash:
+                status = "success" 
+                overall_score += 1
+            else:
+                status = "failure"
             scores["test_{0}".format(count+1)] = {}
             test = scores["test_{0}".format(count+1)]
             test["status"] = status
             test["input_length"] = test_stats[1][count]
             test["input_type"] = test_stats[2][count]
-            overall_score += 1
 
         scores["overall_score"] = "{0}%".format(round(overall_score/len(sample_hashes), 4) * 100)
