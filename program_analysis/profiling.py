@@ -102,21 +102,19 @@ class Profiler:
                         in_func = True
                     elif not in_func:
                         pass
-                    else:
-                        if "@profile" in split_line:
-                            pass
-                        else:
-                            if len_sl > 1 and len_sl < 6:
-                                if split_line[1].startswith("def"):
-                                    fname = split_line[2].split("(")[0]
-                                    fdef_k = self.__udef_info[fname][0]
-                                    fdefs[fdef_k]["line_profile"] = {}
-                                    fnum = int(re.search(r'\d+', fdef_k).group())
-                                split_line = " ".join(split_line).split(maxsplit=1)
-                                split_line.append("0.0")
-                                write_lprofs(reached=False)
-                            elif len_sl == 6:
-                                write_lprofs()
+                    elif "@profile" in split_line:
+                        pass
+                    elif len_sl > 1 and len_sl < 6:
+                        if split_line[1].startswith("def"):
+                            fname = split_line[2].split("(")[0]
+                            fdef_k = self.__udef_info[fname][0]
+                            fdefs[fdef_k]["line_profile"] = {}
+                            fnum = int(re.search(r'\d+', fdef_k).group())
+                        split_line = " ".join(split_line).split(maxsplit=1)
+                        split_line.append("0.0")
+                        write_lprofs(reached=False)
+                    elif len_sl == 6:
+                        write_lprofs()
             
             # call kernprof as subprocess, redirecting stdout to pipe, and read results
             process = subprocess.Popen(["kernprof", "-l", "-v", "{0}".format(pro_file), "{0}_input.json".format(self.__data_path), "1"], stdout=subprocess.PIPE)
