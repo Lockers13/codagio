@@ -31,7 +31,7 @@ class AstTreeVisitor(ast.NodeVisitor):
     """
 
     # private instance var determining what entries to initialize in global program dict
-    __node_types = ["fdefs", "whiles", "ifs", "fors", "assigns", "augassigns", "fcalls", "calls", "ops", "elses", "trys", "exc_handlers", "returns"]
+    __node_types = ["fdefs", "whiles", "ifs", "fors", "assigns", "augassigns", "fcalls", "calls", "ops", "elses", "trys", "exc_handlers", "returns", "else-ifs"]
 
     def __init__(self, analyzer):
         # create glboal program dict [important!]
@@ -56,7 +56,6 @@ class AstTreeVisitor(ast.NodeVisitor):
         # count var to record number of primitive operations (e.g. assign, aug_assign, etc.)
         self.__count_hash["nest_level"] = -1
         
-        
     def get_program_dict(self):
         return self.__program_dict
 
@@ -78,20 +77,21 @@ class AstTreeVisitor(ast.NodeVisitor):
         if isinstance(node.value, ast.Call):
             self.__increment_counts(node.value)
             self.__program_dict["line_indents"]["line_{0}".format(node.value.lineno)] = self.__count_hash["level"]
-            example_string = "[e.g. var = function(params)]"
-        else:
-            example_string = ""
 
-        self.__fdef_dict["skeleton"].append("{0}{1} {2} {3}".format("    " * self.__count_hash["level"], op_type, value, example_string))
+        self.__fdef_dict["skeleton"].append("{0}{1} {2}".format("    " * self.__count_hash["level"], op_type, value))
         self.__program_dict["line_indents"]["line_{0}".format(node.lineno)] = self.__count_hash["level"]
         
     def __process_orelse(self, node, orelse):
         if isinstance(orelse, ast.If):
             if isinstance(node, ast.If):
+                self.__count_hash["else-ifs"] += 1
+                self.__fdef_dict["num_else-ifs"] += 1
                 elseif = True
             self.__increment_counts(orelse)
             self.__process_conditional(orelse, elseif)
         else:
+            self.__count_hash["elses"] += 1
+            self.__fdef_dict["num_elses"] += 1
             self.__fdef_dict["skeleton"].append("{0}{1}".format("    " * self.__count_hash["level"], "else:"))
             self.__program_dict["line_indents"]["line_{0}".format(orelse.lineno-1)] = self.__count_hash["level"]
             self.__process_body(orelse)
@@ -107,8 +107,8 @@ class AstTreeVisitor(ast.NodeVisitor):
 
         conditional_type = "elif" if elseif else "if"
         self.__fdef_dict["skeleton"].append("{0}{1} {2}:".format("    " * self.__count_hash["level"], conditional_type, test_type))
-
         self.__process_body(node)
+
         try:
             orelse = node.orelse[0]
             self.__process_orelse(node, orelse)
@@ -176,6 +176,7 @@ class AstTreeVisitor(ast.NodeVisitor):
         Returns None"""
 
         def do_body(body_node):
+            
             try:
                 self.__increment_counts(body_node)
             except:
@@ -188,7 +189,6 @@ class AstTreeVisitor(ast.NodeVisitor):
                 elseif = False
             elif isinstance(body_node, ast.Expr):
                 value = body_node.value
-
                 if isinstance(value, ast.Call):
                     self.__increment_counts(value)
                     self.__program_dict["line_indents"]["line_{0}".format(value.lineno)] = self.__count_hash["level"]
@@ -243,7 +243,7 @@ class AstTreeVisitor(ast.NodeVisitor):
             signature = "def {0}({1}):".format(node.name, ', '.join(self.__fdef_dict["args"]))
             self.__fdef_dict["skeleton"] = []
             self.__fdef_dict["skeleton"].append(signature)
-            for cat in ["whiles", "fors", "ifs", "ops", "calls", "elses", "assigns", "augassigns", "trys", "returns"]:
+            for cat in ["whiles", "fors", "ifs", "ops", "calls", "elses", "assigns", "augassigns", "trys", "returns", "else-ifs"]:
                 self.__fdef_dict["num_{0}".format(cat)] = 0
             self.__process_body(node)
             self.__count_hash["level"] -= 1

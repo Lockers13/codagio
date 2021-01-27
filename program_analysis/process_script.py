@@ -4,7 +4,7 @@ import os
 from analyzer import Analyzer
 
 # example submission call : python process_script.py -s prime_checker -t submission -l
-# example sample call : python process_script.py -s quicksort -t sample -l
+# example sample call : python process_script.py -s quicksort -t sample 
 
 def parse_clargs():
     """Helper function to parse command line args.

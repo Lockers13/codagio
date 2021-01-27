@@ -94,12 +94,8 @@ class Profiler:
 
                     float(second_item)
                     fdefs[fdef_k]["line_profile"]["line_{0}".format(int(split_line[0]) - fnum)] = {}
-                    # tot_time = fdefs[fdef_k]["tot_time"]
-                    # cum_time = fdefs[fdef_k]["cum_time"]
                     line_info = fdefs[fdef_k]["line_profile"]["line_{0}".format(int(split_line[0]) - fnum)]
                     line_info["hits"] = split_line[1]
-                    # line_info["time"] = '%.2E' % ((float(split_line[4])/100) * float(cum_time))
-                    # line_info["time_per_hit"] = '%.2E' % (float(line_info["time"]) / float(line_info["hits"]))
                     line_info["%time"] = split_line[4]
                     line_info["contents"] = split_line[5]
                 
@@ -130,6 +126,13 @@ class Profiler:
                                 write_lprofs()
                             except Exception as e:
                                 continue
+                    elif len(split_line) == 2 and split_line[1] == "else:":
+                        ### Note: lprof assigns no time stats to else statements (for whatever reason)
+                        fdefs[fdef_k]["line_profile"]["line_{0}".format(int(split_line[0]) - 1)] = {}
+                        line_info = fdefs[fdef_k]["line_profile"]["line_{0}".format(int(split_line[0]) - 1)]
+                        line_info["hits"] = "0.0"
+                        line_info["%time"] = "0.0"
+                        line_info["contents"] = "else:"
 
             
             # call kernprof as subprocess, redirecting stdout to pipe, and read results
