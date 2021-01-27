@@ -41,7 +41,7 @@ def main():
     if args.get("type") == "submission":
         analyzer.compare()
     analyzer.write_to_json()
-    # analyzer.rprint_dict(analyzer.get_prog_dict())
+    analyzer.rprint_dict(analyzer.get_prog_dict())
 
 if __name__ == "__main__":
     main()

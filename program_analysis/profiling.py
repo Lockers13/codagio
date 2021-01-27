@@ -66,7 +66,7 @@ class Profiler:
 
                 Returns None"""
 
-                def write_lprofs():
+                def write_lprofs(reached=True):
                     """Helper function for actual writing of lprof results to appropriate subdicts
 
                     Returns None"""
@@ -76,50 +76,47 @@ class Profiler:
                     ### inside a function (%time). So we use this latter, in conjunction with the results returned by cProfile
                     ### to get a more accurate estimate of real time spent executing each line.
                     ### viz. real_time_per_line = %time in line (lprof) * total cumulative function time (cProf)
-
-                    float(second_item)
+                    
                     fdefs[fdef_k]["line_profile"]["line_{0}".format(int(split_line[0]) - fnum)] = {}
                     line_info = fdefs[fdef_k]["line_profile"]["line_{0}".format(int(split_line[0]) - fnum)]
-                    line_info["hits"] = split_line[1]
-                    line_info["%time"] = split_line[4]
-                    line_info["contents"] = split_line[5]
-                
+                    if reached:
+                        line_info["hits"] = split_line[1]
+                        line_info["%time"] = split_line[4]
+                        line_info["contents"] = split_line[5]
+                    else:
+                        line_info["hits"] = "0"
+                        line_info["%time"] = "0.0"
+                        contents = "" if split_line[1] == "0.0" else split_line[1]
+                        line_info["contents"] = contents
+
                 fdefs = self.__program_dict["fdefs"]
+                in_func = False
                 for line in output:
                     # received bytes need decoding
                     line = line.decode("utf-8").strip()
-                    print(line)
                     split_line = line.split(maxsplit=5)
-
-                    try:
-                        first_item, second_item = split_line[0], split_line[1]
-                    except IndexError:
-                        continue
-
-                    if len(split_line) == 6 or first_item == "Total" or first_item == "Function:":
-                        # if we are on a function, get the fname, and then its corresponding key from self.udef_info
-                        if first_item == "Function:":
-                            fname = split_line[1]
-                            fdef_k = self.__udef_info[fname][0]   
-                            fdefs[fdef_k]["line_profile"] = {}
-                            # get function number from fdef_key => needed for offsetting line number due to addition of '@profile' decorators
-                            fnum = int(re.search(r'\d+', fdef_k).group())
+                    len_sl = len(split_line)
+                    if len_sl == 0:
+                        in_func = False
+                    elif split_line[0].startswith("=============================================="):
+                        in_func = True
+                    elif not in_func:
+                        pass
+                    else:
+                        if "@profile" in split_line:
+                            pass
                         else:
-                            # if we are inside the function stats, try to write results to appropriate fdef subdict
-                            try:
-                                if split_line[5] == "@profile":
-                                    continue
+                            if len_sl > 1 and len_sl < 6:
+                                if split_line[1].startswith("def"):
+                                    fname = split_line[2].split("(")[0]
+                                    fdef_k = self.__udef_info[fname][0]
+                                    fdefs[fdef_k]["line_profile"] = {}
+                                    fnum = int(re.search(r'\d+', fdef_k).group())
+                                split_line = " ".join(split_line).split(maxsplit=1)
+                                split_line.append("0.0")
+                                write_lprofs(reached=False)
+                            elif len_sl == 6:
                                 write_lprofs()
-                            except Exception as e:
-                                continue
-                    elif len(split_line) == 2 and split_line[1] == "else:":
-                        ### Note: lprof assigns no time stats to else statements (for whatever reason)
-                        fdefs[fdef_k]["line_profile"]["line_{0}".format(int(split_line[0]) - 1)] = {}
-                        line_info = fdefs[fdef_k]["line_profile"]["line_{0}".format(int(split_line[0]) - 1)]
-                        line_info["hits"] = "0.0"
-                        line_info["%time"] = "0.0"
-                        line_info["contents"] = "else:"
-
             
             # call kernprof as subprocess, redirecting stdout to pipe, and read results
             process = subprocess.Popen(["kernprof", "-l", "-v", "{0}".format(pro_file), "{0}_input.json".format(self.__data_path), "1"], stdout=subprocess.PIPE)
