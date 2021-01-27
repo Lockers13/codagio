@@ -25,21 +25,6 @@ class Profiler:
 
         Returns None, writes output to global program dict"""
 
-        def delineate_fskeletons():
-            for fdef_key in self.__program_dict["fdefs"].keys():
-                skeleton = self.__program_dict["fdefs"][fdef_key]["skeleton"]
-                lprof_dict = self.__program_dict["fdefs"][fdef_key]["line_profile"]
-                new_skel = []
-                new_skel.append([skeleton[0]])
-
-                for line, (k, v) in zip(skeleton[1:], lprof_dict.items()):
-                    inner_skel = []
-                    inner_skel.append(line)
-                    inner_skel.append("{0}".format(v["%time"]))
-                    new_skel.append(inner_skel)
-                self.__program_dict["fdefs"][fdef_key]["skeleton"] = new_skel
-                
-
         def make_pro_file(filename, lines, token):
             """Internal helper function; creates file to be profiled by kernprof by inserting 
             
@@ -103,6 +88,7 @@ class Profiler:
                 for line in output:
                     # received bytes need decoding
                     line = line.decode("utf-8").strip()
+                    print(line)
                     split_line = line.split(maxsplit=5)
 
                     try:
@@ -159,10 +145,6 @@ class Profiler:
         pro_token = "@profile"
         pro_file = make_pro_file(self.__filename, udef_lines, pro_token)
         do_profile(pro_file)
-
-        if self.__args.get("l") or self.__args.get("type") == "sample":
-            delineate_fskeletons()
-
 
         ### Note: Line_Profiler output header => Line #: Hits: Time: Per Hit: % Time: Line Contents
             

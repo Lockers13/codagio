@@ -84,9 +84,11 @@ class AstTreeVisitor(ast.NodeVisitor):
     def __process_orelse(self, node, orelse):
         if isinstance(orelse, ast.If):
             if isinstance(node, ast.If):
+                elseif = True
                 self.__count_hash["else-ifs"] += 1
                 self.__fdef_dict["num_else-ifs"] += 1
-                elseif = True
+                self.__count_hash["ifs"] -= 1
+                self.__fdef_dict["num_ifs"] -= 1
             self.__increment_counts(orelse)
             self.__process_conditional(orelse, elseif)
         else:

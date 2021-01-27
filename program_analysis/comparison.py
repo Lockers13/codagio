@@ -12,35 +12,7 @@ class Comparer:
     def __get_sample_analysis(self):
         with open("{0}_analysis.json".format(self.__data_path), 'r') as f:
             samp_analysis = json.loads(f.read())
-        return samp_analysis
-    
-    def __display_skelprof(self):
-        def print_skelprof(fdef_dict, sub=False): 
-            for k, v in fdef_dict.items():
-                lprof_dict = fdef_dict[k]["line_profile"]
-                cum_time = fdef_dict[k]["cum_time"]
-                # Note: we need to normalise percentages due to overhead introduced by profiling in case they do not total to 100%, or some value near enough
-                percentage_time = sum([float(val["%time"]) for val in lprof_dict.values()])
-                cum_time = float(fdef_dict[k]["cum_time"])
-                skeleton = fdef_dict[k]["skeleton"]
-                accumulator = 0
-                print("Overall line percentage time = {0}\n".format(percentage_time))
-                print(skeleton[0][0])
-                for skel in skeleton[1:]:
-                    # see: normalisation note above
-                    p_time = (float(skel[1])/percentage_time) * 100 if abs(percentage_time - 100) > 1 else float(skel[1]) 
-                    print("{0} (%time : {1}%) (real time : {2}s)".format(skel[0], skel[1], '%.2E' % ((p_time/100) * cum_time)))
-                    accumulator += (p_time/100) * cum_time
-
-                print("\nCprof cum time : {0} vs. Calculated cum time : {1}".format(cum_time, accumulator))
-            
-
-        samp_fdefs = self.__samp_analysis["fdefs"]
-        sub_fdefs = self.__sub_analysis["fdefs"]
-        print("Displaying sample skelprof:\n------------------------------------------")
-        print_skelprof(samp_fdefs)
-        print("\nDisplaying submission skelprof:\n------------------------------------------")
-        print_skelprof(sub_fdefs, sub=True)
+        return samp_analysis 
 
     def __print_test_stats(self):
         scores = self.__sub_analysis["scores"]
@@ -53,6 +25,42 @@ class Comparer:
             print("Input Length => {0}".format(v["input_length"]))
             print("Input Type => {0}".format(v["input_type"]))          
         print("\nOverall Score = {0}".format(self.__sub_analysis["scores"]["overall_score"]))
+    
+    def __display_lprof_stats(self):
+        sub_fdefs = self.__sub_analysis["fdefs"]
+        for k, v in sub_fdefs.items():
+            fname = v["name"]
+            lprof_dict = v["line_profile"]
+            first = True
+            print("\nDisplaying lprof stats for function '{0}'".format(fname))
+            print("--------------------------------------------------------")
+            for inner_k, inner_v in lprof_dict.items():
+                line_no = int(inner_k.split("_")[1])
+                if first:
+                    offset = line_no - 1
+                    first = False
+                print("Line {0} - Hits: {1}, Percentage Time: {2}, Contents: {3}".format(
+                    line_no - offset,
+                    inner_v["hits"],
+                    inner_v["%time"],
+                    inner_v["contents"]
+                    )
+                )
+
+    def __show_logical_skeletons(self):
+        def print_skeleton(fdef_dict):
+            for k, v in fdef_dict.items():
+                skeleton = v["skeleton"]
+                print(skeleton[0])
+                for skel in skeleton[1:]:
+                    print(skel)
+
+        samp_fdefs = self.__samp_analysis["fdefs"]
+        sub_fdefs = self.__sub_analysis["fdefs"]
+        print("\nDisplaying logical skeleton of sample:\n------------------------------------------")
+        print_skeleton(samp_fdefs)
+        print("\nDisplaying logical skeleton of submission:\n------------------------------------------")
+        print_skeleton(sub_fdefs)
 
     def __compare_fdef_stats(self):
         """
@@ -82,7 +90,7 @@ class Comparer:
 
     def compare(self):
         self.__sub_analysis["fcomp_overview_stats"] = self.__compare_fdef_stats()
-        if self.__args.get("l"):
-            self.__display_skelprof()
-        if self.__args.get("type") == "submission":
-            self.__print_test_stats()
+        self.__print_test_stats()
+        self.__show_logical_skeletons()
+        # if self.__args.get("l"):
+        #     self.__display_lprof_stats()

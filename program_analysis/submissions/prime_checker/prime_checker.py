@@ -6,6 +6,14 @@ def is_prime(num):
     for i in range(2, num):
         if num % i == 0:
             return False
+        elif 5 + 3:
+            a = 1
+        else:
+            if True:
+                b = 2
+            else:
+                print("hello")
+
     return True
     
 def prep_input():
