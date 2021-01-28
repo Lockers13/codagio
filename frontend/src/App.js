@@ -1,7 +1,12 @@
-import React from "react";
+import React, {Fragment} from "react";
+import Layout from './containers/Layout/Layout';
 
 const App = () => {
-  return <div>Codagio</div>;
+  return(
+    <Fragment>
+      <Layout />
+    </Fragment>
+  )
 };
 
 export default App;
