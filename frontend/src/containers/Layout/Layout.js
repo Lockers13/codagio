@@ -11,9 +11,6 @@ class Layout extends Component {
     makePythonFile = () => {
         const tempState = {...this.state}
         const codeString = tempState.code
-        for(let i = 0; i<codeString.length; i++){
-            console.log(codeString[i])
-        }
         let blob = new Blob([codeString], {type: "text/plain;charset=utf-8"});
         console.log(blob)
         saveAs(blob, "test.py")
