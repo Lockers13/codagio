@@ -70,11 +70,13 @@ class AstTreeVisitor(ast.NodeVisitor):
         self.__fdef_dict["num_ops"] += 1
 
         op_type = type(node).__name__.lower()
+
         try:
             value = type(node.value).__name__.lower()
         except:
-            value = None
-        if isinstance(node.value, ast.Call):
+            value = ""
+
+        if value != "" and isinstance(value, ast.Call):
             self.__increment_counts(node.value)
             self.__program_dict["line_indents"]["line_{0}".format(node.value.lineno)] = self.__count_hash["level"]
 
@@ -99,6 +101,7 @@ class AstTreeVisitor(ast.NodeVisitor):
             self.__process_body(orelse)
 
     def __process_conditional(self, node, elseif=False):
+
         node_type = type(node).__name__.lower()
         self.__program_dict["line_indents"]["line_{0}".format(node.lineno)] = self.__count_hash["level"]
         # try to record test type
