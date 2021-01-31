@@ -18,6 +18,7 @@
     "react-codemirror2": "^7.2.1",
     "react-dom": "^16.13.1",
     "ttf-module-loader": "^1.0.0",
+    "underscore.string": "^3.3.5",
     "webfonts-loader": "^7.1.0"
   },
   "devDependencies": {
