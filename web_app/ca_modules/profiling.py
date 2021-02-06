@@ -5,11 +5,10 @@ import re
 
 class Profiler:
 
-    def __init__(self, analyzer):
+    def __init__(self, analyzer,):
         self.__filename, self.__simple_basename, self.__data_path = analyzer.get_paths()
         self.__program_dict = analyzer.get_prog_dict()
         self.__udef_info = self.__get_udef_info()
-        print("FILENAME =", self.__filename)
 
     def __get_udef_info(self):
         """Utility method to make user function defintiion info collected by ast visitor more easily accessible.

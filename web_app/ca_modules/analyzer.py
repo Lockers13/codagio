@@ -48,8 +48,8 @@ class Analyzer:
         # visit ast-parsed script
         atv.visit(parsed_tree)
     
-    def verify(self):
-        verifier = Verifier(self)
+    def verify(self, paragon):
+        verifier = Verifier(self, paragon)
         verifier.verify_output()
 
     def profile(self):

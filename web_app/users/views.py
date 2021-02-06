@@ -44,6 +44,7 @@ class SubmissionView(APIView):
         return Response("GET OK", status=status.HTTP_200_OK)
     
     def post(self, request):
+        # Artificially create a user and problem instance
         uid = prob_id = 1
         user = User.objects.filter(id=uid).first()
         problem = Problem.objects.filter(id=prob_id).first()
@@ -52,12 +53,13 @@ class SubmissionView(APIView):
             code_data = request.data.decode("utf-8")
 
             if self.__validate_submission(code_data):
-                filename = "prime_checker.py"
+
+                filename = "{0}.py".format(problem.name)
                 maker.make_file(filename, code_data)
                 analyzer = Analyzer(filename, None)
                 analyzer.visit_ast()
-                analyzer.profile()
-                analyzer.verify()
+                analyzer.profile(problem)
+                analyzer.verify(problem)
                 os.remove(filename)
                 analysis = analyzer.get_prog_dict()
                 submission = Submission(

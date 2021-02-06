@@ -10,11 +10,12 @@ class Verifier:
 
     previously generated via the relevant sample paragon program"""
 
-    def __init__(self, analyzer):
+    def __init__(self, analyzer, paragon):
         self.__filename, self.__simple_basename, self.__data_path = analyzer.get_paths()
         self.__program_dict = analyzer.get_prog_dict()
         self.__test_stats = self.__detail_inputs("{0}_input.json".format(self.__data_path))
         self.__num_tests = self.__test_stats[0]
+        self.__paragon = paragon
         
     def __gen_sub_hashes(self):
         """Private utility method to make hashes from output of provided submission program.
@@ -51,13 +52,8 @@ class Verifier:
         """Private utility method to read in previously generated sample hashes from disk.
 
         Returns list of sample hashes."""
-
-        sample_hashes = []
-        hash_filename = "{0}_hashes.txt".format(self.__data_path)
-        with open(hash_filename, 'r') as hf:
-            for line in hf:
-                sample_hashes.append(line.strip('\n'))
-        return sample_hashes
+        
+        return json.loads(self.__paragon.hashes)
 
     def verify_output(self):
         """Public method for verifying matches between hashes of submitted program's output, and sample hashes.
