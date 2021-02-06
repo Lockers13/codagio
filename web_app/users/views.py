@@ -9,6 +9,7 @@ from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 from ca_modules import make_executable as maker
 from ca_modules.analyzer import Analyzer
+import os
 
 class PlainTextParser(BaseParser):
     """
@@ -49,5 +50,6 @@ class Submission(APIView):
                 analyzer.visit_ast()
                 analyzer.profile()
                 analyzer.verify()
+                os.remove(filename)
                 return Response(analyzer.get_prog_dict(), status=status.HTTP_200_OK)
         return Response("POST NOT OK", status=status.HTTP_400_BAD_REQUEST)
