@@ -56,10 +56,10 @@ class Analyzer:
         profiler = Profiler(self)
         
         profiler.cprof()
-        if self.__args.get("l") or self.__args.get("type") == "sample":
-            profiler.lprof()
-        if self.__args.get("g"):
-            profiler.gnu_time_stats()
+
+        profiler.lprof()
+
+        #profiler.gnu_time_stats()
 
     def compare(self):
         comparer = Comparer(self)

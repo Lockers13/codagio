@@ -27,7 +27,7 @@ def make_file(path, code):
                     "def main():",
                     "    input_list = prep_input()",
                     "    for inp in input_list:",
-                    "        print(\"{0}\".format(template_function(inp)))\n",
+                    "        print(\"{0} {1}\".format(inp, template_function(inp)))\n",
                     "main()"]
 
     program_text = code.split("\n")

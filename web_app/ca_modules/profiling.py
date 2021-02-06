@@ -9,7 +9,7 @@ class Profiler:
         self.__filename, self.__simple_basename, self.__data_path = analyzer.get_paths()
         self.__program_dict = analyzer.get_prog_dict()
         self.__udef_info = self.__get_udef_info()
-        self.__args = analyzer.get_args()
+        print("FILENAME =", self.__filename)
 
     def __get_udef_info(self):
         """Utility method to make user function defintiion info collected by ast visitor more easily accessible.
@@ -94,6 +94,7 @@ class Profiler:
                 for line in output:
                     # received bytes need decoding
                     line = line.decode("utf-8").strip()
+                    print(line)
                     split_line = line.split(maxsplit=5)
                     len_sl = len(split_line)
                     if len_sl == 0:

@@ -8,6 +8,7 @@ from rest_framework.decorators import parser_classes
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 from ca_modules import make_executable as maker
+from ca_modules.analyzer import Analyzer
 
 class PlainTextParser(BaseParser):
     """
@@ -42,6 +43,11 @@ class Submission(APIView):
         if bool(request.data):
             code_data = request.data.decode("utf-8")
             if self.__validate_submission(code_data):
-                maker.make_file("hello.py", code_data)
-                return Response("POST OK", status=status.HTTP_200_OK)
+                filename = "prime_checker.py"
+                maker.make_file(filename, code_data)
+                analyzer = Analyzer(filename, None)
+                analyzer.visit_ast()
+                analyzer.profile()
+                analyzer.verify()
+                return Response(analyzer.get_prog_dict(), status=status.HTTP_200_OK)
         return Response("POST NOT OK", status=status.HTTP_400_BAD_REQUEST)

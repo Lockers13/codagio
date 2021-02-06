@@ -13,7 +13,6 @@ class Verifier:
     def __init__(self, analyzer):
         self.__filename, self.__simple_basename, self.__data_path = analyzer.get_paths()
         self.__program_dict = analyzer.get_prog_dict()
-        self.__args = analyzer.get_args()
         self.__test_stats = self.__detail_inputs("{0}_input.json".format(self.__data_path))
         self.__num_tests = self.__test_stats[0]
         
