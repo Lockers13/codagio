@@ -94,7 +94,6 @@ class Profiler:
                 for line in output:
                     # received bytes need decoding
                     line = line.decode("utf-8").strip()
-                    print(line)
                     split_line = line.split(maxsplit=5)
                     len_sl = len(split_line)
                     if len_sl == 0:
