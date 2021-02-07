@@ -13,9 +13,9 @@ class Verifier:
     def __init__(self, analyzer, paragon):
         self.__filename, self.__simple_basename, self.__data_path = analyzer.get_paths()
         self.__program_dict = analyzer.get_prog_dict()
-        self.__test_stats = self.__detail_inputs("{0}_input.json".format(self.__data_path))
-        self.__num_tests = self.__test_stats[0]
-        self.__paragon = paragon
+        self.__sample_hashes = json.loads(paragon.hashes)
+        self.__sample_inputs = json.loads(paragon.inputs)
+        self.__test_stats = self.__detail_inputs()
         
     def __gen_sub_hashes(self):
         """Private utility method to make hashes from output of provided submission program.
@@ -23,11 +23,11 @@ class Verifier:
         Returns list of said hashes."""
 
         sub_hashes = []
-        
+
         # Note: number adjustable...based on number of hash samples available for given problem
-        for i in range(self.__num_tests):
+        for i in range(len(self.__sample_inputs)):
             try:
-                process = subprocess.Popen(["python", "{0}".format(self.__filename), "{0}_input.json".format(self.__data_path), str(i)], \
+                process = subprocess.Popen(["python", "{0}".format(self.__filename), json.dumps(self.__sample_inputs[i])], \
                      stdout=subprocess.PIPE)
             except Exception as e:
                 print("Exception in verify_output, program processing stage:", str(e))
@@ -40,27 +40,18 @@ class Verifier:
 
         return sub_hashes
 
-    def __detail_inputs(self, input_file):
-        with open(input_file, 'r') as f:
-            tests = json.loads(f.read())
-            num_tests = len(tests)
-            input_lengths = [len(inp) for inp in tests]
-            input_types = [type(inp[0]).__name__.lower() for inp in tests]
-            return num_tests, input_lengths, input_types
+    def __detail_inputs(self):
+        num_tests = len(self.__sample_inputs)
+        input_lengths = [len(inp) for inp in self.__sample_inputs]
+        input_types = [type(inp[0]).__name__.lower() for inp in self.__sample_inputs]
+        return num_tests, input_lengths, input_types
     
-    def __get_sample_hashes(self):
-        """Private utility method to read in previously generated sample hashes from disk.
-
-        Returns list of sample hashes."""
-        
-        return json.loads(self.__paragon.hashes)
-
     def verify_output(self):
         """Public method for verifying matches between hashes of submitted program's output, and sample hashes.
 
         Returns score as percentage (string) of exact hash matches."""
 
-        sample_hashes = self.__get_sample_hashes()
+        sample_hashes = self.__sample_hashes
         sub_hashes = self.__gen_sub_hashes()
         self.__program_dict["scores"] = {}
         scores = self.__program_dict["scores"]

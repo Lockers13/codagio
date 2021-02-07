@@ -2,13 +2,15 @@ import subprocess
 import os
 import platform
 import re
+import json
 
 class Profiler:
 
-    def __init__(self, analyzer,):
+    def __init__(self, analyzer, paragon):
         self.__filename, self.__simple_basename, self.__data_path = analyzer.get_paths()
         self.__program_dict = analyzer.get_prog_dict()
         self.__udef_info = self.__get_udef_info()
+        self.__sample_inputs = json.loads(paragon.inputs)
 
     def __get_udef_info(self):
         """Utility method to make user function defintiion info collected by ast visitor more easily accessible.
@@ -116,7 +118,7 @@ class Profiler:
                         write_lprofs()
             
             # call kernprof as subprocess, redirecting stdout to pipe, and read results
-            process = subprocess.Popen(["kernprof", "-l", "-v", "{0}".format(pro_file), "{0}_input.json".format(self.__data_path), "1"], stdout=subprocess.PIPE)
+            process = subprocess.Popen(["kernprof", "-l", "-v", "{0}".format(pro_file), json.dumps(self.__sample_inputs[0])], stdout=subprocess.PIPE)
             # crucially, readlines() is blocking for pipes
             output = process.stdout.readlines()
             process_lprof_out(output)
@@ -170,7 +172,7 @@ class Profiler:
                     pass
 
         # call cProfile as subprocess, redirecting stdout to pipe, and read results, as before
-        process = subprocess.Popen(["python", "-m", "cProfile", "-s", "time", "{0}".format(self.__filename), "{0}_input.json".format(self.__data_path), "1"], stdout=subprocess.PIPE)
+        process = subprocess.Popen(["python", "-m", "cProfile", "-s", "time", "{0}".format(self.__filename), json.dumps(self.__sample_inputs[0])], stdout=subprocess.PIPE)
         output = process.stdout.readlines()
 
         process_cprof_out(output)

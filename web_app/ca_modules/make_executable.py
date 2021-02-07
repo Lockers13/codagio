@@ -18,10 +18,8 @@ def make_file(path, code):
 
     TEMPLATE_CODE = ["def prep_input():",
                     "    try:",
-                    "        with open(sys.argv[1], 'r') as f:",
-                    "            contents = json.loads(f.read())",
-                    "        return contents[int(sys.argv[2])]",
-                    "    except (IndexError, FileNotFoundError):",
+                    "        return json.loads(sys.argv[1])",
+                    "    except IndexError:",
                     "        print(\"Error: please make sure correct input has been provided\")",
                     "        sys.exit(1)\n",
                     "def main():",
