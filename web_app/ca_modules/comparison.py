@@ -4,11 +4,10 @@ import os
 class Comparer:
 
     def __init__(self, analyzer):
-        self.__filename, self.__simple_basename, self.__data_path = analyzer.get_paths()
+        self.__filename = analyzer.get_filename()
         self.__sub_analysis = analyzer.get_prog_dict()
         self.__samp_analysis = self.__get_sample_analysis()
         self.__sub_fdefs, self.__samp_fdefs = self.__sub_analysis["fdefs"], self.__samp_analysis["fdefs"]
-        self.__args = analyzer.get_args()
 
     def __get_sample_analysis(self):
         with open("{0}_analysis.json".format(self.__data_path), 'r') as f:
@@ -100,5 +99,5 @@ class Comparer:
         self.__sub_analysis["fcomp_overview_stats"] = self.__compare_fdef_stats()
         self.__print_test_stats()
         self.__show_logical_skeletons()
-        if self.__args.get("l"):
-            self.__display_lprof_stats()
+
+        self.__display_lprof_stats()

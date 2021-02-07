@@ -11,7 +11,7 @@ class Verifier:
     previously generated via the relevant sample paragon program"""
 
     def __init__(self, analyzer, paragon):
-        self.__filename, self.__simple_basename, self.__data_path = analyzer.get_paths()
+        self.__filename = analyzer.get_filename()
         self.__program_dict = analyzer.get_prog_dict()
         self.__sample_hashes = json.loads(paragon.hashes)
         self.__sample_inputs = json.loads(paragon.inputs)
@@ -72,5 +72,5 @@ class Verifier:
 
         percentage_score = round(overall_score/len(sample_hashes), 4) * 100
         scores["overall_score"] = "{0}%".format(percentage_score)
-        
+
         return percentage_score

@@ -9,21 +9,15 @@ from .comparison import Comparer
 
 class Analyzer:
 
-    def __init__(self, filename, args):
+    def __init__(self, filename):
         self.__program_dict = {}
         self.__filename = filename
-        self.__simple_basename = os.path.basename(self.__filename).split(".")[0]
-        self.__data_path = os.path.join("sample_problems", self.__simple_basename, self.__simple_basename)
-        self.__args = args
-    
+
     def get_prog_dict(self):
         return self.__program_dict
     
-    def get_args(self):
-        return self.__args
-    
-    def get_paths(self):
-        return self.__filename, self.__simple_basename, self.__data_path
+    def get_filename(self):
+        return self.__filename
 
     def rprint_dict(self, nested, indent=0):
         """Helper function to recursively print nested program_dict.

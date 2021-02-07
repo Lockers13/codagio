@@ -56,7 +56,7 @@ class SubmissionView(APIView):
 
                 filename = "{0}.py".format(problem.name)
                 maker.make_file(filename, code_data)
-                analyzer = Analyzer(filename, None)
+                analyzer = Analyzer(filename)
                 analyzer.visit_ast()
                 percentage_score = analyzer.verify(problem)
                 ### only profile submission if all tests are passed

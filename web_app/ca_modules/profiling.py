@@ -7,7 +7,7 @@ import json
 class Profiler:
 
     def __init__(self, analyzer, paragon):
-        self.__filename, self.__simple_basename, self.__data_path = analyzer.get_paths()
+        self.__filename = analyzer.get_filename()
         self.__program_dict = analyzer.get_prog_dict()
         self.__udef_info = self.__get_udef_info()
         self.__sample_inputs = json.loads(paragon.inputs)
