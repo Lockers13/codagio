@@ -58,8 +58,11 @@ class SubmissionView(APIView):
                 maker.make_file(filename, code_data)
                 analyzer = Analyzer(filename, None)
                 analyzer.visit_ast()
-                analyzer.profile(problem)
-                analyzer.verify(problem)
+                percentage_score = analyzer.verify(problem)
+                ### only profile submission if all tests are passed
+                if float(percentage_score) == 100.0:
+                    analyzer.profile(problem)
+
                 os.remove(filename)
                 analysis = analyzer.get_prog_dict()
                 submission = Submission(

@@ -50,7 +50,7 @@ class Analyzer:
     
     def verify(self, paragon):
         verifier = Verifier(self, paragon)
-        verifier.verify_output()
+        return verifier.verify_output()
 
     def profile(self, paragon):
         profiler = Profiler(self, paragon)

@@ -70,4 +70,7 @@ class Verifier:
             test["input_length"] = test_stats[1][count]
             test["input_type"] = test_stats[2][count]
 
-        scores["overall_score"] = "{0}%".format(round(overall_score/len(sample_hashes), 4) * 100)
+        percentage_score = round(overall_score/len(sample_hashes), 4) * 100
+        scores["overall_score"] = "{0}%".format(percentage_score)
+        
+        return percentage_score
