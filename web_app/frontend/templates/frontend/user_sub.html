@@ -10,9 +10,10 @@
 </head>
 
 <body>
+
     <div>
-        <form id="sub_form" action="" method="post">
-            {% csrf_token %}
+        <form id="sub_form" action="" method="post" enc="multipart/form-data">
+            {% csrf_token %} {% if sub_type == 'solution' %}
             <div class="form-row">
                 <div class="form-group col-md-6 mb-0">
                     {{ form.title }}
@@ -26,13 +27,33 @@
                     <br>
                 </div>
             </div>
-            <button id="sub_btn" type="submit" class="btn btn-primary">Submit your code!</button>
+            <button id="sub_btn" type="submit" class="btn btn-primary">Submit your solution!</button>
+            {% elif sub_type == 'problem' %}
+            <div class="form-row">
+                <div class="form-group col-md-6 mb-0">
+                    {{ form.title }}
+                </div>
+            </div>
+            <br>
+            <div class="form-row">
+                Name: {{ form.name }}<br>Description: {{ form.desc }}<br>Difficulty: {{ form.difficulty }}<br><br>
+                <div class="form-group col-md-6 mb-0">
+                    {{ form.solution }} {{ form.user_id }} {{ form.problem_id }}
+                    <br>
+                    <br> Upload Input File: {{ form.inputs }}
+                </div>
+            </div>
+            <br>
+            <button id="sub_btn" type="submit" class="btn btn-primary">Submit your problem!</button>
+            {% endif %}
         </form>
+
+
 
 
     </div>
 
-    
+
 </body>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <script src="{% static 'frontend/user_submission.js' %}"></script>

@@ -31,6 +31,7 @@ class SubmissionView(APIView):
     
     def post(self, request):
         data = request.data
+        print("DATA =", data)
         # Artificially create a user and problem instance
         uid = data['user_id'][0]
         prob_id = data['problem_id'][0]
