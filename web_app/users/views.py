@@ -14,20 +14,6 @@ import json
 from datetime import datetime
 from .models import User, Problem, Submission
 
-class PlainTextParser(BaseParser):
-    """
-    Plain text parser.
-    """
-    media_type = 'text/plain'
-
-    def parse(self, stream, media_type=None, parser_context=None):
-        """
-        Simply return a string representing the body of the request.
-        """
-        return stream.read()
-
-
-@parser_classes([PlainTextParser])
 class SubmissionView(APIView):
 
     def __validate_submission(self, sub):
@@ -44,13 +30,16 @@ class SubmissionView(APIView):
         return Response("GET OK", status=status.HTTP_200_OK)
     
     def post(self, request):
+        data = request.data
         # Artificially create a user and problem instance
-        uid = prob_id = 1
+        uid = data['user_id'][0]
+        prob_id = data['problem_id'][0]
+
         user = User.objects.filter(id=uid).first()
         problem = Problem.objects.filter(id=prob_id).first()
 
         if bool(request.data):
-            code_data = request.data.decode("utf-8")
+            code_data = data['solution']
 
             if self.__validate_submission(code_data):
 
