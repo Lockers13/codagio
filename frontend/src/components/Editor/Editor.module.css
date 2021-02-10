@@ -1,0 +1,22 @@
+.topPanel{
+    background-color: hsl(255, 6%, 25%);
+    color: white;
+    padding: 10px 10px;
+}
+
+.editorContainer{
+    margin: 20px 0;
+    width: 50%;
+    background-color: red;
+    height: 80vh;
+}
+
+.codeMirrorWrapper{
+    height: 100%;
+    border-bottom-right-radius: .5rem;
+    border-bottom-left-radius: .5rem;
+}
+
+.codeMirror{
+    height: 100%;
+}
