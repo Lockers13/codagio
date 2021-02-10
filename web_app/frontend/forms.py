@@ -7,7 +7,7 @@ class SolutionSubmissionForm(forms.Form):
 
 class ProblemSubmissionForm(forms.Form):
     problem_id = forms.IntegerField(widget=forms.HiddenInput(), required=True)
-    author_id = forms.IntegerField(widget=forms.HiddenInput(), required=True)
+    user_id = forms.IntegerField(widget=forms.HiddenInput(), required=True)
     desc = forms.CharField(required=False, max_length=200)
     name = forms.CharField(required=True, max_length=50)
     inputs = forms.FileField()
