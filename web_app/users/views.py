@@ -9,7 +9,7 @@ from django.utils.translation import gettext_lazy as _
 from ca_modules import make_utils
 from ca_modules.analyzer import Analyzer
 from datetime import datetime
-from .models import User, Problem, Submission
+from .models import User, Problem, Solution
 
 class SubmissionView(APIView):
 
@@ -46,14 +46,12 @@ class SubmissionView(APIView):
                 if float(percentage_score) == 100.0:
                     analyzer.profile(problem.inputs)
                 analysis = analyzer.get_prog_dict()
-
-                submission = Submission(
-                    user_id=user, 
-                    problem_id=problem, 
-                    analysis=json.dumps(analysis), 
-                    date_submitted=datetime.now()
+                solution, created = Solution.objects.update_or_create(
+                    user_id=uid,
+                    problem_id=prob_id,
+                    defaults={'analysis': json.dumps(analysis), 'date_submitted': datetime.now()}
                 )
-                submission.save()
+                solution.save()
 
             elif sub_type == "problem":
                 json_inputs = data['inputs'].read().decode("utf-8")
@@ -63,16 +61,18 @@ class SubmissionView(APIView):
                 name = data['name'][0]
                 desc = data['desc']
                 hashes = make_utils.gen_sample_hashes(filename, json_inputs)
-                problem = Problem(
+                problem, created = Problem.objects.update_or_create(
                     id=prob_id,
-                    difficulty=difficulty,
-                    hashes=json.dumps(hashes),
-                    date_created=datetime.now(),
-                    author_id=uid,
-                    desc=desc,
-                    name=problem.name,
-                    inputs=json_inputs,
-                    analysis=analysis
+                    defaults={
+                        'difficulty': difficulty,
+                        'hashes': json.dumps(hashes),
+                        'date_created': datetime.now(),
+                        'author_id': uid,
+                        'desc': desc,
+                        'name': problem.name,
+                        'inputs': json_inputs,
+                        'analysis': analysis
+                    }
                 )
                 problem.save()
 

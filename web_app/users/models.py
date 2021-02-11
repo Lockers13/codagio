@@ -16,8 +16,11 @@ class Problem(models.Model):
     date_created = models.DateField()
     analysis = JSONField(default=dict)
 
-class Submission(models.Model):
-    user_id = models.ForeignKey(User, on_delete=models.CASCADE)
-    problem_id = models.ForeignKey(Problem, on_delete=models.CASCADE)
+class Solution(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    problem = models.ForeignKey(Problem, on_delete=models.CASCADE)
     analysis = JSONField()
     date_submitted = models.DateField()
+    
+    class Meta:
+        unique_together = ('user', 'problem',)

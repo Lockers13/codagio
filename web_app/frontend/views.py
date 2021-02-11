@@ -8,7 +8,7 @@ def index(request):
 def user_sub(request, sub_type):
     if sub_type == "solution":
         initial_state = {
-            'user_id': 1,
+            'user_id': 2,
             'problem_id': 1,
             'solution': "def is_prime(num):\n    for i in range(2, num):\n        if num % i == 0:\n           return False\n    return True"
         }
