@@ -6,7 +6,8 @@ import { saveAs } from 'file-saver';
 class Layout extends Component {
 
     state = {
-        code: "#Quick recursive fibonnaci\ndef fibonnaci(a,b):\n    if a == 1:\n        return 1\n    else:\n        fibonnaci(a-1,a-2)"
+        code: "#test",
+        submit: false
     }
 
     makePythonFile = () => {
@@ -18,10 +19,15 @@ class Layout extends Component {
     }
 
     codeChangeHandler = (value) => {
-        this.setState({code:value})
+        if (this.state.submit)
+            this.setState({code:value})
+        //this.setState({code:value})
     }
 
-
+    submitStateHandler = () => {
+        this.setState({submit:true})
+        codeChangeHandler()
+    }
 
     render(){
         return(
@@ -35,6 +41,8 @@ class Layout extends Component {
                         code={this.state.code}
                         onChange = {this.codeChangeHandler}
                     />
+
+                    <button onClick={this.submitStateHandler} > Submit code </button>
 
                     <Editor
                         language="python" 

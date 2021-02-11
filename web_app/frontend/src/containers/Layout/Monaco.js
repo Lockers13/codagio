@@ -1,11 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Editor from "@monaco-editor/react";
 
 const monEditor = (props) => {
 
-    function handleChange(monEditor, data, defaultValue){
-        onChange(defaultValue)
-    }
+    useEffect(() => {
+        console.log("rendered the editor")
+    })
 
     return(
         <div>
@@ -15,6 +15,7 @@ const monEditor = (props) => {
             theme="vs-dark"
             defaultLanguage={props.language}
             defaultValue={props.code}
+            onChange={props.onChange}
             />
         </div>
     )
