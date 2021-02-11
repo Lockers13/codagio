@@ -1,16 +1,13 @@
+import os
+import json
 from django.shortcuts import render
 from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from .forms import UploadFileForm
-from rest_framework.parsers import BaseParser
-from rest_framework.decorators import parser_classes
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 from ca_modules import make_utils
 from ca_modules.analyzer import Analyzer
-import os
-import json
 from datetime import datetime
 from .models import User, Problem, Submission
 
@@ -42,13 +39,13 @@ class SubmissionView(APIView):
             make_utils.make_file(filename, code_data)
             analyzer = Analyzer(filename)
             analyzer.visit_ast()
-            analysis = analyzer.get_prog_dict()
 
             if sub_type == "solution" and problem is not None:
                 percentage_score = analyzer.verify(problem)
                 ### only profile submission if all tests are passed
                 if float(percentage_score) == 100.0:
-                    analyzer.profile(problem)
+                    analyzer.profile(problem.inputs)
+                analysis = analyzer.get_prog_dict()
 
                 submission = Submission(
                     user_id=user, 
@@ -60,6 +57,8 @@ class SubmissionView(APIView):
 
             elif sub_type == "problem":
                 json_inputs = data['inputs'].read().decode("utf-8")
+                analyzer.profile(json_inputs, solution=False)
+                analysis = json.dumps(analyzer.get_prog_dict())
                 difficulty = data['difficulty']
                 name = data['name'][0]
                 desc = data['desc']
@@ -67,12 +66,13 @@ class SubmissionView(APIView):
                 problem = Problem(
                     id=prob_id,
                     difficulty=difficulty,
-                    hashes=hashes,
+                    hashes=json.dumps(hashes),
                     date_created=datetime.now(),
                     author_id=uid,
                     desc=desc,
                     name=problem.name,
-                    inputs=json_inputs
+                    inputs=json_inputs,
+                    analysis=analysis
                 )
                 problem.save()
 
