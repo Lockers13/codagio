@@ -46,12 +46,13 @@ class Analyzer:
         verifier = Verifier(self, paragon)
         return verifier.verify_output()
 
-    def profile(self, paragon):
-        profiler = Profiler(self, paragon)
+    def profile(self, inputs, solution=True):
+        profiler = Profiler(self, inputs)
         
         profiler.cprof()
 
-        profiler.lprof()
+        if solution:
+            profiler.lprof()
 
         #profiler.gnu_time_stats()
 

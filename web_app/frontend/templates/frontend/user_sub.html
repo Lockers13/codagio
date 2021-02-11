@@ -26,6 +26,7 @@
                     {{ form.solution }} {{ form.user_id }} {{ form.problem_id }}
                     <br>
                 </div>
+                <input type="hidden" name="sub_type" value="{{ sub_type }}">
             </div>
             <button id="sub_btn" type="submit" class="btn btn-primary">Submit your solution!</button>
             {% elif sub_type == 'problem' %}
@@ -41,6 +42,7 @@
                     {{ form.solution }} {{ form.user_id }} {{ form.problem_id }}
                     <br>
                     <br> Upload Input File: {{ form.inputs }}
+                    <input type="hidden" name="sub_type" value="{{ sub_type }}">
                 </div>
             </div>
             <br>

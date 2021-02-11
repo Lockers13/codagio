@@ -14,6 +14,7 @@ class Problem(models.Model):
     hashes = JSONField()
     inputs = JSONField()
     date_created = models.DateField()
+    analysis = JSONField(default=dict)
 
 class Submission(models.Model):
     user_id = models.ForeignKey(User, on_delete=models.CASCADE)

@@ -1,22 +1,23 @@
 import React, { useState } from "react";
 import Editor from "@monaco-editor/react";
 
-const MonEditor = (props) => {
-  
+const monEditor = (props) => {
 
+    function handleChange(monEditor, data, defaultValue){
+        onChange(defaultValue)
+    }
 
-
-  return(
-      <div>
-          <Editor
+    return(
+        <div>
+            <Editor
             height="90vh"
             width="50%"
             theme="vs-dark"
             defaultLanguage={props.language}
             defaultValue={props.code}
-         />
-      </div>
-  )
+            />
+        </div>
+    )
 };
 
-export default MonEditor;
+export default monEditor;

@@ -33,6 +33,7 @@ class Layout extends Component {
                     <MonEditor
                         language={"python"}
                         code={this.state.code}
+                        onChange = {this.codeChangeHandler}
                     />
 
                     <Editor
