@@ -1,5 +1,6 @@
 import React, { Fragment, Component} from 'react';
 import Editor from '../../components/Editor/Editor';
+import Monaco from './Monaco';
 import { saveAs } from 'file-saver';
 
 class Layout extends Component {
@@ -28,13 +29,14 @@ class Layout extends Component {
                 <div>Toolbar</div>
                 <div>Problem Description</div>
                 <main>
-                    <Editor
+                    {/* <Editor
                         language="python" 
                         displayName="Python Editor"
                         value={this.state.code}
                         onChange={this.codeChangeHandler} 
                         checkCode={this.makePythonFile}  
-                    />
+                    /> */}
+                    <Monaco />
                     <p>File Drop</p>
                     {this.props.children}
                 </main>
