@@ -5,7 +5,6 @@ import os
 from .ast_visitor import AstTreeVisitor
 from .profiling import Profiler
 from .verification import Verifier
-from .comparison import Comparer
 
 class Analyzer:
 
@@ -56,6 +55,3 @@ class Analyzer:
 
         #profiler.gnu_time_stats()
 
-    def compare(self):
-        comparer = Comparer(self)
-        comparer.compare()

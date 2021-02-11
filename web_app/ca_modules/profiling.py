@@ -124,10 +124,17 @@ class Profiler:
             process_lprof_out(output)
 
             ### clean up ###
-            # remove file with '@profile' 
-            os.remove(pro_file)
+            
+            # remove file with '@profile'
+            try: 
+                os.remove(pro_file)
+            except FileNotFoundError:
+                pass
             # remove auto generated lprof output file
-            os.remove("{0}.lprof".format(os.path.basename(pro_file)))
+            try:
+                os.remove("{0}.lprof".format(os.path.basename(pro_file)))
+            except FileNotFoundError:
+                pass
     
         # check that line profiler is installed for kernprof
         try:

@@ -8,6 +8,7 @@ from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 from ca_modules import make_utils
 from ca_modules.analyzer import Analyzer
+from ca_modules import comparison
 from datetime import datetime
 from .models import User, Problem, Solution
 
@@ -46,6 +47,8 @@ class SubmissionView(APIView):
                 if float(percentage_score) == 100.0:
                     analyzer.profile(problem.inputs)
                 analysis = analyzer.get_prog_dict()
+                comparison.write_comp(analysis, json.loads(problem.analysis))
+                
                 solution, created = Solution.objects.update_or_create(
                     user_id=uid,
                     problem_id=prob_id,
