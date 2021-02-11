@@ -1,5 +1,6 @@
-# import sys
-# import os
+import json
+import subprocess
+import hashlib
 
 def make_file(path, code):
     def write_prequel(file_obj):
@@ -40,19 +41,14 @@ def make_file(path, code):
             f.write("\n")
 
         write_sequel(f, fname)
-        
-# if len(sys.argv) != 2:
-#     print("Incorrect number of command line args...USAGE : python make_executable.py {scriptname}")
-#     sys.exit(1)
 
-# script_name = sys.argv[1]
-
-# try:
-#     make_dir = os.path.join("submissions", script_name.split(".")[0])
-#     os.mkdir(make_dir)
-# except FileExistsError:
-#     pass
-    
-
-# script_path = os.path.join(make_dir, script_name)
-# make_file(script_path)
+def gen_sample_hashes(filename, inputs):
+    hashes = []
+    programmatic_inputs = json.loads(inputs)
+    for i in range(len(programmatic_inputs)):  
+        s_process = subprocess.Popen(["python", filename, json.dumps(programmatic_inputs[i])], stdout=subprocess.PIPE)
+        output = s_process.stdout.read().decode("utf-8")
+        output = output.replace(' ', '').replace('\n', '')
+        samp_hash = hashlib.md5(output.encode()).hexdigest()
+        hashes.append(samp_hash)
+    return hashes
