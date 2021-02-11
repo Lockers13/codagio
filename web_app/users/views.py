@@ -41,7 +41,7 @@ class SubmissionView(APIView):
             analyzer = Analyzer(filename)
             analyzer.visit_ast()
 
-            if sub_type == "solution" and problem is not None:
+            if sub_type == "solution":
                 percentage_score = analyzer.verify(problem)
                 ### only profile submission if all tests are passed
                 if float(percentage_score) == 100.0:
