@@ -3,6 +3,9 @@ import Editor from '../../components/Editor/Editor';
 import MonEditor from './Monaco';
 import { saveAs } from 'file-saver';
 
+
+const AlteredCode = ""
+
 class Layout extends Component {
 
     state = {
@@ -19,14 +22,11 @@ class Layout extends Component {
     }
 
     codeChangeHandler = (value) => {
-        if (this.state.submit)
-            this.setState({code:value})
-        //this.setState({code:value})
+        this.setState({code:value})
     }
 
     submitStateHandler = () => {
-        this.setState({submit:true})
-        codeChangeHandler()
+        alert(this.state.code)
     }
 
     render(){

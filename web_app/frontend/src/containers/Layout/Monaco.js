@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import Editor from "@monaco-editor/react";
 
 const monEditor = (props) => {
