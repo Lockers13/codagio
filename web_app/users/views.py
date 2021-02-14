@@ -78,8 +78,12 @@ class SubmissionView(APIView):
                     }
                 )
                 problem.save()
+                
+            try:
+                os.remove(filename)
+            except FileNotFoundError:
+                pass
 
-            os.remove(filename)
             return Response(analysis, status=status.HTTP_200_OK)
         else:
             return Response("POST NOT OK: invalid code!", status=status.HTTP_400_BAD_REQUEST)
