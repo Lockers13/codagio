@@ -9,6 +9,13 @@
     <title>Codagio</title>
   </head>
   <body>
+      {% if user.is_authenticated %}
+      <p>Welcome {{ user.username }} !!!</p>
+      {% else %}
+      <p>It looks like you aren't logged in...click here to change that:
+        <a href="{% url 'login' %}">Login</a>
+      </p>      
+      {% endif %}
     <div id="app"></div>
     {% render_bundle 'frontend' %}
   </body>

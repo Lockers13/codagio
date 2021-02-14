@@ -31,7 +31,7 @@ class SubmissionView(APIView):
         sub_type = data.get("sub_type")
         prob_name = data.get("name")
         # Artificially create a user and problem instance
-        uid = data.get("user_id")[0]
+        uid = request.user.id
         prob_id = data.get("problem_id")[0]
         code_data = data.get("solution")
         user = Profile.objects.filter(id=uid).first()
