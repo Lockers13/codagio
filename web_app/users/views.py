@@ -10,7 +10,7 @@ from ca_modules import make_utils
 from ca_modules.analyzer import Analyzer
 from ca_modules import comparison
 from datetime import datetime
-from .models import User, Problem, Solution
+from .models import Profile, Problem, Solution
 
 class SubmissionView(APIView):
 
@@ -34,13 +34,13 @@ class SubmissionView(APIView):
         uid = data.get("user_id")[0]
         prob_id = data.get("problem_id")[0]
         code_data = data.get("solution")
-        user = User.objects.filter(id=uid).first()
+        user = Profile.objects.filter(id=uid).first()
         filename = "{0}.py".format(prob_name)
         if validate_submission(code_data):
             make_utils.make_file(filename, code_data)
             analyzer = Analyzer(filename)
             analyzer.visit_ast()
-            
+
             if sub_type == "solution":
                 problem = Problem.objects.filter(id=prob_id).first()
                 percentage_score = analyzer.verify(problem)
@@ -51,7 +51,7 @@ class SubmissionView(APIView):
                 comparison.write_comp(analysis, json.loads(problem.analysis))
                 
                 solution, created = Solution.objects.update_or_create(
-                    user_id=uid,
+                    submitter_id=uid,
                     problem_id=prob_id,
                     defaults={'analysis': json.dumps(analysis), 'date_submitted': datetime.now()}
                 )
