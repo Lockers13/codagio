@@ -29,20 +29,20 @@ class SubmissionView(APIView):
 
         data = request.data
         sub_type = data.get("sub_type")
-        p_name = data.get("name")
+        prob_name = data.get("name")
         # Artificially create a user and problem instance
         uid = data.get("user_id")[0]
         prob_id = data.get("problem_id")[0]
         code_data = data.get("solution")
         user = User.objects.filter(id=uid).first()
-        problem = Problem.objects.filter(id=prob_id).first()
-        filename = "{0}.py".format(data.get("name"))
+        filename = "{0}.py".format(prob_name)
         if validate_submission(code_data):
             make_utils.make_file(filename, code_data)
             analyzer = Analyzer(filename)
             analyzer.visit_ast()
-
+            
             if sub_type == "solution":
+                problem = Problem.objects.filter(id=prob_id).first()
                 percentage_score = analyzer.verify(problem)
                 ### only profile submission if all tests are passed
                 if float(percentage_score) == 100.0:
@@ -73,7 +73,7 @@ class SubmissionView(APIView):
                         'date_created': datetime.now(),
                         'author_id': uid,
                         'desc': desc,
-                        'name': p_name,
+                        'name': prob_name,
                         'inputs': json_inputs,
                         'analysis': analysis
                     }
