@@ -5,7 +5,6 @@ import os
 from .ast_visitor import AstTreeVisitor
 from .profiling import Profiler
 from .verification import Verifier
-from .comparison import Comparer
 
 class Analyzer:
 
@@ -46,15 +45,13 @@ class Analyzer:
         verifier = Verifier(self, paragon)
         return verifier.verify_output()
 
-    def profile(self, paragon):
-        profiler = Profiler(self, paragon)
+    def profile(self, inputs, solution=True):
+        profiler = Profiler(self, inputs)
         
         profiler.cprof()
 
-        profiler.lprof()
+        if solution:
+            profiler.lprof()
 
         #profiler.gnu_time_stats()
 
-    def compare(self):
-        comparer = Comparer(self)
-        comparer.compare()

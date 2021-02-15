@@ -6,11 +6,11 @@ import json
 
 class Profiler:
 
-    def __init__(self, analyzer, paragon):
+    def __init__(self, analyzer, inputs):
         self.__filename = analyzer.get_filename()
         self.__program_dict = analyzer.get_prog_dict()
         self.__udef_info = self.__get_udef_info()
-        self.__sample_inputs = json.loads(paragon.inputs)
+        self.__sample_inputs = json.loads(inputs)
 
     def __get_udef_info(self):
         """Utility method to make user function defintiion info collected by ast visitor more easily accessible.
@@ -124,10 +124,17 @@ class Profiler:
             process_lprof_out(output)
 
             ### clean up ###
-            # remove file with '@profile' 
-            os.remove(pro_file)
+            
+            # remove file with '@profile'
+            try: 
+                os.remove(pro_file)
+            except FileNotFoundError:
+                pass
             # remove auto generated lprof output file
-            os.remove("{0}.lprof".format(os.path.basename(pro_file)))
+            try:
+                os.remove("{0}.lprof".format(os.path.basename(pro_file)))
+            except FileNotFoundError:
+                pass
     
         # check that line profiler is installed for kernprof
         try:

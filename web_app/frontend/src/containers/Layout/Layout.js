@@ -1,12 +1,16 @@
 import React, { Fragment, Component} from 'react';
 import Editor from '../../components/Editor/Editor';
-import Monaco from './Monaco';
+import MonEditor from './Monaco';
 import { saveAs } from 'file-saver';
+
+
+const AlteredCode = ""
 
 class Layout extends Component {
 
     state = {
-        code: "def fibonnaci():\n    return fibonnaciList"
+        code: "#test",
+        submit: false
     }
 
     makePythonFile = () => {
@@ -21,7 +25,9 @@ class Layout extends Component {
         this.setState({code:value})
     }
 
-
+    submitStateHandler = () => {
+        alert(this.state.code)
+    }
 
     render(){
         return(
@@ -29,14 +35,23 @@ class Layout extends Component {
                 <div>Toolbar</div>
                 <div>Problem Description</div>
                 <main>
-                    {/* <Editor
+                    
+                    <MonEditor
+                        language={"python"}
+                        code={this.state.code}
+                        onChange = {this.codeChangeHandler}
+                    />
+
+                    <button onClick={this.submitStateHandler} > Submit code </button>
+
+                    <Editor
                         language="python" 
                         displayName="Python Editor"
                         value={this.state.code}
                         onChange={this.codeChangeHandler} 
                         checkCode={this.makePythonFile}  
-                    /> */}
-                    <Monaco />
+                    /> 
+
                     <p>File Drop</p>
                     {this.props.children}
                 </main>

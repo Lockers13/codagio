@@ -1,43 +1,24 @@
-import React from 'react';
-import MonacoEditor from 'react-monaco-editor';
+import React, { useEffect } from "react";
+import Editor from "@monaco-editor/react";
 
-class Monaco extends React.Component {
-  
-    constructor(props) {
-        super(props);
-        this.state = {
-        code: '// type your code...',
-        }
-    }
+const monEditor = (props) => {
 
-    editorDidMount(editor, monaco) {
-        console.log('editorDidMount', editor);
-        editor.focus();
-    }
+    useEffect(() => {
+        console.log("rendered the editor")
+    })
 
-    onChange(newValue, e) {
-        console.log('onChange', newValue, e);
-    }
-
-    render() {
-        const code = this.state.code;
-        const options = {
-        selectOnLineNumbers: true
-        };
-        return (
-        <MonacoEditor
-            width="800"
-            height="600"
-            language="python"
+    return(
+        <div>
+            <Editor
+            height="90vh"
+            width="50%"
             theme="vs-dark"
-            value={code}
-            options={options}
-            onChange={this.onChange}
-            editorDidMount={this.editorDidMount}
-        />
-        );
-    }
-}
+            defaultLanguage={props.language}
+            defaultValue={props.code}
+            onChange={props.onChange}
+            />
+        </div>
+    )
+};
 
-export default Monaco;
-
+export default monEditor;
