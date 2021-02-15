@@ -35,8 +35,6 @@ LOGOUT_REDIRECT_URL = 'login'
 # Application definition
 
 INSTALLED_APPS = [
-    'webpack_loader',
-    'frontend',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -46,14 +44,9 @@ INSTALLED_APPS = [
     'rest_framework',
     'users',
     'crispy_forms',
+    'code_analysis',
+    'accounts',
 ]
-
-WEBPACK_LOADER = {
-    'DEFAULT': {
-        'BUNDLE_DIR_NAME': 'frontend/',
-        'STATS_FILE': os.path.join(BASE_DIR, 'webpack-stats.json')
-    }
-}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -71,10 +64,11 @@ TEMPLATE_DIRS = (
     os.path.join(BASE_DIR, 'templates'),
 )
 
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [

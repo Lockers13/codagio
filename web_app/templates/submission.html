@@ -1,16 +1,10 @@
-<!DOCTYPE html> {% load static %}
-<html lang="en">
 
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="preconnect" href="https://fonts.gstatic.com">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;700;800&display=swap" rel="stylesheet">
-    <title>Codagio</title>
-</head>
+{% extends "base.html" %}
+{% load static %}
 
-<body>
+{% block title %}CGC - Code for Code's Sake{% endblock %}
 
+{% block content %}
     <div>
         <form id="sub_form" action="" method="post" enc="multipart/form-data">
             {% csrf_token %} {% if sub_type == 'solution' %}
@@ -49,15 +43,10 @@
             <button id="sub_btn" type="submit" class="btn btn-primary">Submit your problem!</button>
             {% endif %}
         </form>
-
-
-
+        
 
     </div>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="{% static 'js/submission.js' %}"></script>
+{% endblock %}
 
-
-</body>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-<script src="{% static 'frontend/user_submission.js' %}"></script>
-
-</html>

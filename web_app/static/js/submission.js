@@ -1,7 +1,7 @@
 $("#sub_form").submit(function (e) {
     e.preventDefault();
     $.ajax( {
-        url: 'http://localhost:8000/submission/',
+        url: 'http://localhost:8000/code/analysis/',
         type: 'POST',
         data: new FormData(this),
         processData: false,
