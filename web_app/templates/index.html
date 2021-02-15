@@ -1,10 +1,24 @@
-{% extends "base.html" %}
+{% extends "base.html" %} {% block title %}CGC - Code for Code's Sake{% endblock %} {% block content %}
 
-{% block title %}CGC - Code for Code's Sake{% endblock %}
+<div class="jumbotron text-center">
+    <h1>CGC - Codē Gratia Codis</h1>
+    <p>Or in plain english...code for code's sake!</p>
+</div>
 
-{% block content %}
-{% for entry in blog_entries %}
-    <h2>{{ entry.title }}</h2>
-    <p>{{ entry.body }}</p>
-{% endfor %}
+<div class="container">
+    {% for problem in problems %}
+    <div class="row">
+        <div class="col-sm-4">
+            <h2 style="text-align: center;"><u>{{ problem.name }}</u></h2><br>
+            <ul class="list-group">  
+                <li class="list-group-item">Description: {{ problem.desc }}</li>
+                <li class="list-group-item">Difficulty Level: {{ problem.difficulty }}</li>
+                <li class="list-group-item">Problem Author: {{ problem.author__user__username }}</li>
+                <li class="list-group-item">Date Posted: {{ problem.date_created }}</li>
+            </ul>
+        </div>
+        <div><a href="{% url 'code:submission' sub_type='solution' %}">Try problem</a></div>
+    </div>
+    {% endfor %} 
+</div>
 {% endblock %}

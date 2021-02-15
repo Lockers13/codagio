@@ -7,7 +7,8 @@ async-generator==1.10
 attrs==20.2.0
 autopep8==1.5.4
 backcall==0.2.0
-bleach==3.3.0
+beautifulsoup4==4.9.3
+bleach==3.2.1
 bokeh==2.2.3
 certifi==2020.6.20
 cffi==1.14.3
@@ -15,7 +16,10 @@ cycler==0.10.0
 decorator==4.4.2
 defusedxml==0.6.0
 Django==3.1.5
+django-bootstrap4==2.3.1
+django-crispy-forms==1.11.0
 django-webpack-loader==0.7.0
+djangorestframework==3.12.2
 entrypoints==0.3
 imageio==2.9.0
 importlib-metadata==2.0.0
@@ -56,6 +60,7 @@ Pillow==8.0.1
 prometheus-client==0.8.0
 prompt-toolkit==3.0.8
 psutil==5.8.0
+psycopg2==2.8.6
 ptyprocess==0.6.0
 pycodestyle==2.6.0
 pycparser==2.20
@@ -77,6 +82,7 @@ selenium==3.141.0
 Send2Trash==1.5.0
 six==1.15.0
 sklearn==0.0
+soupsieve==2.2
 sqlparse==0.4.1
 terminado==0.9.1
 testpath==0.4.4

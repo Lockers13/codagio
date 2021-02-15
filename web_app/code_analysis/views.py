@@ -92,7 +92,6 @@ class AnalysisView(APIView):
             return Response("POST NOT OK: invalid code!", status=status.HTTP_400_BAD_REQUEST)
 
 def submission(request, sub_type):
-    print(sub_type)
     if sub_type == "solution":
 
         # initial_state = {
