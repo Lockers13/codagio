@@ -3,14 +3,12 @@
 <head>
     <style type="text/css" media="screen">
         #editor {
-            position: absolute;
-            top: 100;
-            right: 0;
-            bottom: 100;
-            left: 0;
-            width: 50%;
-            height: 100%;
-        }
+        position: absolute; /* Added */
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+   }    
     </style>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -20,7 +18,7 @@
 {% endblock %}
 
 {% block content %}
-<div style="padding:10 10 10 10">
+
 <!-- <div>
         <form id="sub_form" action="" method="post" enc="multipart/form-data">
             {% csrf_token %} {% if sub_type == 'solution' %}
@@ -62,8 +60,29 @@
 
 
 <!-- </div> -->
-<div id="editor"></div>
-<div id="btndiv" style="display:block"></div>
+<div style="width: 100%; overflow: hidden;">
+    <div id="container" style="width:50%;height: 600px;float:left;position:relative;">
+        <div id="editor"></div>
+    </div>
+    <div style="width:50%;margin-left:620px;position:relative;text-align:center;">
+            <form id="sub_form" action="" method="post" enc="multipart/form-data">
+                {% csrf_token %}
+                <div class="form-row">
+                    <div class="form-group col-md-6 mb-0">
+                        {{ form.title }}
+                    </div>
+                </div>
+                <br>
+                <div class="form-row">
+                    <div class="form-group col-md-6 mb-0">
+                        {{ form.solution }} {{ form.user_id }} {{ form.problem_id }}
+                        <br>
+                    </div>
+                    <input type="hidden" name="sub_type" value="{{ sub_type }}">
+                </div>
+                <button id="sub_btn" type="submit" class="btn btn-primary">Submit your solution!</button>
+            </form>
+    </div>
 </div>
 
 
@@ -72,10 +91,11 @@
 <script src="https://pagecdn.io/lib/ace/1.4.12/ace.js" type="text/javascript" charset="utf-8"></script>
 <script>
     var editor = ace.edit("editor");
-
+    editor.setValue("Write your code here...");
+    
     editor.setOptions({
     // editor options
-    selectionStyle: 'line',// "line"|"text"
+    selectionStyle: 'text',// "line"|"text"
     highlightActiveLine: false, // boolean
     highlightSelectedWord: true, // boolean
     readOnly: false, // boolean: true if read only
@@ -91,7 +111,7 @@
     displayIndentGuides: false, // boolean: true if the indent should be shown. See 'showInvisibles'
     showInvisibles: false, // boolean -> displayIndentGuides: true if show the invisible tabs/spaces in indents
     showPrintMargin: true, // boolean: true if show the vertical print margin
-    printMarginColumn: false, // number: number of columns for vertical print margin
+    printMarginColumn: true, // number: number of columns for vertical print margin
     printMargin: undefined, // boolean | number: showPrintMargin | printMarginColumn
     showGutter: true, // boolean: true if show line gutter
     fadeFoldWidgets: false, // boolean: true if the fold lines should be faded
@@ -99,7 +119,7 @@
     showLineNumbers: true,
     highlightGutterLine: false, // boolean: true if the gutter line should be highlighted
     hScrollBarAlwaysVisible: false, // boolean: true if the horizontal scroll bar should be shown regardless
-    vScrollBarAlwaysVisible: false, // boolean: true if the vertical scroll bar should be shown regardless
+    vScrollBarAlwaysVisible: true, // boolean: true if the vertical scroll bar should be shown regardless
     fontSize: 14, // number | string: set the font size to this many pixels
     fontFamily: undefined, // string: set the font-family css value
     maxLines: undefined, // number: set the maximum lines possible. This will make the editor height changes
@@ -107,7 +127,7 @@
     maxPixelHeight: 0, // number -> maxLines: set the maximum height in pixel, when 'maxLines' is defined. 
     scrollPastEnd: 0, // number -> !maxLines: if positive, user can scroll pass the last line and go n * editorHeight more distance 
     fixedWidthGutter: false, // boolean: true if the gutter should be fixed width
-    theme: 'ace/theme/solarized_dark', // theme string from ace/theme or custom?
+    theme: 'ace/theme/github', // theme string from ace/theme or custom?
     
     // mouseHandler options
     scrollSpeed: 2, // number: the scroll speed index
@@ -127,7 +147,28 @@
     indentedSoftWrap: true, // boolean
     foldStyle: 'markbegin', // enum: 'manual'/'markbegin'/'markbeginend'.
     mode: 'ace/mode/python' // string: path to language mode 
+    })
+    
+
+    $("#sub_form").submit(function (e) {
+        e.preventDefault();
+        console.log(editor.getValue())
+        // $.ajax( {
+        //     url: 'http://localhost:8000/code/analysis/',
+        //     type: 'POST',
+        //     data: new FormData(this),
+        //     processData: false,
+        //     contentType: false,
+        // })
+        // .done(function(resp_data) {console.log(resp_data)})
+        // .fail(function(resp_data) {console.log(resp_data)})
     });
+
+
+
+
+
+    
 </script> 
-<script src="{% static 'js/submission.js' %}"></script>
+
 {% endblock %}
