@@ -10,3 +10,4 @@ $("#sub_form").submit(function (e) {
     .done(function(resp_data) {console.log(resp_data)})
     .fail(function(resp_data) {console.log(resp_data)})
 });
+

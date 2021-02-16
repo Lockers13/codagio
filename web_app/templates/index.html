@@ -17,7 +17,7 @@
                 <li class="list-group-item">Date Posted: {{ problem.date_created }}</li>
             </ul>
         </div>
-        <div><a href="{% url 'code:submission' sub_type='solution' %}">Try problem</a></div>
+        <div class="col-sm-4" style="text-align:center;"><a href="{% url 'code:solution' prob_id=problem.id %}">Try problem</a></div>
     </div>
     {% endfor %} 
 </div>

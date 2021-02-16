@@ -91,52 +91,58 @@ class AnalysisView(APIView):
         else:
             return Response("POST NOT OK: invalid code!", status=status.HTTP_400_BAD_REQUEST)
 
-def submission(request, sub_type):
-    if sub_type == "solution":
 
-        # initial_state = {
-        #     'user_id': request.user.id,
-        #     'problem_id': 1,
-        #     'solution': "def is_prime(num):\n    for i in range(2, num):\n        if num % i == 0:\n           return False\n    return True"
-        # }
+def solution_upload(request, prob_id):
 
-        initial_state = {
-            'user_id': request.user.id,
-            'problem_id': 1,
-            'solution': "def rot13(phrase):\n    ascii_lower = (97, 122)\n    ascii_upper = (65, 90)\n    LEN_ALPHA = 26\n    new_string = \"\"\n" +
-                "    for char in phrase:\n        ascii_num = ord(char)\n        if ascii_num >= ascii_lower[0] and ascii_num <= ascii_lower[1]:\n            if ((ascii_num - ascii_lower[0]) + 13) >= LEN_ALPHA:\n                ascii_num = ascii_lower[0] + (((ascii_num - ascii_lower[0]) + 13) - LEN_ALPHA)\n" +
-                    "            else:\n                ascii_num += 13\n        elif ascii_num >= ascii_upper[0] and ascii_num <= ascii_upper[1]:\n            if ((ascii_num - ascii_upper[0]) + 13) >= LEN_ALPHA:\n" +
-                        "                ascii_num = ascii_upper[0] + (((ascii_num - ascii_upper[0]) + 13) - LEN_ALPHA)\n            else:\n                ascii_num += 13\n        else:\n            pass\n" +
-                            "        new_string += chr(ascii_num)\n    return new_string",
-        }
-        form = submission_forms.SolutionSubmissionForm(initial=initial_state)
 
-    elif sub_type == "problem":
+    # initial_state = {
+    #     'user_id': request.user.id,
+    #     'problem_id': 1,
+    #     'solution': "def is_prime(num):\n    for i in range(2, num):\n        if num % i == 0:\n           return False\n    return True"
+    # }
 
-        initial_state = {
-            'user_id': request.user.id,
-            'problem_id': 1,
-            'solution': "def is_prime(num):\n    lim = round(num**1/2)\n    for i in range(2, lim+1):\n        if num % i == 0:\n           return False\n    return True",
-            'name': 'prime_checker',
-            'desc': 'Quick Prime Checker',
-            'difficulty': 'Easy'
-        }
+    initial_state = {
+        'user_id': request.user.id,
+        'problem_id': prob_id,
+        'solution': "",
+    }
 
-        # initial_state = {
-        #     'user_id': request.user.id,
-        #     'problem_id': 3,
-        #     'solution': "ABC_LOWER = 'abcdefghijklmnopqrstuvwxyz'\nABC_UPPER = ABC_LOWER.upper()\n\ndef rot13(phrase):\n" +
-        #         "    out_phrase = \"\"\n    for char in phrase:\n        if char.isupper():\n            out_phrase += ABC_UPPER[(ABC_UPPER.find(char)+13)%26]\n" +
-        #             "        else:\n            out_phrase += ABC_LOWER[(ABC_LOWER.find(char)+13)%26]\n    return out_phrase",
-        #     'name': 'rot13',
-        #     'desc': 'Rot 13 Cipher Algorithm',
-        #     'difficulty': 'Medium'
-        # }
-        form = submission_forms.ProblemSubmissionForm(initial=initial_state)
+    form = submission_forms.SolutionSubmissionForm(initial=initial_state)
+
 
     context = {'title': 'CGC | Home',
                 'form': form,
-                'sub_type': sub_type}
+                'sub_type': "solution"}
 
     return render(request, 'submission.html', context)
 
+
+def problem_upload(request):
+
+    # initial_state = {
+    #     'user_id': request.user.id,
+    #     'problem_id': 1,
+    #     'solution': "def is_prime(num):\n    lim = round(num**1/2)\n    for i in range(2, lim+1):\n        if num % i == 0:\n           return False\n    return True",
+    #     'name': 'prime_checker',
+    #     'desc': 'Quick Prime Checker',
+    #     'difficulty': 'Easy'
+    # }
+
+    initial_state = {
+        'user_id': request.user.id,
+        'problem_id': 3,
+        'solution': "ABC_LOWER = 'abcdefghijklmnopqrstuvwxyz'\nABC_UPPER = ABC_LOWER.upper()\n\ndef rot13(phrase):\n" +
+            "    out_phrase = \"\"\n    for char in phrase:\n        if char.isupper():\n            out_phrase += ABC_UPPER[(ABC_UPPER.find(char)+13)%26]\n" +
+                "        else:\n            out_phrase += ABC_LOWER[(ABC_LOWER.find(char)+13)%26]\n    return out_phrase",
+        'name': 'rot13',
+        'desc': 'Rot 13 Cipher Algorithm',
+        'difficulty': 'Medium'
+    }
+
+    form = submission_forms.ProblemSubmissionForm(initial=initial_state)
+
+    context = {'title': 'CGC | Home',
+        'form': form,
+        'sub_type': "problem"}
+
+    return render(request, 'submission.html', context)
