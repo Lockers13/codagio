@@ -114,7 +114,7 @@ def solution_upload(request, prob_id):
                 'form': form,
                 'sub_type': "solution"}
 
-    return render(request, 'submission.html', context)
+    return render(request, 'solution.html', context)
 
 
 def problem_upload(request):
@@ -145,4 +145,4 @@ def problem_upload(request):
         'form': form,
         'sub_type': "problem"}
 
-    return render(request, 'submission.html', context)
+    return render(request, 'solution.html', context)

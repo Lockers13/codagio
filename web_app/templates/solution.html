@@ -1,0 +1,96 @@
+ {% extends "base.html" %} {% load static %} {% load crispy_forms_tags %} {% block title %}CGC - Code for Code's Sake{% endblock %}
+{% block head %} 
+<head>
+    <style type="text/css" media="screen">
+        #editor {
+        position: absolute; /* Added */
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+   }    
+    </style>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;700;800&display=swap" rel="stylesheet">
+</head>
+{% endblock %}
+
+{% block content %}
+
+<!-- <div>
+        <form id="sub_form" action="" method="post" enc="multipart/form-data">
+            {% csrf_token %} {% if sub_type == 'solution' %}
+            <div class="form-row">
+                <div class="form-group col-md-6 mb-0">
+                    {{ form.title }}
+                </div>
+            </div>
+            <br>
+            <div class="form-row">
+
+                <div class="form-group col-md-6 mb-0">
+                    {{ form.solution }} {{ form.user_id }} {{ form.problem_id }}
+                    <br>
+                </div>
+                <input type="hidden" name="sub_type" value="{{ sub_type }}">
+            </div>
+            <button id="sub_btn" type="submit" class="btn btn-primary">Submit your solution!</button>
+            {% elif sub_type == 'problem' %}
+            <div class="form-row">
+                <div class="form-group col-md-6 mb-0">
+                    {{ form.title }}
+                </div>
+            </div>
+            <br>
+            <div class="form-row">
+                Name: {{ form.name }}<br>Description: {{ form.desc }}<br>Difficulty: {{ form.difficulty }}<br><br>
+                <div class="form-group col-md-6 mb-0">
+                    {{ form.solution }} {{ form.user_id }} {{ form.problem_id }}
+                    <br>
+                    <br> Upload Input File: {{ form.inputs }}
+                    <input type="hidden" name="sub_type" value="{{ sub_type }}">
+                </div>
+            </div>
+            <br>
+            <button id="sub_btn" type="submit" class="btn btn-primary">Submit your problem!</button>
+            {% endif %}
+        </form> -->
+
+
+<!-- </div> -->
+<div style="width: 100%; overflow: hidden;"></div>
+
+    <div id="container" style="border:4px solid black;width:50%;height: 600px;float:left;position:relative;">
+        
+        <div id="editor"></div>
+    </div>
+    <div style="width:50%;margin-left:620px;position:relative;text-align:center;">
+            <form id="sub_form" action="" method="post" enc="multipart/form-data">
+                {% csrf_token %}
+                <div class="form-row">
+                    <div class="form-group col-md-6 mb-0">
+                        {{ form.title }}
+                    </div>
+                </div>
+                <br>
+                <div class="form-row">
+                    <div class="form-group col-md-6 mb-0">
+                        {{ form.solution }} {{ form.user_id }} {{ form.problem_id }}
+                        <br>
+                    </div>
+                    <input type="hidden" name="sub_type" value="{{ sub_type }}">
+                </div>
+                <button id="sub_btn" type="submit" class="btn btn-primary">Submit your solution!</button>
+            </form>
+    </div>
+</div>
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+<script src="https://pagecdn.io/lib/ace/1.4.12/ace.js" type="text/javascript" charset="utf-8"></script>
+<script type="text/javascript" src="{% static 'js/solution.js' %}"></script> 
+
+{% endblock %}
