@@ -87,7 +87,7 @@ class AnalysisView(APIView):
             except FileNotFoundError:
                 pass
 
-            return Response(analysis, status=status.HTTP_200_OK)
+            return Response(json.dumps(analysis), status=status.HTTP_200_OK)
         else:
             return Response("POST NOT OK: invalid code!", status=status.HTTP_400_BAD_REQUEST)
 

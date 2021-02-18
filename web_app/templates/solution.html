@@ -77,20 +77,22 @@
                 <br>
                 <div class="form-row">
                     <div class="form-group col-md-6 mb-0">
-                        {{ form.solution }} {{ form.user_id }} {{ form.problem_id }}
+                        <input name="solution" id="solution_text" type="hidden">
+                        {{ form.problem_id }}
                         <br>
                     </div>
-                    <input type="hidden" name="sub_type" value="{{ sub_type }}">
+                    <input type="hidden" name="sub_type" value="solution">
                 </div>
                 <button id="sub_btn" type="submit" class="btn btn-primary">Submit your solution!</button>
             </form>
-    </div>
+            <div id="analysis" style="position:relative;text-align:center;"><p id="result" class="text-md-center"></p></div>
+ 
 </div>
 
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 
-<script src="https://pagecdn.io/lib/ace/1.4.12/ace.js" type="text/javascript" charset="utf-8"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.12/ace.js" type="text/javascript" charset="utf-8"></script>
 <script type="text/javascript" src="{% static 'js/solution.js' %}"></script> 
 
 {% endblock %}
