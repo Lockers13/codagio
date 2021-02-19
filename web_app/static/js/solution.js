@@ -19,23 +19,42 @@ $("#sub_form").submit(function(e) {
         console.log(analysis)
         let scores = analysis["scores"]
         let comp_stats = analysis["comp_stats"][0]
-        let comp_str = ""
+        let fdefs = analysis["fdefs"]
+        let comp_str = skel_str = ""
         let result = scores["overall_score"]
+        let samp_skels = analysis["samp_skels"]
         // make global collapsible visible
         document.getElementById("accordion").style.visibility = "visible"
         let bd_collapse = document.getElementById("breakdown_collapse")
         let comp_collapse = document.getElementById("comp_collapse")
+        let lp_collapse = document.getElementById("lp_collapse")
+        let sp_collapse = document.getElementById("sp_collapse")
         let result_p = document.getElementById("result")
-        if(result == "100.0") {
+        if(result == "100.0%") {
             result_p.style.color = "green"
-            result_p.innerHTML = "Congratulations, you passed all our tests!"
+            result_p.innerHTML = "<br>Congratulations, you passed all our tests!"
+            write_breakdown(bd_collapse, scores)
+            write_comp(comp_collapse, comp_stats, comp_str)
+            sp_collapse.innerHTML = ""
+            for(let i = 0; i < samp_skels.length; i++) {
+                let skeleton = samp_skels[i]
+                write_skeleton(sp_collapse, skeleton, skel_str)
+            }
+            lp_collapse.innerHTML ="<p>Coming Soon!<p>"
+            
         }
         else {
             result_p.style.color = "red"
-            result_p.innerHTML = "<br>Oops, looks like your code doesn't produce the correct outputs...please try again!"
-            // do quick marks breakdown on failure
+            result_p.innerHTML = "<br>Oops, looks like your code doesn't produce the correct outputs...<br><br>Please Try again! But first, why not check out some feedback below?"
+            // do quick marks breakdown and comparison on failure
             write_breakdown(bd_collapse, scores)
             write_comp(comp_collapse, comp_stats, comp_str)
+            sp_collapse.innerHTML = ""
+            for(let i = 0; i < samp_skels.length; i++) {
+                let skeleton = samp_skels[i]
+                write_skeleton(sp_collapse, skeleton, skel_str)
+            }
+            lp_collapse.innerHTML ="<p>Sorry, you have to pass all tests to qualify for line profiling!<p>"
             }
         })
     .fail(function(resp_data) {console.log(resp_data)})
@@ -44,7 +63,7 @@ $("#sub_form").submit(function(e) {
 
 function write_breakdown(collapsible, scores) {
     collapsible.innerHTML = ""
-    let breakdown = "<h1>Quick Results Breakdown</h1>" +
+    let breakdown = "<h3>Quick Results Breakdown</h3>" +
                 "<p class='lead'>Let's see where you went right and where you went wrong" + 
                 "<table style='max-width:80%;margin-left:auto;margin-right:auto;' class='table table-dark'>" + 
                 "<thead><tr><th class='topline scope='col'>Test #</th><th class='topline' scope='col'>Status</th><th class='topline' scope='col'>Input Length</th><th class='topline' scope='col'>Input Type</th></tr></thead><tbody>"
@@ -63,24 +82,37 @@ function write_breakdown(collapsible, scores) {
 
 function write_comp(collapsible, comp_stats, comp_str) {
     collapsible.innerHTML = ""
-    comp_str += "<h1>Code Comaprison</h1>" +
+    comp_str += "<h3>Code Comparison</h3>" +
             "<p class='lead'>Let's see how you match up structurally with the desired solution" + 
             "<table style='max-width:80%;margin-left:auto;margin-right:auto;' class='table table-dark'>" + 
             "<thead><tr><th class='topline' scope='col'>Your Code</th><th class='topline' scope='col'>Our Code</th></tr></thead><tbody>"
     for(let i = 0; i < comp_stats.length; i++) {
+        if(comp_stats[i][0].startsWith("skeleton"))
+            continue
         comp_str += "<tr><th scope='row'>" + comp_stats[i][0] + "</th>"  +
             "<td>" + comp_stats[i][1] + "</td></tr>"
     }
-
     comp_str += "</tbody></table></p>"
     collapsible.innerHTML += comp_str
 }
 
+function write_skeleton(collapsible, skeleton, skel_str) {
+    collapsible.innerHTML = ""
+    skel_str += "<h3>Our Sample Solution:</h3><hr><br><table style='width:100%'><tr><td valign='middle' align='center'><p style='text-align:left;margin-left:35%'>"
+    for(let i = 0; i < skeleton.length; i++) {
+        real_str = skeleton[i].replace(/\s/g, '&nbsp')
+        skel_str += real_str + "<br>"
+        console.log(skel_str)
+    }
+    skel_str += "</p></td></tr></table>"
+    collapsible.innerHTML += skel_str
+}
+
 function init_editor() {
     let editor = ace.edit("editor");
-        editor.setValue("Write your code here...");
+    editor.setValue("Write your code here...");
 
-        editor.setOptions({
+    editor.setOptions({
         // editor options
         selectionStyle: 'text',// "line"|"text"
         highlightActiveLine: false, // boolean
@@ -134,8 +166,7 @@ function init_editor() {
         indentedSoftWrap: true, // boolean
         foldStyle: 'markbegin', // enum: 'manual'/'markbegin'/'markbeginend'.
         mode: 'ace/mode/python' // string: path to language mode 
-        })
+    })
 
     return editor;
 }
-

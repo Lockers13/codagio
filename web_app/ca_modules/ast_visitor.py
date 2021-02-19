@@ -62,11 +62,11 @@ class AstTreeVisitor(ast.NodeVisitor):
         node_type = type(node).__name__.lower()
         plural_id = "{0}s".format(node_type)
         self.__count_hash[plural_id] += 1
-        self.__fdef_dict["num_{0}".format(plural_id)] += 1
+        self.__fdef_dict["{0}".format(plural_id)] += 1
 
     def __process_simple_op(self, node):
         self.__count_hash["ops"] += 1
-        self.__fdef_dict["num_ops"] += 1
+        self.__fdef_dict["ops"] += 1
 
         op_type = type(node).__name__.lower()
 
@@ -87,14 +87,14 @@ class AstTreeVisitor(ast.NodeVisitor):
             if isinstance(node, ast.If):
                 elseif = True
                 self.__count_hash["else-ifs"] += 1
-                self.__fdef_dict["num_else-ifs"] += 1
+                self.__fdef_dict["else-ifs"] += 1
                 self.__count_hash["ifs"] -= 1
-                self.__fdef_dict["num_ifs"] -= 1
+                self.__fdef_dict["ifs"] -= 1
             self.__increment_counts(orelse)
             self.__process_conditional(orelse, elseif)
         else:
             self.__count_hash["elses"] += 1
-            self.__fdef_dict["num_elses"] += 1
+            self.__fdef_dict["elses"] += 1
             self.__fdef_dict["skeleton"].append("{0}{1}".format("    " * self.__count_hash["level"], "else:"))
             self.__program_dict["line_indents"]["line_{0}".format(orelse.lineno-1)] = self.__count_hash["level"]
             self.__process_body(orelse)
@@ -248,7 +248,7 @@ class AstTreeVisitor(ast.NodeVisitor):
             self.__fdef_dict["skeleton"] = []
             self.__fdef_dict["skeleton"].append(signature)
             for cat in ["whiles", "fors", "ifs", "ops", "calls", "elses", "assigns", "augassigns", "trys", "returns", "else-ifs"]:
-                self.__fdef_dict["num_{0}".format(cat)] = 0
+                self.__fdef_dict["{0}".format(cat)] = 0
             self.__process_body(node)
             self.__count_hash["level"] -= 1
 
