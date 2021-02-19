@@ -32,7 +32,7 @@ $("#sub_form").submit(function(e) {
         let result_p = document.getElementById("result")
         if(result == "100.0%") {
             result_p.style.color = "green"
-            result_p.innerHTML = "<br>Congratulations, you passed all our tests!"
+            result_p.innerHTML = "<br>Congratulations, your code passed all our tests!...<br>Now check out some of your feedback below:"
             write_breakdown(bd_collapse, scores)
             write_comp(comp_collapse, comp_stats, comp_str)
             sp_collapse.innerHTML = ""
@@ -63,9 +63,9 @@ $("#sub_form").submit(function(e) {
 
 function write_breakdown(collapsible, scores) {
     collapsible.innerHTML = ""
-    let breakdown = "<h3>Quick Results Breakdown</h3>" +
-                "<p class='lead'>Let's see where you went right and where you went wrong" + 
-                "<table style='max-width:80%;margin-left:auto;margin-right:auto;' class='table table-dark'>" + 
+    let breakdown = "<h3 style='text-align:left;'>Quick Results Breakdown</h3>" +
+                "<p style='text-align:left;' class='lead'>Let's see where you went right and where you went wrong" + 
+                "<table style='align:left;max-width:80%;margin-left:auto;margin-right:auto;' class='table table-dark'>" + 
                 "<thead><tr><th class='topline scope='col'>Test #</th><th class='topline' scope='col'>Status</th><th class='topline' scope='col'>Input Length</th><th class='topline' scope='col'>Input Type</th></tr></thead><tbody>"
     let count = 1;
     for (test_key in scores) {
@@ -82,9 +82,9 @@ function write_breakdown(collapsible, scores) {
 
 function write_comp(collapsible, comp_stats, comp_str) {
     collapsible.innerHTML = ""
-    comp_str += "<h3>Code Comparison</h3>" +
-            "<p class='lead'>Let's see how you match up structurally with the desired solution" + 
-            "<table style='max-width:80%;margin-left:auto;margin-right:auto;' class='table table-dark'>" + 
+    comp_str += "<h3 style='text-align:left;'>Code Comparison</h3>" +
+            "<p style='text-align:left;' class='lead'>Let's see how you match up structurally with the desired solution" + 
+            "<table style='align:left;max-width:80%;margin-left:auto;margin-right:auto;' class='table table-dark'>" + 
             "<thead><tr><th class='topline' scope='col'>Your Code</th><th class='topline' scope='col'>Our Code</th></tr></thead><tbody>"
     for(let i = 0; i < comp_stats.length; i++) {
         if(comp_stats[i][0].startsWith("skeleton"))
@@ -98,13 +98,12 @@ function write_comp(collapsible, comp_stats, comp_str) {
 
 function write_skeleton(collapsible, skeleton, skel_str) {
     collapsible.innerHTML = ""
-    skel_str += "<h3>Our Sample Solution:</h3><hr><br><table style='width:100%'><tr><td valign='middle' align='center'><p style='text-align:left;margin-left:35%'>"
+    skel_str += "<h3 style='text-align:left;'>Our Sample Solution:</h3><hr><br><p style='text-align:left;margin-left:10%'>"
     for(let i = 0; i < skeleton.length; i++) {
         real_str = skeleton[i].replace(/\s/g, '&nbsp')
-        skel_str += real_str + "<br>"
-        console.log(skel_str)
+        skel_str += "<b><i>" + real_str + "</i></b><br>"
     }
-    skel_str += "</p></td></tr></table>"
+    skel_str += "</p>"
     collapsible.innerHTML += skel_str
 }
 
@@ -139,7 +138,7 @@ function init_editor() {
         highlightGutterLine: false, // boolean: true if the gutter line should be highlighted
         hScrollBarAlwaysVisible: false, // boolean: true if the horizontal scroll bar should be shown regardless
         vScrollBarAlwaysVisible: true, // boolean: true if the vertical scroll bar should be shown regardless
-        fontSize: 14, // number | string: set the font size to this many pixels
+        fontSize: 15, // number | string: set the font size to this many pixels
         fontFamily: undefined, // string: set the font-family css value
         maxLines: undefined, // number: set the maximum lines possible. This will make the editor height changes
         minLines: undefined, // number: set the minimum lines possible. This will make the editor height changes
