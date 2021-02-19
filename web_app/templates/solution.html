@@ -13,58 +13,18 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link rel="stylesheet" href="{% static 'css/solution.css' %}">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;700;800&display=swap" rel="stylesheet">
 </head>
 {% endblock %}
 
 {% block content %}
 
-<!-- <div>
-        <form id="sub_form" action="" method="post" enc="multipart/form-data">
-            {% csrf_token %} {% if sub_type == 'solution' %}
-            <div class="form-row">
-                <div class="form-group col-md-6 mb-0">
-                    {{ form.title }}
-                </div>
-            </div>
-            <br>
-            <div class="form-row">
-
-                <div class="form-group col-md-6 mb-0">
-                    {{ form.solution }} {{ form.user_id }} {{ form.problem_id }}
-                    <br>
-                </div>
-                <input type="hidden" name="sub_type" value="{{ sub_type }}">
-            </div>
-            <button id="sub_btn" type="submit" class="btn btn-primary">Submit your solution!</button>
-            {% elif sub_type == 'problem' %}
-            <div class="form-row">
-                <div class="form-group col-md-6 mb-0">
-                    {{ form.title }}
-                </div>
-            </div>
-            <br>
-            <div class="form-row">
-                Name: {{ form.name }}<br>Description: {{ form.desc }}<br>Difficulty: {{ form.difficulty }}<br><br>
-                <div class="form-group col-md-6 mb-0">
-                    {{ form.solution }} {{ form.user_id }} {{ form.problem_id }}
-                    <br>
-                    <br> Upload Input File: {{ form.inputs }}
-                    <input type="hidden" name="sub_type" value="{{ sub_type }}">
-                </div>
-            </div>
-            <br>
-            <button id="sub_btn" type="submit" class="btn btn-primary">Submit your problem!</button>
-            {% endif %}
-        </form> -->
-
-
-<!-- </div> -->
 <div style="width: 100%; overflow: hidden;"></div>
 
     <div id="container" style="border:4px solid black;width:50%;height: 600px;float:left;position:relative;">
         
-        <div id="editor"></div>
+     <div id="editor"></div>
     </div>
     <div style="width:50%;margin-left:620px;position:relative;text-align:center;">
             <form id="sub_form" action="" method="post" enc="multipart/form-data">
@@ -86,7 +46,50 @@
                 <button id="sub_btn" type="submit" class="btn btn-primary">Submit your solution!</button>
             </form>
             <div id="analysis" style="position:relative;text-align:center;"><p id="result" class="text-md-center"></p></div>
- 
+
+            <div id="accordion" style="visibility:hidden" style="margin-top:5em">
+                <div class="card">
+                  <div class="card-header" id="headingOne">
+                    <h5 class="mb-0">
+                      <button class="btn btn-link" data-toggle="collapse" data-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
+                        Results Breakdown
+                      </button>
+                    </h5>
+                  </div>
+              
+                  <div id="collapseOne" class="collapse" aria-labelledby="headingOne" data-parent="#accordion">
+                    <div id="breakdown_collapse" class="card-body">
+                    </div>
+                  </div>
+                </div>
+                <div class="card">
+                  <div class="card-header" id="headingTwo">
+                    <h5 class="mb-0">
+                      <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="true" aria-controls="collapseTwo">
+                        Code Comparison
+                      </button>
+                    </h5>
+                  </div>
+                  <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordion">
+                    <div id="comp_collapse" class="card-body">
+                    </div>
+                  </div>
+                </div>
+                <div class="card">
+                  <div class="card-header" id="headingThree">
+                    <h5 class="mb-0">
+                      <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                        Line-By-Line Profile
+                      </button>
+                    </h5>
+                  </div>
+                  <div id="collapseThree" class="collapse" aria-labelledby="headingThree" data-parent="#accordion">
+                    <div class="card-body">
+                      Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. 3 wolf moon officia aute, non cupidatat skateboard dolor brunch. Food truck quinoa nesciunt laborum eiusmod. Brunch 3 wolf moon tempor, sunt aliqua put a bird on it squid single-origin coffee nulla assumenda shoreditch et. Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident. Ad vegan excepteur butcher vice lomo. Leggings occaecat craft beer farm-to-table, raw denim aesthetic synth nesciunt you probably haven't heard of them accusamus labore sustainable VHS.
+                    </div>
+                  </div>
+                </div>
+              </div> 
 </div>
 
 

@@ -3,9 +3,9 @@ import os
 
 def write_comp(sub, samp):
     def ziplist_stats(sub, samp):
-        fdef_comp_stats = [["Submission", "Sample"]]
+        fdef_comp_stats = []
         for (k1, v1), (k2, v2) in zip(sub.items(), samp.items()):
-            if not isinstance(v1, dict):
+            if not isinstance(v1, dict) and k1 != "skeleton":
                 inner_comp = []
                 sub_stats = "{0} : {1}".format(k1, v1)
                 sample_stats = "{0} : {1}".format(k2, v2)

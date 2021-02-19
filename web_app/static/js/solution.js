@@ -15,11 +15,16 @@ $("#sub_form").submit(function(e) {
         contentType: false,
     })
     .done(function(resp_data) {
-        console.log(resp_data)
         let analysis = JSON.parse(resp_data)
+        console.log(analysis)
         let scores = analysis["scores"]
+        let comp_stats = analysis["comp_stats"][0]
+        let comp_str = ""
         let result = scores["overall_score"]
-        let analysis_div = document.getElementById("analysis")
+        // make global collapsible visible
+        document.getElementById("accordion").style.visibility = "visible"
+        let bd_collapse = document.getElementById("breakdown_collapse")
+        let comp_collapse = document.getElementById("comp_collapse")
         let result_p = document.getElementById("result")
         if(result == "100.0") {
             result_p.style.color = "green"
@@ -29,19 +34,20 @@ $("#sub_form").submit(function(e) {
             result_p.style.color = "red"
             result_p.innerHTML = "<br>Oops, looks like your code doesn't produce the correct outputs...please try again!"
             // do quick marks breakdown on failure
-            write_breakdown(analysis_div, scores)
-            
+            write_breakdown(bd_collapse, scores)
+            write_comp(comp_collapse, comp_stats, comp_str)
             }
         })
     .fail(function(resp_data) {console.log(resp_data)})
 
 });
 
-function write_breakdown(analysis_div, scores) {
+function write_breakdown(collapsible, scores) {
+    collapsible.innerHTML = ""
     let breakdown = "<h1>Quick Results Breakdown</h1>" +
                 "<p class='lead'>Let's see where you went right and where you went wrong" + 
                 "<table style='max-width:80%;margin-left:auto;margin-right:auto;' class='table table-dark'>" + 
-                "<thead><tr><th scope='col'>Test #</th><th scope='col'>Status</th><th scope='col'>Input Length</th><th scope='col'>Input Type</th></tr></thead><tbody>"
+                "<thead><tr><th class='topline scope='col'>Test #</th><th class='topline' scope='col'>Status</th><th class='topline' scope='col'>Input Length</th><th class='topline' scope='col'>Input Type</th></tr></thead><tbody>"
     let count = 1;
     for (test_key in scores) {
         if(test_key == "overall_score")
@@ -49,10 +55,25 @@ function write_breakdown(analysis_div, scores) {
         breakdown += "<tr><th scope='row'>" + count++ + "</th>"  +
             "<td>" + scores[test_key]["status"] + "</td>" + 
             "<td>" + scores[test_key]["input_length"] + "</td>" +
-            "<td>" + scores[test_key]["input_type"] + "</td>"
+            "<td>" + scores[test_key]["input_type"] + "</td></tr>"
     }
     breakdown += "</tbody></table></p>"
-    analysis_div.innerHTML += breakdown
+    collapsible.innerHTML += breakdown
+}
+
+function write_comp(collapsible, comp_stats, comp_str) {
+    collapsible.innerHTML = ""
+    comp_str += "<h1>Code Comaprison</h1>" +
+            "<p class='lead'>Let's see how you match up structurally with the desired solution" + 
+            "<table style='max-width:80%;margin-left:auto;margin-right:auto;' class='table table-dark'>" + 
+            "<thead><tr><th class='topline' scope='col'>Your Code</th><th class='topline' scope='col'>Our Code</th></tr></thead><tbody>"
+    for(let i = 0; i < comp_stats.length; i++) {
+        comp_str += "<tr><th scope='row'>" + comp_stats[i][0] + "</th>"  +
+            "<td>" + comp_stats[i][1] + "</td></tr>"
+    }
+
+    comp_str += "</tbody></table></p>"
+    collapsible.innerHTML += comp_str
 }
 
 function init_editor() {
