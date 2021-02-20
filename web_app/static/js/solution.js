@@ -20,7 +20,7 @@ $("#sub_form").submit(function(e) {
         let scores = analysis["scores"]
         let comp_stats = analysis["comp_stats"][0]
         let fdefs = analysis["fdefs"]
-        let comp_str = skel_str = ""
+        let comp_str = skel_str = lprof_str = ""
         let result = scores["overall_score"]
         let samp_skels = analysis["samp_skels"]
         // make global collapsible visible
@@ -35,12 +35,8 @@ $("#sub_form").submit(function(e) {
             result_p.innerHTML = "<br>Congratulations, your code passed all our tests!...<br>Now check out some of your feedback below:"
             write_breakdown(bd_collapse, scores)
             write_comp(comp_collapse, comp_stats, comp_str)
-            sp_collapse.innerHTML = ""
-            for(let i = 0; i < samp_skels.length; i++) {
-                let skeleton = samp_skels[i]
-                write_skeleton(sp_collapse, skeleton, skel_str)
-            }
-            lp_collapse.innerHTML ="<p>Coming Soon!<p>"
+            write_skeleton(sp_collapse, samp_skels, skel_str)
+            write_lprof(lp_collapse, fdefs, lprof_str)
             
         }
         else {
@@ -49,11 +45,7 @@ $("#sub_form").submit(function(e) {
             // do quick marks breakdown and comparison on failure
             write_breakdown(bd_collapse, scores)
             write_comp(comp_collapse, comp_stats, comp_str)
-            sp_collapse.innerHTML = ""
-            for(let i = 0; i < samp_skels.length; i++) {
-                let skeleton = samp_skels[i]
-                write_skeleton(sp_collapse, skeleton, skel_str)
-            }
+            write_skeleton(sp_collapse, samp_skels, skel_str)
             lp_collapse.innerHTML ="<p>Sorry, you have to pass all tests to qualify for line profiling!<p>"
             }
         })
@@ -96,16 +88,47 @@ function write_comp(collapsible, comp_stats, comp_str) {
     collapsible.innerHTML += comp_str
 }
 
-function write_skeleton(collapsible, skeleton, skel_str) {
+function write_skeleton(collapsible, skels, skel_str) {
     collapsible.innerHTML = ""
     skel_str += "<h3 style='text-align:left;'>Our Sample Solution:</h3><hr><br><p style='text-align:left;margin-left:10%'>"
-    for(let i = 0; i < skeleton.length; i++) {
-        real_str = skeleton[i].replace(/\s/g, '&nbsp')
-        skel_str += "<b><i>" + real_str + "</i></b><br>"
+    for(let i = 0; i < skels.length; i++) {
+        let skeleton = skels[i]
+        for(let j = 0; j < skeleton.length; j++) {
+            real_str = skeleton[j].replace(/\s/g, '&nbsp')
+            skel_str += "<b><i>" + real_str + "</i></b><br>"
+        }
     }
     skel_str += "</p>"
     collapsible.innerHTML += skel_str
 }
+
+function write_lprof(collapsible, fdefs, lprof_str) {
+    collapsible.innerHTML = ""
+    lprof_str += "<h3 style='text-align:left;'>Line Profiling</h3>" +
+        "<p style='text-align:left;' class='lead'>Check out the performance of your code in more detail:" + 
+        "<table style='align:left;max-width:80%;margin-left:auto;margin-right:auto;' class='table table-dark'>" + 
+        "<thead><tr><th class='topline' scope='col'>Line #</th><th class='topline' scope='col'># Hits</th><th class='topline' scope='col'>% Time</th><th class='topline' scope='col'>Real Time</th><th class='topline' scope='col'>Contents</th></tr></thead><tbody>"
+
+    for(fdef in fdefs) {
+        rt = parseFloat(fdefs[fdef]["cum_time"])
+        count = 1
+        lprof_dict = fdefs[fdef]["line_profile"]
+        for(lprof in lprof_dict) {
+            hits = lprof_dict[lprof]["hits"]
+            p_time = parseFloat(lprof_dict[lprof]["%time"])
+            contents = lprof_dict[lprof]["contents"]
+            real_time = Math.round((rt * p_time + Number.EPSILON) * 1000) / 1000
+            let bar_colour = p_time < 15? (p_time < 10? "green": "orange"): "red";
+            lprof_str += "<tr><th scope='row'>" + count++ + "</th>"  +
+            "<td style='height:5px;colour:" + bar_colour + ";'>" + hits + "</td>" + 
+            "<td style='height:5px;colour:" + bar_colour + ";'>" + p_time + "</td>" +
+            "<td style='height:5px;colour:" + bar_colour + ";'>" + real_time + "</td>" +
+            "<td style='height:5px;colour:" + bar_colour + ";'>" + contents + "</td></tr>"
+            }
+        }
+        lprof_str += "</tbody></table></p>"
+        collapsible.innerHTML += lprof_str
+    }
 
 function init_editor() {
     let editor = ace.edit("editor");
