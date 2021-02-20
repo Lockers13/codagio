@@ -10,6 +10,7 @@ from ca_modules import make_utils
 from datetime import datetime
 import random
 import string
+from django.contrib.auth.models import User
     
 def create_problem():
     def generate_input(input_type, input_length, num_tests):
@@ -28,7 +29,9 @@ def create_problem():
                 inp_list = [random_string(random.randint(1, 10)) for x in range(input_length)]
             global_inputs.append(inp_list)
         return json.dumps(global_inputs)
-        
+    
+    name = input("Please enter your username: ")
+    uid = User.objects.filter(username=name).first().id
     input_type = input("Input Type: ")
     input_length = int(input("Input Length: "))
     num_tests = int(input("# Tests: "))
@@ -43,13 +46,12 @@ def create_problem():
     analysis = json.dumps(analyzer.get_prog_dict())
     hashes = make_utils.gen_sample_hashes(filename, json_inputs)
     problem, created = Problem.objects.update_or_create(
+        name=prob_name, author_id=uid,
         defaults = {
             'difficulty': difficulty,
             'hashes': json.dumps(hashes),
-            'date_created': datetime.now(),
-            'author_id': 7,
-            'desc': desc,
-            'name': prob_name,
+            'date_created': datetime.now(),    
+            'desc': desc,   
             'inputs': json_inputs,
             'analysis': analysis
         }
