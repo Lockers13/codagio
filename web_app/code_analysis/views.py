@@ -13,12 +13,11 @@ from .models import Problem, Solution
 from users.models import Profile
 from django.shortcuts import render, redirect
 from . import forms as submission_forms
-from . import submit_problem
+
 
 class AnalysisView(APIView):
 
     def get(self, request):
-        submit_problem.create_problem(request.GET)
         return Response("GET OK", status=status.HTTP_200_OK)
     
     def post(self, request):
@@ -59,7 +58,7 @@ class AnalysisView(APIView):
                 defaults={'analysis': json.dumps(analysis), 'date_submitted': datetime.now()}
             )
             solution.save()
-            
+
             try:
                 os.remove(filename)
             except FileNotFoundError:
