@@ -13,10 +13,12 @@ from .models import Problem, Solution
 from users.models import Profile
 from django.shortcuts import render, redirect
 from . import forms as submission_forms
+from . import submit_problem
 
 class AnalysisView(APIView):
 
     def get(self, request):
+        submit_problem.create_problem(request.GET)
         return Response("GET OK", status=status.HTTP_200_OK)
     
     def post(self, request):
@@ -43,45 +45,21 @@ class AnalysisView(APIView):
             analyzer = Analyzer(filename)
             analyzer.visit_ast()
 
-            if sub_type == "solution":
-                problem = Problem.objects.filter(id=prob_id).first()
-                percentage_score = analyzer.verify(problem)
-                ### only profile submission if all tests are passed
-                if float(percentage_score) == 100.0:
-                    analyzer.profile(problem.inputs)
-                analysis = analyzer.get_prog_dict()
-                comparison.write_comp(analysis, json.loads(problem.analysis))
-                
-                solution, created = Solution.objects.update_or_create(
-                    submitter_id=uid,
-                    problem_id=prob_id,
-                    defaults={'analysis': json.dumps(analysis), 'date_submitted': datetime.now()}
-                )
-                solution.save()
-
-            elif sub_type == "problem":
-                json_inputs = data['inputs'].read().decode("utf-8")
-                analyzer.profile(json_inputs, solution=False)
-                analysis = json.dumps(analyzer.get_prog_dict())
-                difficulty = data['difficulty']
-                name = data['name'][0]
-                desc = data['desc']
-                hashes = make_utils.gen_sample_hashes(filename, json_inputs)
-                problem, created = Problem.objects.update_or_create(
-                    id=prob_id,
-                    defaults={
-                        'difficulty': difficulty,
-                        'hashes': json.dumps(hashes),
-                        'date_created': datetime.now(),
-                        'author_id': uid,
-                        'desc': desc,
-                        'name': prob_name,
-                        'inputs': json_inputs,
-                        'analysis': analysis
-                    }
-                )
-                problem.save()
-
+            problem = Problem.objects.filter(id=prob_id).first()
+            percentage_score = analyzer.verify(problem)
+            ### only profile submission if all tests are passed
+            if float(percentage_score) == 100.0:
+                analyzer.profile(problem.inputs)
+            analysis = analyzer.get_prog_dict()
+            comparison.write_comp(analysis, json.loads(problem.analysis))
+            
+            solution, created = Solution.objects.update_or_create(
+                submitter_id=uid,
+                problem_id=prob_id,
+                defaults={'analysis': json.dumps(analysis), 'date_submitted': datetime.now()}
+            )
+            solution.save()
+            
             try:
                 os.remove(filename)
             except FileNotFoundError:
