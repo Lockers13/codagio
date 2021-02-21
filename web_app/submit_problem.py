@@ -11,6 +11,10 @@ from datetime import datetime
 import random
 import string
 from django.contrib.auth.models import User
+from django.contrib.auth import authenticate
+import getpass
+
+
     
 def create_problem():
     def generate_input(input_type, input_length, num_tests):
@@ -31,14 +35,33 @@ def create_problem():
         return json.dumps(global_inputs)
     
     name = input("Please enter your username: ")
-    uid = User.objects.filter(username=name).first().id
+    user = User.objects.filter(username=name).first()
+    uid = user.id
+    if not user.is_superuser:
+        print("Sorry, only admins can submit problems, exiting...")
+        sys.exit(2)
+    else:
+        tries = 0
+        while tries < 3:
+            password = getpass.getpass(prompt="Please enter your password: ")
+            if not authenticate(username=name, password=password):
+                print("Incorrect password, please try again.")
+                tries += 1
+            else:
+                break
+        if tries > 2:
+            print("Three attempts failed, exiting...")
+            sys.exit(3)
     input_type = input("Input Type: ")
     input_length = int(input("Input Length: "))
     num_tests = int(input("# Tests: "))
-    filename = os.path.join(os.getcwd(), "sample_problems", input("Script Name: "))
-    prob_name = os.path.basename(filename).split(".")[0]
+    fname = os.path.join(os.getcwd(), "sample_problems", input("Script Name: "))
+    prob_name = os.path.basename(fname).split(".")[0]
     difficulty = input("Problem Difficulty: ")
     desc = input("Problem Description: ")
+    code = make_utils.get_code_from_file(fname)
+    filename = "{0}.py".format(prob_name)
+    make_utils.make_file(filename, code, source="file")
     analyzer = Analyzer(filename)
     analyzer.visit_ast()
     json_inputs = generate_input(input_type, input_length, num_tests)
@@ -57,5 +80,10 @@ def create_problem():
         }
     )
     problem.save()
+
+    try:
+        os.remove(filename)
+    except FileNotFoundError:
+        pass
 
 create_problem()

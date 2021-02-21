@@ -1,8 +1,9 @@
 import json
 import subprocess
 import hashlib
+import sys
 
-def make_file(path, code):
+def make_file(path, code, source="web"):
     def write_prequel(file_obj):
         for line in IMPORTS:
             file_obj.write("{0}\n".format(line))
@@ -28,8 +29,14 @@ def make_file(path, code):
                     "    for inp in input_list:",
                     "        print(\"{0} {1}\".format(inp, template_function(inp)))\n",
                     "main()"]
-
-    program_text = code.split("\n")
+    
+    if source == "web":  
+        program_text = code.split("\n")
+    elif source == "file":
+        program_text = code
+    else:
+        print("ERROR: Unrecognized source type...exiting")
+        sys.exit(1)
 
     with open(path, 'w') as f:
         write_prequel(f)
@@ -52,3 +59,7 @@ def gen_sample_hashes(filename, inputs):
         samp_hash = hashlib.md5(output.encode()).hexdigest()
         hashes.append(samp_hash)
     return hashes
+
+def get_code_from_file(path):
+    with open(path, 'r') as f:
+        return f.read().splitlines()
