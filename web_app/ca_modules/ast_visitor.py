@@ -235,9 +235,9 @@ class AstTreeVisitor(ast.NodeVisitor):
             fdef_dict[fdef_key] = {}
             self.__fdef_dict = fdef_dict[fdef_key]
             self.__fdef_dict["name"] = node.name
-            self.__fdef_dict["retval"] = node.returns
+            # self.__fdef_dict["retval"] = node.returns
             self.__fdef_dict["lineno"] = node.lineno
-            self.__fdef_dict["level"] = self.__count_hash["level"]
+            # self.__fdef_dict["level"] = self.__count_hash["level"]
             self.__program_dict["line_indents"]["line_{0}".format(node.lineno)] = self.__count_hash["level"]
             self.__fdef_dict["args"] = []
 

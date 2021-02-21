@@ -79,7 +79,7 @@ function write_comp(collapsible, comp_stats, comp_str) {
             "<table style='align:left;max-width:80%;margin-left:auto;margin-right:auto;' class='table table-dark'>" + 
             "<thead><tr><th class='topline' scope='col'>Your Code</th><th class='topline' scope='col'>Our Code</th></tr></thead><tbody>"
     for(let i = 0; i < comp_stats.length; i++) {
-        if(comp_stats[i][0].startsWith("skeleton"))
+        if(comp_stats[i][0].startsWith("skeleton") || comp_stats[i][0].startsWith("lineno"))
             continue
         comp_str += "<tr><th scope='row'>" + comp_stats[i][0] + "</th>"  +
             "<td>" + comp_stats[i][1] + "</td></tr>"
