@@ -9,7 +9,12 @@
     {% for problem in problems %}
     <div class="row">
         <div class="col-sm-4">
-            <h2 style="text-align: center;"><u>{{ problem.name }}</u></h2><br>
+            <h2 style="text-align:left;text-transform:capitalize"><u>{{ problem.name }}</u></h2><br>
+            <a href="{% url 'code:solution' prob_id=problem.id %}">
+                <button type="button" class="btn btn-primary btn-md" style="display:inline-block;">Give it a shot!</button>
+            </a>
+
+            <hr><br>
             <ul class="list-group">  
                 <li class="list-group-item">Description: {{ problem.desc }}</li>
                 <li class="list-group-item">Difficulty Level: {{ problem.difficulty }}</li>
@@ -17,8 +22,11 @@
                 <li class="list-group-item">Date Posted: {{ problem.date_created }}</li>
             </ul>
         </div>
-        <div class="col-sm-4" style="text-align:center;"><a href="{% url 'code:solution' prob_id=problem.id %}">Try problem</a></div>
+        <div>
+        </div>
     </div>
+    <br>
+    <br>
     {% endfor %} 
 </div>
 {% endblock %}
