@@ -1,0 +1,75 @@
+:root {
+    --yellow:#FFF700;
+    --orange:#EFDF00;
+    --red:#FF3E6C;
+    --black:#3E3E3E;
+    --white:#F7F7F7;
+}
+
+body{
+    background-color: var(--yellow);
+    font-family: 'Poppins', sans-serif;
+}
+
+/* Navbar Section */
+
+.navbar{
+    background-color: var(--yellow);
+}
+
+.logo{
+    font-family: 'Bungee Shade', cursive;
+    color: var(--red);
+    text-decoration: none;
+    font-size: 20px;
+    margin-right: 10px;
+}
+
+/* Showcase Section */
+
+.showcase{
+    height: 100vh;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    text-align:center;
+}
+
+.cgc-title{
+    font-family: 'Bungee Shade', cursive;
+    font-size: 200px;
+    color: var(--red);
+    margin-top: 100px;
+}
+
+.second-title{
+    font-family: 'Bungee Shade', cursive;
+    margin-top: 20px;
+}
+
+.scroll-down-btn{
+    background-color: var(--yellow);
+    color: var(--yellow);
+    border: none;
+    margin-top: 40px;
+}
+
+
+/* Problems Section*/
+
+
+
+
+
+
+
+
+
+
+/* Footer Section */
+
+footer{
+    margin-top: 80px;
+    margin-bottom: 20px;
+}

@@ -1,11 +1,26 @@
-<!DOCTYPE html>
+{% load static %}
+{% load bootstrap4 %}
+{% bootstrap_css %}
+{% bootstrap_javascript jquery='full' %}
+{% bootstrap_messages %}
 
+<!DOCTYPE html>
 <html lang="en">
-{% load bootstrap4 %} {% bootstrap_css %} {% bootstrap_javascript jquery='full' %} {% bootstrap_messages %} 
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;700;800&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Bungee+Shade&display=swap" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/main.css' %}">
+    <title>{% block title %}CGC - Code for Code's Sake{% endblock %}</title>
+</head>
+ 
 <header>
     <!-- Fixed navbar -->
-    <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
-        <a class="navbar-brand" href="{% url 'index' %}">CGC</a>
+    <nav class="navbar navbar-expand-md navbar-light fixed-top">
+        <a class="logo" href="{% url 'index' %}">CGC</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse"
             aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
@@ -28,37 +43,31 @@
                 </li>
                 {% endif %}
             </ul>
-            <form class="form-inline mt-2 mt-md-0">
-                <input class="form-control mr-sm-2" type="text" placeholder="Search" aria-label="Search">
-                <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
-            </form>
         </div>
     </nav>
 </header>
 
-{% block head %}
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="preconnect" href="https://fonts.gstatic.com">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;700;800&display=swap" rel="stylesheet">
-    <title>{% block title %}CGC - Code for Code's Sake{% endblock %}</title>
-</head>
-{% endblock %}
-
 <body>
-    <div id="sidebar">
+    
+    <!-- <div id="sidebar">
         {% block sidebar %}
         <ul>
             <li><a href="/">Home</a></li>
             <li><a href="/blog/">Blog</a></li>
         </ul>
         {% endblock %}
-    </div>
+    </div> -->
 
     <div id="content">
         {% block content %}{% endblock %}
     </div>
+
+    <footer>
+        <div class="text-center">
+            <a><img src="{% static 'images/github.png' %}"/></a>
+        </div>
+    </footer>
+
 </body>
 
 </html>
