@@ -11,7 +11,15 @@
 
     <div class="container">
         {% for problem in problems %}
-        <div class="row">
+        <button type="button" class="collapsible">{{ problem.name }} </button>
+        <div class="content">
+            <p class="problem_desc">{{ problem.desc }}</p>
+            <p>{{ problem.difficulty }}</p>
+            <a href="{% url 'code:solution' prob_id=problem.id %}">
+                <button type="button" class="btn btn-primary btn-md" style="display:inline-block;">Give it a shot!</button>
+            </a>
+        </div>
+        <!-- <div class="row">
             <div class="col-sm-4">
                 <h2 style="text-align:left;text-transform:capitalize"><u>{{ problem.name }}</u></h2><br>
                 <a href="{% url 'code:solution' prob_id=problem.id %}">
@@ -28,12 +36,12 @@
             </div>
             <div>
             </div>
-        </div>
+        </div> -->
         {% endfor %} 
     </div>
 
 
-    <script type="text/javascript" src="placeholder"></script>
+    <script type="text/javascript" src="{% static 'js/collapse.js' %}"></script>
     <script type="text/javascript" src="placeholder"></script>
     <script type="text/javascript" src="placeholder"></script>
 {% endblock %}

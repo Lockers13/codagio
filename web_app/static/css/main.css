@@ -25,6 +25,15 @@ body{
     margin-right: 10px;
 }
 
+.bold{
+    font-weight: bold;
+    color: black !important;
+}
+
+.nav-item{
+    color: black !important;
+}
+
 /* Showcase Section */
 
 .showcase{
@@ -58,7 +67,33 @@ body{
 
 /* Problems Section*/
 
+.collapsible {
+    background-color: var(--red);
+    color: var(--white);
+    cursor: pointer;
+    padding: 18px;
+    width: 100%;
+    border: none;
+    text-align: left;
+    outline: none;
+    font-size: 20px;
+}
+  
+.active, .collapsible:hover {
+background-color: var(--red);
+}
 
+.content {
+padding: 0 18px;
+display: none;
+overflow: hidden;
+background-color: var(--white);
+color: var(--black);
+}
+
+.problem_desc{
+    margin-top: 20px;
+}
 
 
 
