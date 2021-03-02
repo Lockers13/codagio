@@ -69,7 +69,7 @@ body{
 
 .collapsible {
     background-color: var(--red);
-    color: var(--white);
+    color: var(--black);
     cursor: pointer;
     padding: 18px;
     width: 100%;
@@ -77,18 +77,39 @@ body{
     text-align: left;
     outline: none;
     font-size: 20px;
+    width: 80%;
+    margin-left: 10%;
+    margin-top: 10px;
+    margin-bottom: 10px;
 }
   
 .active, .collapsible:hover {
-background-color: var(--red);
+    background-color: var(--white);
+    color: var(--black);
 }
-
+  
+.collapsible:after {
+    content: '\002B';
+    color: var(--black);
+    font-weight: bold;
+    float: right;
+    margin-left: 5px;
+}
+  
+.active:after {
+    content: "\2212";
+}
+  
 .content {
-padding: 0 18px;
-display: none;
-overflow: hidden;
-background-color: var(--white);
-color: var(--black);
+    padding: 0 18px;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.2s ease-out;
+    background-color: var(--white);
+    width: 80%;
+    margin-left: 10%;
+    color:var(--black);
+    margin-top: -10px;
 }
 
 .problem_desc{
