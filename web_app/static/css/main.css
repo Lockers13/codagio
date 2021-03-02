@@ -6,6 +6,10 @@
     --white:#F7F7F7;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body{
     background-color: var(--yellow);
     font-family: 'Poppins', sans-serif;
@@ -115,7 +119,6 @@ body{
 .problem_desc{
     margin-top: 20px;
 }
-
 
 
 
