@@ -14,10 +14,21 @@ body{
     background-color: var(--yellow);
     font-family: 'Poppins', sans-serif;
     color: var(--black);
+    overflow-x: hidden;
 }
 
-.home{
-    /* margin-top: 50px; */
+body::-webkit-scrollbar {
+    width: 1em;
+}
+   
+body::-webkit-scrollbar-track {
+    box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+}
+   
+body::-webkit-scrollbar-thumb {
+    background-color: var(--red);
+    /* //outline: 1px solid var(--red); */
+    border-radius: 10px;
 }
 
 /* Navbar Section */
@@ -153,12 +164,29 @@ body{
 .solution-info{
     height: 80vh;
     background-color: var(--white);
+    overflow-y: scroll; 
 }
 
 .nopadding {
     padding: 0 !important;
     margin: 0 !important;
- }
+}
+
+.solution-info::-webkit-scrollbar {
+    width: 1em;
+}
+   
+.solution-info::-webkit-scrollbar-track {
+    box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+}
+   
+.solution-info::-webkit-scrollbar-thumb {
+    background-color: var(--red);
+    /* //outline: 1px solid var(--red); */
+    border-radius: 10px;
+}
+
+
 
 
 

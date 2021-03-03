@@ -137,18 +137,18 @@ function init_editor() {
     editor.setOptions({
         // editor options
         selectionStyle: 'text',// "line"|"text"
-        highlightActiveLine: false, // boolean
+        highlightActiveLine: true, // boolean
         highlightSelectedWord: true, // boolean
         readOnly: false, // boolean: true if read only
-        cursorStyle: 'ace', // "ace"|"slim"|"smooth"|"wide"
+        cursorStyle: 'smooth', // "ace"|"slim"|"smooth"|"wide"
         mergeUndoDeltas: true, // false|true|"always"
         behavioursEnabled: true, // boolean: true if enable custom behaviours
         wrapBehavioursEnabled: true, // boolean
-        autoScrollEditorIntoView: undefined, // boolean: this is needed if editor is inside scrollable page
+        autoScrollEditorIntoView: true, // boolean: this is needed if editor is inside scrollable page
         keyboardHandler: null, // function: handle custom keyboard events
 
         // renderer options
-        animatedScroll: false, // boolean: true if scroll should be animated
+        animatedScroll: true, // boolean: true if scroll should be animated
         displayIndentGuides: false, // boolean: true if the indent should be shown. See 'showInvisibles'
         showInvisibles: false, // boolean -> displayIndentGuides: true if show the invisible tabs/spaces in indents
         showPrintMargin: true, // boolean: true if show the vertical print margin
@@ -160,7 +160,7 @@ function init_editor() {
         showLineNumbers: true,
         highlightGutterLine: false, // boolean: true if the gutter line should be highlighted
         hScrollBarAlwaysVisible: false, // boolean: true if the horizontal scroll bar should be shown regardless
-        vScrollBarAlwaysVisible: true, // boolean: true if the vertical scroll bar should be shown regardless
+        vScrollBarAlwaysVisible: false, // boolean: true if the vertical scroll bar should be shown regardless
         fontSize: 15, // number | string: set the font size to this many pixels
         fontFamily: undefined, // string: set the font-family css value
         maxLines: undefined, // number: set the maximum lines possible. This will make the editor height changes
