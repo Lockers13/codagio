@@ -18,6 +18,7 @@
                 <a href="{% url 'code:solution' prob_id=problem.id %}">
                     <button type="button" class="btn btn-primary btn-md" style="display:inline-block;">Give it a shot!</button>
                 </a>
+                <p class="problem_author"> Created by {{ problem.author__user__username }} on {{ problem.date_created }} </p>
             </div>
 
             <!-- <div class="row">

@@ -15,6 +15,10 @@ body{
     font-family: 'Poppins', sans-serif;
 }
 
+.home{
+    margin-top: 50px;
+}
+
 /* Navbar Section */
 
 .navbar{
@@ -53,7 +57,7 @@ body{
     font-family: 'Bungee Shade', cursive;
     font-size: 200px;
     color: var(--red);
-    margin-top: 100px;
+    /* margin-top: 100px; */
 }
 
 .second-title{
@@ -118,6 +122,30 @@ body{
 
 .problem_desc{
     margin-top: 20px;
+}
+
+.problem_author{
+    margin-top: 30px;
+    font-size: 12.5px;
+}
+
+
+/* //////////////  Code Page /////////////////  */
+
+/* Main page styling */
+
+.code-home{
+    margin-top: 60px;
+}
+
+#editor { 
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    height: 80vh;
+    width: 50%;
+    margin-top: 100px;
 }
 
 

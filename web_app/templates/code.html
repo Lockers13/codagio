@@ -1,0 +1,17 @@
+{% extends "base.html" %} 
+{% load static %}
+{% block content %}
+
+    <div class="code-home">
+
+        <div id="editor">
+        </div>
+
+    </div>
+
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.12/ace.js" type="text/javascript" charset="utf-8"></script>
+<script type="text/javascript" src="{% static 'js/solution.js' %}"></script>
+{% endblock content %}

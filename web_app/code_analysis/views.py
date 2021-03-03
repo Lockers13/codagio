@@ -83,4 +83,4 @@ def solution_upload(request, prob_id):
     context = {'title': 'CGC | Home',
                 'form': form}
 
-    return render(request, 'solution.html', context)
+    return render(request, 'code.html', context)
