@@ -1,9 +1,9 @@
 :root {
-    --yellow:#FFF700;
+    --yellow:#101010;
     --orange:#EFDF00;
-    --red:#FF3E6C;
-    --black:#3E3E3E;
-    --white:#F7F7F7;
+    --red:#06D6A0;
+    --black:#FFFFFF;
+    --white:#AB87FF;
 }
 
 html {
@@ -13,10 +13,11 @@ html {
 body{
     background-color: var(--yellow);
     font-family: 'Poppins', sans-serif;
+    color: var(--black);
 }
 
 .home{
-    margin-top: 50px;
+    /* margin-top: 50px; */
 }
 
 /* Navbar Section */
@@ -35,11 +36,11 @@ body{
 
 .bold{
     font-weight: bold;
-    color: black !important;
+    color: white !important;
 }
 
 .nav-item{
-    color: black !important;
+    color: white !important;
 }
 
 /* Showcase Section */
@@ -63,6 +64,7 @@ body{
 .second-title{
     font-family: 'Bungee Shade', cursive;
     margin-top: 20px;
+    color: var(--black);
 }
 
 .scroll-down-btn{
@@ -135,7 +137,7 @@ body{
 /* Main page styling */
 
 .code-home{
-    margin-top: 60px;
+    margin-top: 30px;
 }
 
 #editor { 
@@ -144,9 +146,19 @@ body{
     bottom: 0;
     left: 0;
     height: 80vh;
-    width: 50%;
-    margin-top: 100px;
+    /* width: 50%; */
+    /* margin-top: 100px; */
 }
+
+.solution-info{
+    height: 80vh;
+    background-color: var(--white);
+}
+
+.nopadding {
+    padding: 0 !important;
+    margin: 0 !important;
+ }
 
 
 

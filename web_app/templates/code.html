@@ -4,8 +4,33 @@
 
     <div class="code-home">
 
-        <div id="editor">
-        </div>
+            <div class="row no-gutters">
+                
+                <div class="solution-info col-sm-12 col-md-6 col-lg-6 col-xl-6 nopadding">
+                    <form id="sub_form" action="" method="post" enc="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="form-row">
+                            <div class="form-group col-md-6 mb-0 col-lg-12">
+                                {{ form.title }}
+                            </div>
+                        </div>
+                        <br>
+                        <div class="form-row">
+                            <div class="form-group col-md-6 mb-0 col-lg-12">
+                                <input name="solution" id="solution_text" type="hidden"> {{ form.problem_id }}
+                            </div>
+                            <input type="hidden" name="sub_type" value="solution">
+                        </div>
+                        <button id="sub_btn" type="submit" class="btn btn-primary">Submit your solution!</button>
+                    </form>
+                </div>
+                
+                <div id="editor" class="col-sm-12 col-md-6 col-lg-6 col-xl-6 nopadding">
+                </div>
+            
+            </div>
+        
+        
 
     </div>
 
