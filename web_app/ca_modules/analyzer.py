@@ -8,12 +8,16 @@ from .verification import Verifier
 
 class Analyzer:
 
-    def __init__(self, filename):
+    def __init__(self, filename, metadata):
         self.__program_dict = {}
         self.__filename = filename
+        self.__metadata = metadata
 
     def get_prog_dict(self):
         return self.__program_dict
+    
+    def get_meta(self):
+        return self.__metadata
     
     def get_filename(self):
         return self.__filename

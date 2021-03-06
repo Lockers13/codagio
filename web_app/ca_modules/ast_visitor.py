@@ -55,10 +55,12 @@ class AstTreeVisitor(ast.NodeVisitor):
         # count var to record number of primitive operations (e.g. assign, aug_assign, etc.)
         self.__count_hash["nest_level"] = -1
 
-        self.__allowed_abs_imports = ["math"]
-        self.__allowed_rel_imports = {"os": ["listdir", "chdir"]}
         self.__program_dict["UNSAFE"] = []
-        
+        self.__metadata = analyzer.get_meta()
+        self.__allowed_abs_imports = self.__metadata.get("allowed_abs_imports", [])
+        self.__allowed_rel_imports = self.__metadata.get("allowed_rel_imports", {})
+
+
     def get_program_dict(self):
         return self.__program_dict
 

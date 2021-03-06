@@ -14,7 +14,6 @@ from users.models import Profile
 from django.shortcuts import render, redirect
 from . import forms as submission_forms
 
-
 class AnalysisView(APIView):
 
     def get(self, request):
@@ -38,43 +37,48 @@ class AnalysisView(APIView):
         code_data = data.get("solution")
         user = Profile.objects.filter(id=uid).first()
         filename = "{0}.py".format(prob_name)
-        if validate_submission(code_data):
-            ### make basic initial file from code_data for the sole purposes of ast parsing
-            with open(filename, 'w') as f:
-                f.write(code_data)
-            analyzer = Analyzer(filename)
-            analyzer.visit_ast()
-            ### if the ast_visitor has piscked up on any blacklisted imports/functions then return error status
-            if len(analyzer.get_prog_dict()["UNSAFE"]) > 0:
-                os.remove(filename)
-                return Response("POST NOT OK: potentially unsafe code!", status=status.HTTP_400_BAD_REQUEST)
-            ### remove old basic file and create more sophisticated one for verification and profiling
-            os.remove(filename)
-            make_utils.make_file(filename, code_data)
-            problem = Problem.objects.filter(id=prob_id).first()
-            percentage_score = analyzer.verify(problem)
-            centpourcent = float(percentage_score) == 100.0
-            ### only profile submission if all tests are passed
-            if centpourcent:
-                analyzer.profile(problem.inputs)
-            analysis = analyzer.get_prog_dict()
-            comparison.write_comp(analysis, json.loads(problem.analysis))
-            if centpourcent:
-                solution, created = Solution.objects.update_or_create(
-                    submitter_id=uid,
-                    problem_id=prob_id,
-                    defaults={'analysis': json.dumps(analysis), 'date_submitted': datetime.now()}
-                )
-                solution.save()
-
-            try:
-                os.remove(filename)
-            except FileNotFoundError:
-                pass
-
-            return Response(json.dumps(analysis), status=status.HTTP_200_OK)
-        else:
+        if not validate_submission(code_data):
             return Response("POST NOT OK: invalid code!", status=status.HTTP_400_BAD_REQUEST)
+        ### make basic initial file from code_data for the sole purposes of ast parsing
+        with open(filename, 'w') as f:
+            f.write(code_data)
+        metadata = {
+            "allowed_abs_imports": ["math"],
+            "allowed_rel_imports": {
+                "os": ["listdir", "chdir"]
+                }
+        }
+        analyzer = Analyzer(filename, metadata)
+        analyzer.visit_ast()
+        ### if the ast_visitor has picked up on any blacklisted imports/functions then return appropriate error status
+        if len(analyzer.get_prog_dict()["UNSAFE"]) > 0:
+            os.remove(filename)
+            return Response("POST NOT OK: potentially unsafe code!", status=status.HTTP_400_BAD_REQUEST)
+        ### remove old basic file and create more sophisticated one for verification and profiling
+        os.remove(filename)
+        make_utils.make_file(filename, code_data)
+        problem = Problem.objects.filter(id=prob_id).first()
+        percentage_score = analyzer.verify(problem)
+        centpourcent = float(percentage_score) == 100.0
+        ### only profile submission if all tests are passed
+        if centpourcent:
+            analyzer.profile(problem.inputs)
+        analysis = analyzer.get_prog_dict()
+        comparison.write_comp(analysis, json.loads(problem.analysis))
+        if centpourcent:
+            solution, created = Solution.objects.update_or_create(
+                submitter_id=uid,
+                problem_id=prob_id,
+                defaults={'analysis': json.dumps(analysis), 'date_submitted': datetime.now()}
+            )
+            solution.save()
+
+        try:
+            os.remove(filename)
+        except FileNotFoundError:
+            pass
+
+        return Response(json.dumps(analysis), status=status.HTTP_200_OK)
 
 
 def solution_upload(request, prob_id):
