@@ -54,6 +54,10 @@ class AstTreeVisitor(ast.NodeVisitor):
         self.__count_hash["level"] = -1
         # count var to record number of primitive operations (e.g. assign, aug_assign, etc.)
         self.__count_hash["nest_level"] = -1
+
+        self.__allowed_abs_imports = ["math"]
+        self.__allowed_rel_imports = {"os": ["listdir", "chdir"], "json": ["loads"], "sys": ["argv"]}
+        self.__program_dict["UNSAFE"] = []
         
     def get_program_dict(self):
         return self.__program_dict
@@ -253,3 +257,30 @@ class AstTreeVisitor(ast.NodeVisitor):
             self.__count_hash["level"] -= 1
 
         self.generic_visit(node)
+
+    def visit_Import(self, node):
+        for imp in node.names:
+            if imp.name not in self.__allowed_abs_imports:
+               unsafe_entry_list = self.__program_dict["UNSAFE"]
+               unsafe_entry_list.append({
+                    "type": "Absolute import",
+                    "name": imp.name
+                })
+                
+    def visit_ImportFrom(self, node):
+        module = node.module
+        rel_imps = self.__allowed_rel_imports.get(module, None)
+        if rel_imps is None:
+            unsafe_entry_list = self.__program_dict["UNSAFE"]
+            unsafe_entry_list.append({
+                "type": "Relative import",
+                "name": "from {0}".format(module)
+            })
+        else:
+            for imp in node.names:
+                if imp.name not in rel_imps:
+                    unsafe_entry_list = self.__program_dict["UNSAFE"]
+                    unsafe_entry_list.append({
+                        "type": "Relative import",
+                        "name": imp.name
+                    })

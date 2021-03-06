@@ -42,6 +42,10 @@ class AnalysisView(APIView):
             make_utils.make_file(filename, code_data)
             analyzer = Analyzer(filename)
             analyzer.visit_ast()
+            if len(analyzer.get_prog_dict()["UNSAFE"]) > 0:
+                os.remove(filename)
+                return Response("POST NOT OK: potentially unsafe code!", status=status.HTTP_400_BAD_REQUEST)
+
 
             problem = Problem.objects.filter(id=prob_id).first()
             percentage_score = analyzer.verify(problem)

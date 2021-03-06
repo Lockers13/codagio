@@ -15,12 +15,13 @@ def make_file(path, code, source="web"):
                 line = line.replace("template_function", str(fname))
             file_obj.write("{0}\n".format(line))
 
-    IMPORTS = ["import json", 
-                "import sys"]
+
+    IMPORTS = ["from json import loads as json_load", 
+                "from sys import argv"]
 
     TEMPLATE_CODE = ["def prep_input():",
                     "    try:",
-                    "        return json.loads(sys.argv[1])",
+                    "        return json_load(argv[1])",
                     "    except IndexError:",
                     "        print(\"Error: please make sure correct input has been provided\")",
                     "        sys.exit(1)\n",
