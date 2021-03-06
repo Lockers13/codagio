@@ -57,6 +57,7 @@ class AstTreeVisitor(ast.NodeVisitor):
         self.__count_hash["nest_level"] = -1
         self.__allowed_abs_imports = ["math"]
         self.__allowed_rel_imports = {"os": ["listdir", "chdir"], "json": ["loads"], "sys": ["argv"]}
+        self.__disallowed_fcalls = ["eval", "exec", "open"]
         self.__program_dict["UNSAFE"] = []
         
     def get_program_dict(self):
@@ -284,6 +285,18 @@ class AstTreeVisitor(ast.NodeVisitor):
                         "type": "Relative import",
                         "name": imp.name
                     })
+    
+    def visit_Call(self, node):
+        try:
+            func_name = node.func.id
+        except AttributeError:
+            func_name = node.func.attr
+        if func_name in self.__disallowed_fcalls:
+            unsafe_entry_list = self.__program_dict["UNSAFE"]
+            unsafe_entry_list.append({
+                "type": "Disallowed fcall",
+                "name": func_name
+            })
 
 
 

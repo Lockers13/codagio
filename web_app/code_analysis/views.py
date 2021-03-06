@@ -30,10 +30,12 @@ class AnalysisView(APIView):
             return True
 
         data = request.data
-        prob_name = data.get("name")
+        prob_id = data.get("problem_id")[0]
+        problem = Problem.objects.filter(id=prob_id).first()
+        prob_name = problem.name
         # Artificially create a user and problem instance
         uid = request.user.id
-        prob_id = data.get("problem_id")[0]
+        
         code_data = data.get("solution")
         user = Profile.objects.filter(id=uid).first()
         filename = "{0}.py".format(prob_name)
@@ -46,7 +48,8 @@ class AnalysisView(APIView):
             "allowed_abs_imports": ["math"],
             "allowed_rel_imports": {
                 "os": ["listdir", "chdir"]
-                }
+                },
+            "disallowed_fcalls": ["print", "eval"]
         }
         analyzer = Analyzer(filename, metadata)
         analyzer.visit_ast()
@@ -57,7 +60,7 @@ class AnalysisView(APIView):
         ### remove old basic file and create more sophisticated one for verification and profiling
         os.remove(filename)
         make_utils.make_file(filename, code_data)
-        problem = Problem.objects.filter(id=prob_id).first()
+
         percentage_score = analyzer.verify(problem)
         centpourcent = float(percentage_score) == 100.0
         ### only profile submission if all tests are passed

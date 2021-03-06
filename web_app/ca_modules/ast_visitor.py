@@ -59,7 +59,9 @@ class AstTreeVisitor(ast.NodeVisitor):
         self.__metadata = analyzer.get_meta()
         self.__allowed_abs_imports = self.__metadata.get("allowed_abs_imports", [])
         self.__allowed_rel_imports = self.__metadata.get("allowed_rel_imports", {})
-
+        self.__disallowed_fcalls = set(["exec", "open", "eval"])
+        for func in self.__metadata.get("disallowed_fcalls", []):
+            self.__disallowed_fcalls.add(func)
 
     def get_program_dict(self):
         return self.__program_dict
@@ -286,3 +288,15 @@ class AstTreeVisitor(ast.NodeVisitor):
                         "type": "Relative import",
                         "name": imp.name
                     })
+
+    def visit_Call(self, node):
+        try:
+            func_name = node.func.id
+        except AttributeError:
+            func_name = node.func.attr
+        if func_name in self.__disallowed_fcalls:
+            unsafe_entry_list = self.__program_dict["UNSAFE"]
+            unsafe_entry_list.append({
+                "type": "Disallowed fcall",
+                "name": func_name
+            })
