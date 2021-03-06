@@ -13,6 +13,7 @@ from .models import Problem, Solution
 from users.models import Profile
 from django.shortcuts import render, redirect
 from . import forms as submission_forms
+import yaml
 
 class AnalysisView(APIView):
 
@@ -44,13 +45,9 @@ class AnalysisView(APIView):
         ### make basic initial file from code_data for the sole purposes of ast parsing
         with open(filename, 'w') as f:
             f.write(code_data)
-        metadata = {
-            "allowed_abs_imports": ["math"],
-            "allowed_rel_imports": {
-                "os": ["listdir", "chdir"]
-                },
-            "disallowed_fcalls": ["print", "eval"]
-        }
+        ### get json metadata from disk in lieu of db (to be implemented)
+        with open(os.path.join("sample_problems", "{0}_meta.json".format(prob_name)), 'r') as f:
+            metadata = json.loads(f.read())
         analyzer = Analyzer(filename, metadata)
         analyzer.visit_ast()
         ### if the ast_visitor has picked up on any blacklisted imports/functions then return appropriate error status
