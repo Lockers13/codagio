@@ -56,7 +56,7 @@ class AstTreeVisitor(ast.NodeVisitor):
         self.__count_hash["nest_level"] = -1
 
         self.__allowed_abs_imports = ["math"]
-        self.__allowed_rel_imports = {"os": ["listdir", "chdir"], "json": ["loads"], "sys": ["argv"]}
+        self.__allowed_rel_imports = {"os": ["listdir", "chdir"]}
         self.__program_dict["UNSAFE"] = []
         
     def get_program_dict(self):

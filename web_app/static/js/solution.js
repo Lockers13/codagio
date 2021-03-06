@@ -4,6 +4,8 @@ $("#sub_form").submit(function(e) {
     e.preventDefault();
     let sub_text = editor.getValue();
     let solution_text_box = document.getElementById("solution_text")
+    let result_p = document.getElementById("result")
+    result_p.innerHTML = ""
 
     solution_text_box.value = sub_text
 
@@ -29,7 +31,6 @@ $("#sub_form").submit(function(e) {
         let comp_collapse = document.getElementById("comp_collapse")
         let lp_collapse = document.getElementById("lp_collapse")
         let sp_collapse = document.getElementById("sp_collapse")
-        let result_p = document.getElementById("result")
         if(result == "100.0%") {
             result_p.style.color = "green"
             result_p.innerHTML = "<br>Congratulations, your code passed all our tests!...<br>Now check out some of your feedback below:"
@@ -49,7 +50,11 @@ $("#sub_form").submit(function(e) {
             lp_collapse.innerHTML ="<p>Sorry, you have to pass all tests to qualify for line profiling!<p>"
             }
         })
-    .fail(function(resp_data) {console.log(resp_data)})
+    .fail(function(resp_data) {
+        console.log(resp_data)
+        if(resp_data["responseJSON"] == "POST NOT OK: potentially unsafe code!")
+            result_p.innerHTML = "<br><b><i>Sorry, we cannot trust the submitted code as it does not abide by our rules. Please try again!</i></b>"
+    })
 
 });
 

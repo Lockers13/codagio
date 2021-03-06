@@ -39,14 +39,18 @@ class AnalysisView(APIView):
         user = Profile.objects.filter(id=uid).first()
         filename = "{0}.py".format(prob_name)
         if validate_submission(code_data):
-            make_utils.make_file(filename, code_data)
+            ### make basic initial file from code_data for the sole purposes of ast parsing
+            with open(filename, 'w') as f:
+                f.write(code_data)
             analyzer = Analyzer(filename)
             analyzer.visit_ast()
+            ### if the ast_visitor has piscked up on any blacklisted imports/functions then return error status
             if len(analyzer.get_prog_dict()["UNSAFE"]) > 0:
                 os.remove(filename)
                 return Response("POST NOT OK: potentially unsafe code!", status=status.HTTP_400_BAD_REQUEST)
-
-
+            ### remove old basic file and create more sophisticated one for verification and profiling
+            os.remove(filename)
+            make_utils.make_file(filename, code_data)
             problem = Problem.objects.filter(id=prob_id).first()
             percentage_score = analyzer.verify(problem)
             centpourcent = float(percentage_score) == 100.0
