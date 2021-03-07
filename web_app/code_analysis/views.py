@@ -34,9 +34,7 @@ class AnalysisView(APIView):
         prob_id = data.get("problem_id")[0]
         problem = Problem.objects.filter(id=prob_id).first()
         prob_name = problem.name
-        # Artificially create a user and problem instance
         uid = request.user.id
-        
         code_data = data.get("solution")
         user = Profile.objects.filter(id=uid).first()
         filename = "{0}.py".format(prob_name)
@@ -57,7 +55,6 @@ class AnalysisView(APIView):
         ### remove old basic file and create more sophisticated one for verification and profiling
         os.remove(filename)
         make_utils.make_file(filename, code_data)
-
         percentage_score = analyzer.verify(problem)
         centpourcent = float(percentage_score) == 100.0
         ### only profile submission if all tests are passed

@@ -57,10 +57,10 @@ class AstTreeVisitor(ast.NodeVisitor):
 
         self.__program_dict["UNSAFE"] = []
         self.__metadata = analyzer.get_meta()
-        self.__allowed_abs_imports = self.__metadata.get("allowed_abs_imports", [])
-        self.__allowed_rel_imports = self.__metadata.get("allowed_rel_imports", {})
+        self.__allowed_abs_imports = self.__metadata.get("constraints").get("allowed_abs_imports", [])
+        self.__allowed_rel_imports = self.__metadata.get("constraints").get("allowed_rel_imports", {})
         self.__disallowed_fcalls = set(["exec", "open", "eval"])
-        for func in self.__metadata.get("disallowed_fcalls", []):
+        for func in self.__metadata.get("constraints").get("disallowed_fcalls", []):
             self.__disallowed_fcalls.add(func)
 
     def get_program_dict(self):

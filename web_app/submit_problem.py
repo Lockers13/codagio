@@ -52,17 +52,24 @@ def create_problem():
         if tries > 2:
             print("Three attempts failed, exiting...")
             sys.exit(3)
+
     input_type = input("Input Type: ")
     input_length = int(input("Input Length: "))
     num_tests = int(input("# Tests: "))
+    metafile = os.path.join(os.getcwd(), "sample_problems", input("Metadata file: "))
     fname = os.path.join(os.getcwd(), "sample_problems", input("Script Name: "))
     prob_name = os.path.basename(fname).split(".")[0]
-    difficulty = input("Problem Difficulty: ")
-    desc = input("Problem Description: ")
+    # difficulty = input("Problem Difficulty: ")
+    # desc = input("Problem Description: ")
+    with open(metafile, 'r') as f:
+        metadata = json.loads(f.read())
     code = make_utils.get_code_from_file(fname)
     filename = "{0}.py".format(prob_name)
     make_utils.make_file(filename, code, source="file")
-    analyzer = Analyzer(filename)
+    metadata["date_created"] = datetime.now()
+    metadata["constraints"]["allowed_rel_imports"]["sys"] = ["argv"]
+    metadata["constraints"]["allowed_rel_imports"]["json"] = ["loads"]
+    analyzer = Analyzer(filename, metadata)
     analyzer.visit_ast()
     json_inputs = generate_input(input_type, input_length, num_tests)
     analyzer.profile(json_inputs, solution=False)
@@ -71,10 +78,8 @@ def create_problem():
     problem, created = Problem.objects.update_or_create(
         name=prob_name, author_id=uid,
         defaults = {
-            'difficulty': difficulty,
             'hashes': json.dumps(hashes),
-            'date_created': datetime.now(),    
-            'desc': desc,   
+            'metadata': json.dumps(metadata, default=str),
             'inputs': json_inputs,
             'analysis': analysis
         }

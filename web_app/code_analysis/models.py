@@ -5,13 +5,10 @@ from users.models import Profile
 class Problem(models.Model):
     author = models.ForeignKey(Profile, on_delete=models.CASCADE)
     name = models.CharField(max_length=50, default=None)
-    desc = models.CharField(max_length=200, default=None, null=True)
-    difficulty = models.CharField(max_length=20)
+    metadata = JSONField(default=dict)
     hashes = JSONField()
     inputs = JSONField()
-    date_created = models.DateField()
     analysis = JSONField(default=dict)
-
 
 class Solution(models.Model):
     submitter = models.ForeignKey(Profile, on_delete=models.CASCADE)

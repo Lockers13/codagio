@@ -5,6 +5,7 @@
     <p>Or in plain english...code for code's sake!</p>
 </div>
 
+
 <div class="container">
     {% for problem in problems %}
     <div class="row">
@@ -16,10 +17,10 @@
 
             <hr><br>
             <ul class="list-group">  
-                <li class="list-group-item">Description: {{ problem.desc }}</li>
+                <li class="list-group-item">Description: {{ problem.description }}</li>
                 <li class="list-group-item">Difficulty Level: {{ problem.difficulty }}</li>
-                <li class="list-group-item">Problem Author: {{ problem.author__user__username }}</li>
-                <li class="list-group-item">Date Posted: {{ problem.date_created }}</li>
+                <li class="list-group-item">Problem Author: {{ problem.author }}</li>
+                <li class="list-group-item">Date/Time Posted: {{ problem.date_created }}</li>
             </ul>
         </div>
         <div>
