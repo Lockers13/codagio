@@ -5,7 +5,6 @@
     <p>Or in plain english...code for code's sake!</p>
 </div>
 
-
 <div class="container">
     {% for problem in problems %}
     <div class="row">
@@ -14,14 +13,21 @@
             <a href="{% url 'code:solution' prob_id=problem.id %}">
                 <button type="button" class="btn btn-primary btn-md" style="display:inline-block;">Give it a shot!</button>
             </a>
-
+            
             <hr><br>
-            <ul class="list-group">  
-                <li class="list-group-item">Description: {{ problem.description }}</li>
-                <li class="list-group-item">Difficulty Level: {{ problem.difficulty }}</li>
-                <li class="list-group-item">Problem Author: {{ problem.author }}</li>
-                <li class="list-group-item">Date/Time Posted: {{ problem.date_created }}</li>
+            
+            <ul class="list-group">
+            {% for k, v in problem.metadata.items %}
+                {% if k == 'description' %}
+                <li class="list-group-item">Description: {{ v }}</li>
+                {% elif k == 'difficulty' %}
+                <li class="list-group-item">Difficulty Level: {{ v }}</li>
+                {% elif k == 'date_created' %}
+                <li class="list-group-item">Date/Time Posted: {{ v }}</li>
+                {% endif %}
+            {% endfor %}
             </ul>
+            
         </div>
         <div>
         </div>
