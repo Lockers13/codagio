@@ -85,6 +85,7 @@ class Profiler:
                         line_info["hits"] = split_line[1]
                         line_info["%time"] = split_line[4]
                         line_info["contents"] = split_line[5]
+                        line_info["real_time"] = str(round(float(fdefs[fdef_k]["cum_time"]) * float(split_line[4])/100, 6))
                     else:
                         line_info["hits"] = "0"
                         line_info["%time"] = "0.0"
@@ -100,7 +101,7 @@ class Profiler:
                     len_sl = len(split_line)
                     if len_sl == 0:
                         in_func = False
-                    elif split_line[0].startswith("=============================================="):
+                    elif split_line[0].startswith("==================="):
                         in_func = True
                     elif not in_func:
                         pass
