@@ -12,50 +12,18 @@
 
         <div class="container" id="problems">
             {% for problem in problems %}
-            <button type="button" class="collapsible">{{ problem.name }} ({{ problem.difficulty }}) </button>
+            <button type="button" class="collapsible">{{ problem.name }} ({{ problem.metadata.difficulty }}) </button>
             <div class="content">
-                <p class="problem_desc">{{ problem.desc }}</p>
+                <p class="problem_desc">{{ problem.metadata.description }}</p>
                 <a href="{% url 'code:solution' prob_id=problem.id %}">
                     <button type="button" class="btn btn-primary btn-md" style="display:inline-block;">Give it a shot!</button>
                 </a>
-                <p class="problem_author"> Created by {{ problem.author__user__username }} on {{ problem.date_created }} </p>
-                
-                {% if problem.metadata %}
-                <ul class="list-group">
-                    {% for k, v in problem.metadata.items %}
-                        {% if k == 'description' %}
-                        <li class="list-group-item">Description: {{ v }}</li>
-                        {% elif k == 'difficulty' %}
-                        <li class="list-group-item">Difficulty Level: {{ v }}</li>
-                        {% elif k == 'date_created' %}
-                        <li class="list-group-item">Date/Time Posted: {{ v }}</li>
-                        {% endif %}
-                    {% endfor %}
-                </ul>
-                {% endif %}
+                <p class="problem_author"> Created by {{ problem.author__user__username }}</p>
             </div>
+
+            {% endfor %} 
         </div>
     </div>
-
-            <!-- <div class="row">
-                <div class="col-sm-4">
-                    <h2 style="text-align:left;text-transform:capitalize"><u>{{ problem.name }}</u></h2><br>
-                    <a href="{% url 'code:solution' prob_id=problem.id %}">
-                        <button type="button" class="btn btn-primary btn-md" style="display:inline-block;">Give it a shot!</button>
-                    </a>
-
-                    <hr><br>
-                    <ul class="list-group">  
-                        <li class="list-group-item">Description: {{ problem.desc }}</li>
-                        <li class="list-group-item">Difficulty Level: {{ problem.difficulty }}</li>
-                        <li class="list-group-item">Problem Author: {{ problem.author__user__username }}</li>
-                        <li class="list-group-item">Date Posted: {{ problem.date_created }}</li>
-                    </ul>
-                </div>
-                <div>
-                </div>
-            </div> -->
-            {% endfor %} 
 
 
     <script type="text/javascript" src="{% static 'js/collapse.js' %}"></script>

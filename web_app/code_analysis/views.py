@@ -81,13 +81,14 @@ class AnalysisView(APIView):
 def solution_upload(request, prob_id):
 
     problem = Problem.objects.get(id = prob_id)
+    metadata = json.loads(problem.metadata)
+    difficulty = metadata['difficulty']
+    description = metadata['description']
 
     initial_state = {
         'user_id': request.user.id,
         'problem_id': prob_id,
         'solution': "",
-        'problem_name':problem.name,
-        #'problem_desc':problem.desc,
     }
 
     form = submission_forms.SolutionSubmissionForm(initial=initial_state)
@@ -95,8 +96,9 @@ def solution_upload(request, prob_id):
 
     context = { 'title': 'CGC | Home',
                 'form': form,
+                'difficulty':difficulty,
                 'problem_name':problem.name,
-                #'problem_desc':problem.desc,
+                'problem_desc':description,
                 }
 
     return render(request, 'code.html', context)
