@@ -21,8 +21,26 @@
                             </div>
                             <input type="hidden" name="sub_type" value="solution">
                         </div>
-                        <button id="sub_btn" type="submit" class="btn btn-primary submit_btn">Submit your solution!</button>
+                        <h1 class="problem_name text-center">{{ problem_name }}</h1>
+                        <p class="problem_desc" id="description">{{ problem_desc }}</p>
+                        {% if sample_input %}
+                            <p>Sample input {{ sample_input }}</p>
+                            <p>Sample output: {{ sample_output }} </p>
+                        {% endif %}
+                        <div class="text-center">
+                            <button id="sub_btn" type="submit" class="btn btn-primary submit_btn text-center">Submit your solution!</button>
+                        </div>
                     </form>
+                    <div id="loader">
+                        <div class="text-center">
+                            <svg width="200" height="200" viewBox="0 0 100 100">
+                                <polyline class="line-cornered stroke-still" points="0,0 100,0 100,100" stroke-width="10" fill="none"></polyline>
+                                <polyline class="line-cornered stroke-still" points="0,0 0,100 100,100" stroke-width="10" fill="none"></polyline>
+                                <polyline class="line-cornered stroke-animation" points="0,0 100,0 100,100" stroke-width="10" fill="none"></polyline>
+                                <polyline class="line-cornered stroke-animation" points="0,0 0,100 100,100" stroke-width="10" fill="none"></polyline>
+                            </svg>
+                        </div>
+                    </div>
                 </div>
                 
                 <div id="editor" class="col-sm-12 col-md-6 col-lg-6 col-xl-6 nopadding">
@@ -38,5 +56,6 @@
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.12/ace.js" type="text/javascript" charset="utf-8"></script>
-<script type="text/javascript" src="{% static 'js/solution.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/editor.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/submit_solution.js' %}"></script>
 {% endblock content %}

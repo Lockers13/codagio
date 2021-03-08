@@ -13,6 +13,7 @@ from .models import Problem, Solution
 from users.models import Profile
 from django.shortcuts import render, redirect
 from . import forms as submission_forms
+from code_analysis.models import Problem
 
 
 class AnalysisView(APIView):
@@ -71,16 +72,23 @@ class AnalysisView(APIView):
 
 def solution_upload(request, prob_id):
 
+    problem = Problem.objects.get(id = prob_id)
+
     initial_state = {
         'user_id': request.user.id,
         'problem_id': prob_id,
         'solution': "",
+        'problem_name':problem.name,
+        'problem_desc':problem.desc,
     }
 
     form = submission_forms.SolutionSubmissionForm(initial=initial_state)
 
 
-    context = {'title': 'CGC | Home',
-                'form': form}
+    context = { 'title': 'CGC | Home',
+                'form': form,
+                'problem_name':problem.name,
+                'problem_desc':problem.desc,
+                }
 
     return render(request, 'code.html', context)

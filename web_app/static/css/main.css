@@ -3,7 +3,7 @@
     --orange:#EFDF00;
     --red:#06D6A0;
     --black:#FFFFFF;
-    --white:#AB87FF;
+    --white: #FF3E6C;
 }
 
 html {
@@ -151,20 +151,11 @@ body::-webkit-scrollbar-thumb {
     margin-top: 30px;
 }
 
-#editor { 
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    height: 80vh;
-    /* width: 50%; */
-    /* margin-top: 100px; */
-}
-
 .solution-info{
     height: 80vh;
-    background-color: var(--white);
+    background-color: var(--yellow);
     overflow-y: scroll; 
+    border: 2px solid var(--red);
 }
 
 .nopadding {
@@ -186,10 +177,122 @@ body::-webkit-scrollbar-thumb {
     border-radius: 10px;
 }
 
+.problem_name{
+    margin: 10px;
+}
 
+.problem_desc{
+    margin: 30px;
+}
 
+.submit_btn{
+    margin-top: 100px;
+}
 
+/* Loader */
 
+#loader{
+    display: none;
+}
+
+svg {
+    margin-top: 150px;
+    position: absolute;
+    -webkit-transform: translate(-50%, -50%) rotate(45deg) scale(1);
+            transform: translate(-50%, -50%) rotate(45deg) scale(1);
+}
+  
+.stroke-still {
+stroke: var(--yellow);
+}
+
+.stroke-animation {
+-webkit-animation: stroke-spacing 1.2s ease-in, stroke-color 4.8s linear;
+        animation: stroke-spacing 1.2s ease-in, stroke-color 4.8s linear;
+-webkit-animation-iteration-count: infinite;
+        animation-iteration-count: infinite;
+-webkit-animation-delay: 0;
+        animation-delay: 0;
+-webkit-animation-direction: normal;
+        animation-direction: normal;
+-webkit-animation-fill-mode: forwards;
+        animation-fill-mode: forwards;
+-webkit-animation-play-state: running;
+        animation-play-state: running;
+-webkit-transform-origin: center center;
+        transform-origin: center center;
+}
+
+@-webkit-keyframes stroke-spacing {
+0% {
+    stroke-dasharray: 0 200;
+}
+45% {
+    stroke-dashoffset: 0;
+    stroke-dasharray: 200 200;
+}
+90% {
+    stroke-dashoffset: -200;
+    stroke-dasharray: 200 200;
+}
+100% {
+    stroke-dashoffset: -200;
+    stroke-dasharray: 200 200;
+}
+}
+
+@keyframes stroke-spacing {
+0% {
+    stroke-dasharray: 0 200;
+}
+45% {
+    stroke-dashoffset: 0;
+    stroke-dasharray: 200 200;
+}
+90% {
+    stroke-dashoffset: -200;
+    stroke-dasharray: 200 200;
+}
+100% {
+    stroke-dashoffset: -200;
+    stroke-dasharray: 200 200;
+}
+}
+
+@-webkit-keyframes stroke-color {
+0%  { stroke: #3498DB; }
+24% { stroke: var(--white); }
+25% { stroke: var(--red); }
+49% { stroke: var(--red); }
+50% { stroke: #32326e; }
+74% { stroke: #32326e; }
+75% { stroke: var(--white); }
+99% { stroke: var(--white); }
+}
+
+@keyframes stroke-color {
+0%  { stroke: #3498DB; }
+24% { stroke: #643232; }
+25% { stroke: var(--red); }
+49% { stroke: var(--red); }
+50% { stroke: #32326e; }
+74% { stroke: #32326e; }
+75% { stroke: var(--white); }
+99% { stroke: var(--white); }
+}
+  
+
+/* Editor Section */
+
+#editor { 
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    height: 80vh;
+    /* width: 50%; */
+    /* margin-top: 100px; */
+}
 
 
 
