@@ -14,8 +14,6 @@ from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
 import getpass
 
-
-    
 def create_problem():
     def generate_input(input_type, input_length, num_tests):
         def random_string(length):

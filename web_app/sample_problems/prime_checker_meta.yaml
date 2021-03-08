@@ -1,0 +1,10 @@
+difficulty: "Easy"
+constraints:
+  num_args: 1
+  allowed_abs_imports: ["math"]
+  allowed_rel_imports: 
+    os: ["listdir", "chdir"]
+  disallowed_functions: ["eval", "print", "abs"]
+input_type: "integer"
+input_length: 1000
+num_tests: 3

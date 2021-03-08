@@ -11,6 +11,7 @@ class Profiler:
         self.__program_dict = analyzer.get_prog_dict()
         self.__udef_info = self.__get_udef_info()
         self.__sample_inputs = json.loads(inputs)
+        self.__offset = 3 ### this is the number of lines added during preprocessing, whereas calculation of function lineno during ast_visitor stage happens prior to preprocessing, so it must be offset
 
     def __get_udef_info(self):
         """Utility method to make user function defintiion info collected by ast visitor more easily accessible.
@@ -116,6 +117,11 @@ class Profiler:
                         write_lprofs(reached=False)
                     elif len_sl == 6:
                         write_lprofs()
+
+            ### ! below is useful for debugging problems with line_profiler! ###
+            # with open(pro_file, 'r') as f:
+            #     for line in f.readlines():
+            #         print(line)
             
             # call kernprof as subprocess, redirecting stdout to pipe, and read results
             process = subprocess.Popen(["kernprof", "-l", "-v", "{0}".format(pro_file), json.dumps(self.__sample_inputs[0])], stdout=subprocess.PIPE)
@@ -144,7 +150,7 @@ class Profiler:
             return
 
         # get udef linenos from self.udef_info as defined above
-        udef_lines = [self.__udef_info[fdef_name][1] for fdef_name in self.__udef_info.keys()]
+        udef_lines = [(self.__udef_info[fdef_name][1] + self.__offset) for fdef_name in self.__udef_info.keys()]
         pro_token = "@profile"
         pro_file = make_pro_file(self.__filename, udef_lines, pro_token)
         do_profile(pro_file)

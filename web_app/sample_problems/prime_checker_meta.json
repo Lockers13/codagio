@@ -1,1 +1,0 @@
-{"difficulty": "Easy", "description": "Quick Prime Checker", "constraints": {"num_args": 1, "allowed_abs_imports": ["math"], "allowed_rel_imports": {"os": ["listdir", "chdir"]}, "disallowed_functions": ["eval", "print", "abs"]}}
