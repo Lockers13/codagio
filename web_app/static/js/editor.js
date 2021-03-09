@@ -5,14 +5,22 @@ let submitbtn = document.getElementById('sub_btn');
 let desc = document.getElementById('description'); 
 let result_section = document.getElementById('result');
 let overall = document.getElementById('overall_score');
+let back = document.getElementById('go_back');
 
 submitbtn.addEventListener('click', function(){
-    submitbtn.style.display = 'none';
+    submitbtn.style.visibility = 'hidden';
     desc.style.display = 'none';
     loader.style.display = 'block';
 });
 
+back.addEventListener('click', reset);
 
+function reset(){
+    submitbtn.style.visibility = 'visible';
+    desc.style.display = 'block';
+    back.style.display = 'none';
+    result_section.style.display = 'none';
+}
 
 //Form submission logic
 $("#sub_form").submit(function(e) {
@@ -50,6 +58,7 @@ $("#sub_form").submit(function(e) {
         let profiling_section = document.getElementById('line_profiling');
         // make global collapsible visible
         loader.style.display = 'none';
+        back.style.display = 'block';
         overall.style.display = 'block';
         overall.innerHTML = '<h1>Total Score: ' +  result + '</h1>';
         collapse_section.style.display = 'block';
@@ -74,10 +83,12 @@ $("#sub_form").submit(function(e) {
             }
         })
     .fail(function(resp_data) {
-        loader.style.display = 'none';  
+        loader.style.display = 'none';
+        back.style.display = 'block';  
         console.log("Broken code", resp_data)
         if(resp_data["responseJSON"] == "POST NOT OK: potentially unsafe code!")
             loader.style.display = 'none';
+            back.style.display = 'block';
             result_section.style.display = 'block';
             result_section.innerHTML = "<br><b><i>Sorry, we cannot trust the submitted code as it does not abide by our rules. Please try again!</i></b>"
     })
@@ -159,6 +170,7 @@ function write_lprof(collapsible, fdefs, lprof_str) {
         lprof_str += "</tbody></table></p>"
         collapsible.innerHTML += lprof_str
     }
+
 
 
 //Editor set up related 

@@ -24,7 +24,10 @@
                         </div>
 
                         <div id="problem_info">
-                            <h1 class="problem_name text-center">{{ problem_name }}</h1>
+                            <div class="top_section">
+                                <img src="{% static 'images/back.png' %}" id="go_back"/>
+                                <h1 class="problem_name text-center">{{ problem_name }}</h1>
+                            </div>
                             
                             <div id="result">
                                 <p id="overall_score" class="text-center"></p> 
@@ -88,4 +91,5 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.12/ace.js" type="text/javascript" charset="utf-8"></script>
 <script type="text/javascript" src="{% static 'js/editor.js' %}"></script>
 <script type="text/javascript" src="{% static 'js/collapse.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/reset_results.js' %}"></script>
 {% endblock content %}
