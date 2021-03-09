@@ -8,6 +8,7 @@
                 
                 <div class="solution-info col-sm-12 col-md-6 col-lg-6 col-xl-6 nopadding">
                     <form id="sub_form" action="" method="post" enc="multipart/form-data">
+                        
                         {% csrf_token %}
                         <div class="form-row">
                             <div class="form-group col-md-6 mb-0 col-lg-12">
@@ -21,17 +22,36 @@
                             </div>
                             <input type="hidden" name="sub_type" value="solution">
                         </div>
-                        <h1 class="problem_name text-center">{{ problem_name }}</h1>
-                        <p class="problem_desc" id="description">{{ problem_desc }}</p>
-                        {% if sample_input %}
-                            <p>Sample input {{ sample_input }}</p>
-                            <p>Sample output: {{ sample_output }} </p>
-                        {% endif %}
-                        <div class="text-center">
-                            <button id="sub_btn" type="submit" class="btn btn-primary submit_btn text-center">Submit your solution!</button>
+
+                        <div id="problem_info">
+                            <h1 class="problem_name text-center">{{ problem_name }}</h1>
+                            
+                            <div id="result">
+                                <p id="overall_score" class="text-center"></p> 
+                                <div id="collapse_section">
+                                    <button type="button" class="collapsible"> Quick Results Breakdown </button>
+                                    <div class="content">
+                                        <p id="breakdown"> </p>
+                                    </div>
+                                    <button type="button" class="collapsible"> Code Comparison </button>
+                                    <div class="content">
+                                        <p id="comparison"> </p>
+                                    </div>
+                                </div>    
+                            </div>
+
+                            <p class="problem_desc" id="description">{{ problem_desc }}</p>
+                            {% if sample_input %}
+                                <p>Sample input: {{ sample_input }}</p>
+                                <p>Sample output: {{ sample_output }} </p>
+                            {% endif %}
+                            <div class="text-center">
+                                <button id="sub_btn" type="submit" class="btn btn-primary submit_btn text-center">Submit your solution!</button>
+                            </div>
                         </div>
-                        <div id="result"></div>
+
                     </form>
+
                     <div id="loader">
                         <div class="text-center">
                             <svg width="200" height="200" viewBox="0 0 100 100">
@@ -42,6 +62,7 @@
                             </svg>
                         </div>
                     </div>
+
                 </div>
                 
                 <div id="editor" class="col-sm-12 col-md-6 col-lg-6 col-xl-6 nopadding">
@@ -58,5 +79,5 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.12/ace.js" type="text/javascript" charset="utf-8"></script>
 <script type="text/javascript" src="{% static 'js/editor.js' %}"></script>
-<script type="text/javascript" src="{% static 'js/submit_solution.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/collapse.js' %}"></script>
 {% endblock content %}

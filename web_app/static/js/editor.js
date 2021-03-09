@@ -1,11 +1,26 @@
 const editor = init_editor()
 
+let loader = document.getElementById('loader');
+let submitbtn = document.getElementById('sub_btn');
+let desc = document.getElementById('description'); 
+let result_section = document.getElementById('result');
+let overall = document.getElementById('overall_score');
+
+submitbtn.addEventListener('click', function(){
+    submitbtn.style.display = 'none';
+    desc.style.display = 'none';
+    loader.style.display = 'block';
+});
+
+
+
+//Form submission logic
 $("#sub_form").submit(function(e) {
     e.preventDefault();
     let sub_text = editor.getValue();
     let solution_text_box = document.getElementById("solution_text")
-    let result_p = document.getElementById("result")
-    result_p.innerHTML = ""
+    //let result_p = document.getElementById("result")
+    //result_p.innerHTML = ""
 
     solution_text_box.value = sub_text
 
@@ -19,49 +34,62 @@ $("#sub_form").submit(function(e) {
     .done(function(resp_data) {
         let analysis = JSON.parse(resp_data)
         console.log(analysis)
+
+        //Get results
         let scores = analysis["scores"]
         let comp_stats = analysis["comp_stats"][0]
         let fdefs = analysis["fdefs"]
         let comp_str = skel_str = lprof_str = ""
         let result = scores["overall_score"]
         let samp_skels = analysis["samp_skels"]
+        //Get sections
+        let collapse_section = document.getElementById('collapse_section');
+        let breakdown_section = document.getElementById('breakdown');
+        let comparison_section = document.getElementById('comparison');
         // make global collapsible visible
-        document.getElementById("accordion").style.visibility = "visible"
-        let bd_collapse = document.getElementById("breakdown_collapse")
-        let comp_collapse = document.getElementById("comp_collapse")
-        let lp_collapse = document.getElementById("lp_collapse")
-        let sp_collapse = document.getElementById("sp_collapse")
+        loader.style.display = 'none';
+        overall.style.display = 'block';
+        overall.innerHTML = '<h1>Total Score: ' +  result + '</h1>';
+        collapse_section.style.display = 'block';
+
+        // document.getElementById("accordion").style.visibility = "visible"
+        // let bd_collapse = document.getElementById("breakdown_collapse")
+        // let comp_collapse = document.getElementById("comp_collapse")
+        // let lp_collapse = document.getElementById("lp_collapse")
+        // let sp_collapse = document.getElementById("sp_collapse")
         if(result == "100.0%") {
-            result_p.style.color = "green"
-            result_p.innerHTML = "<br>Congratulations, your code passed all our tests!...<br>Now check out some of your feedback below:"
-            write_breakdown(bd_collapse, scores)
-            write_comp(comp_collapse, comp_stats, comp_str)
-            write_skeleton(sp_collapse, samp_skels, skel_str)
-            write_lprof(lp_collapse, fdefs, lprof_str)
+            overall.style.color = "#06D6A0"
+            overall.innerHTML = "<br>Congratulations, your code passed all our tests!...<br>Now check out some of your feedback below:"
+            write_breakdown(bd_collapse_section, scores)
+            write_comp(comparison_section, comp_stats, comp_str)
+            // write_skeleton(sp_collapse, samp_skels, skel_str)
+            // write_lprof(lp_collapse, fdefs, lprof_str)
             
         }
         else {
-            result_p.style.color = "red"
-            result_p.innerHTML = "<br>Oops, looks like your code doesn't produce the correct outputs...<br><br>Please Try again! But first, why not check out some feedback below?"
+            overall.style.color = "#FF3E6C"
+            overall.innerHTML = "<br>Oops, looks like your code doesn't produce the correct outputs...<br><br>Please Try again! But first, why not check out some feedback below?"
             // do quick marks breakdown and comparison on failure
-            write_breakdown(bd_collapse, scores)
-            write_comp(comp_collapse, comp_stats, comp_str)
-            write_skeleton(sp_collapse, samp_skels, skel_str)
-            lp_collapse.innerHTML ="<p>Sorry, you have to pass all tests to qualify for line profiling!<p>"
+            write_breakdown(breakdown_section, scores)
+            write_comp(comparison_section, comp_stats, comp_str)
+            // write_skeleton(sp_collapse, samp_skels, skel_str)
+            // lp_collapse.innerHTML ="<p>Sorry, you have to pass all tests to qualify for line profiling!<p>"
             }
         })
     .fail(function(resp_data) {
-        console.log(resp_data)
+        loader.style.display = 'none';  
+        console.log("Broken code", resp_data)
         if(resp_data["responseJSON"] == "POST NOT OK: potentially unsafe code!")
-            result_p.innerHTML = "<br><b><i>Sorry, we cannot trust the submitted code as it does not abide by our rules. Please try again!</i></b>"
+            loader.style.display = 'none';
+            result_section.style.display = 'block';
+            result_section.innerHTML = "<br><b><i>Sorry, we cannot trust the submitted code as it does not abide by our rules. Please try again!</i></b>"
     })
 
 });
 
 function write_breakdown(collapsible, scores) {
     collapsible.innerHTML = ""
-    let breakdown = "<h3 style='text-align:left;'>Quick Results Breakdown</h3>" +
-                "<p style='text-align:left;' class='lead'>Let's see where you went right and where you went wrong" + 
+    let breakdown = "<p style='text-align:left;margin:20px 0px 20px 0px;' class='lead'>Let's see where you went right and where you went wrong </p>" + 
                 "<table style='align:left;max-width:80%;margin-left:auto;margin-right:auto;' class='table table-dark'>" + 
                 "<thead><tr><th class='topline scope='col'>Test #</th><th class='topline' scope='col'>Status</th><th class='topline' scope='col'>Input Length</th><th class='topline' scope='col'>Input Type</th></tr></thead><tbody>"
     let count = 1;
@@ -79,8 +107,8 @@ function write_breakdown(collapsible, scores) {
 
 function write_comp(collapsible, comp_stats, comp_str) {
     collapsible.innerHTML = ""
-    comp_str += "<h3 style='text-align:left;'>Code Comparison</h3>" +
-            "<p style='text-align:left;' class='lead'>Let's see how you match up structurally with the desired solution" + 
+    comp_str +=
+            "<p style='text-align:left; margin:20px 0px;' class='lead'>Let's see how you match up structurally with the desired solution </p>" + 
             "<table style='align:left;max-width:80%;margin-left:auto;margin-right:auto;' class='table table-dark'>" + 
             "<thead><tr><th class='topline' scope='col'>Your Code</th><th class='topline' scope='col'>Our Code</th></tr></thead><tbody>"
     for(let i = 0; i < comp_stats.length; i++) {
@@ -135,9 +163,11 @@ function write_lprof(collapsible, fdefs, lprof_str) {
         collapsible.innerHTML += lprof_str
     }
 
+
+//Editor set up related 
 function init_editor() {
     let editor = ace.edit("editor");
-    editor.setValue("Write your code here...");
+    editor.setValue("def test(a,b):\n    print(a)");            ///Setting initial value here to quickly test
 
     editor.setOptions({
         // editor options

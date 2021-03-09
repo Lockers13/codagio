@@ -189,6 +189,14 @@ body::-webkit-scrollbar-thumb {
     margin-top: 100px;
 }
 
+#problem_info{
+    
+}
+
+#collapse_section{
+    display:none;
+}
+
 /* Loader */
 
 #loader{
