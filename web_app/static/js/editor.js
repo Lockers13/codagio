@@ -46,24 +46,21 @@ $("#sub_form").submit(function(e) {
         let collapse_section = document.getElementById('collapse_section');
         let breakdown_section = document.getElementById('breakdown');
         let comparison_section = document.getElementById('comparison');
+        let sample_section = document.getElementById('sample_solution');
+        let profiling_section = document.getElementById('line_profiling');
         // make global collapsible visible
         loader.style.display = 'none';
         overall.style.display = 'block';
         overall.innerHTML = '<h1>Total Score: ' +  result + '</h1>';
         collapse_section.style.display = 'block';
 
-        // document.getElementById("accordion").style.visibility = "visible"
-        // let bd_collapse = document.getElementById("breakdown_collapse")
-        // let comp_collapse = document.getElementById("comp_collapse")
-        // let lp_collapse = document.getElementById("lp_collapse")
-        // let sp_collapse = document.getElementById("sp_collapse")
         if(result == "100.0%") {
             overall.style.color = "#06D6A0"
             overall.innerHTML = "<br>Congratulations, your code passed all our tests!...<br>Now check out some of your feedback below:"
             write_breakdown(bd_collapse_section, scores)
             write_comp(comparison_section, comp_stats, comp_str)
-            // write_skeleton(sp_collapse, samp_skels, skel_str)
-            // write_lprof(lp_collapse, fdefs, lprof_str)
+            write_skeleton(sample_section, samp_skels, skel_str)
+            write_lprof(profiling_section, fdefs, lprof_str)
             
         }
         else {
@@ -72,8 +69,8 @@ $("#sub_form").submit(function(e) {
             // do quick marks breakdown and comparison on failure
             write_breakdown(breakdown_section, scores)
             write_comp(comparison_section, comp_stats, comp_str)
-            // write_skeleton(sp_collapse, samp_skels, skel_str)
-            // lp_collapse.innerHTML ="<p>Sorry, you have to pass all tests to qualify for line profiling!<p>"
+            write_skeleton(sample_section, samp_skels, skel_str)
+            profiling_section.innerHTML ="<p class='text-center' style='margin:20px 0px;'>Sorry, you have to pass all tests to qualify for line profiling!<p>"
             }
         })
     .fail(function(resp_data) {
@@ -123,12 +120,12 @@ function write_comp(collapsible, comp_stats, comp_str) {
 
 function write_skeleton(collapsible, skels, skel_str) {
     collapsible.innerHTML = ""
-    skel_str += "<h3 style='text-align:left;'>Our Sample Solution:</h3><hr><br><p style='text-align:left;margin-left:10%'>"
+    skel_str += "<p style='margin:20px 0px; padding: 10px 10px;' class='table table-dark'>"
     for(let i = 0; i < skels.length; i++) {
         let skeleton = skels[i]
         for(let j = 0; j < skeleton.length; j++) {
             real_str = skeleton[j].replace(/\s/g, '&nbsp')
-            skel_str += "<b><i>" + real_str + "</i></b><br>"
+            skel_str += "" + real_str + "<br>"
         }
     }
     skel_str += "</p>"
@@ -137,8 +134,8 @@ function write_skeleton(collapsible, skels, skel_str) {
 
 function write_lprof(collapsible, fdefs, lprof_str) {
     collapsible.innerHTML = ""
-    lprof_str += "<h3 style='text-align:left;'>Line Profiling</h3>" +
-        "<p style='text-align:left;' class='lead'>Check out the performance of your code in more detail:" + 
+    lprof_str += 
+        "<p style='text-align:left; margin:20px 0px;' class='lead'>Check out the performance of your code in more detail </p>" + 
         "<table style='align:left;max-width:80%;margin-left:auto;margin-right:auto;' class='table table-dark'>" + 
         "<thead><tr><th class='topline' scope='col'>Line #</th><th class='topline' scope='col'># Hits</th><th class='topline' scope='col'>% Time</th><th class='topline' scope='col'>Real Time</th><th class='topline' scope='col'>Contents</th></tr></thead><tbody>"
 
