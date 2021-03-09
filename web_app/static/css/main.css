@@ -1,9 +1,8 @@
 :root {
-    --yellow:#101010;
-    --orange:#EFDF00;
-    --red:#06D6A0;
-    --black:#FFFFFF;
-    --white: #FF3E6C;
+    --black:#101010;
+    --green:#06D6A0;
+    --white:#FFFFFF;
+    --red: #FF3E6C;
 }
 
 html {
@@ -11,9 +10,9 @@ html {
 }
 
 body{
-    background-color: var(--yellow);
+    background-color: var(--black);
     font-family: 'Poppins', sans-serif;
-    color: var(--black);
+    color: var(--white);
     overflow-x: hidden;
 }
 
@@ -26,20 +25,20 @@ body::-webkit-scrollbar-track {
 }
    
 body::-webkit-scrollbar-thumb {
-    background-color: var(--red);
-    /* //outline: 1px solid var(--red); */
+    background-color: var(--green);
+    /* //outline: 1px solid var(--green); */
     border-radius: 10px;
 }
 
 /* Navbar Section */
 
 .navbar{
-    background-color: var(--yellow);
+    background-color: var(--black);
 }
 
 .logo{
     font-family: 'Bungee Shade', cursive;
-    color: var(--red);
+    color: var(--green);
     text-decoration: none;
     font-size: 20px;
     margin-right: 10px;
@@ -47,11 +46,11 @@ body::-webkit-scrollbar-thumb {
 
 .bold{
     font-weight: bold;
-    color: white !important;
+    color: red !important;
 }
 
 .nav-item{
-    color: white !important;
+    color: red !important;
 }
 
 /* Showcase Section */
@@ -68,19 +67,19 @@ body::-webkit-scrollbar-thumb {
 .cgc-title{
     font-family: 'Bungee Shade', cursive;
     font-size: 200px;
-    color: var(--red);
+    color: var(--green);
     /* margin-top: 100px; */
 }
 
 .second-title{
     font-family: 'Bungee Shade', cursive;
     margin-top: 20px;
-    color: var(--black);
+    color: var(--white);
 }
 
 .scroll-down-btn{
-    background-color: var(--yellow);
-    color: var(--yellow);
+    background-color: var(--black);
+    color: var(--black);
     border: none;
     margin-top: 40px;
 }
@@ -89,8 +88,8 @@ body::-webkit-scrollbar-thumb {
 /* Problems Section*/
 
 .collapsible {
-    background-color: var(--red);
-    color: var(--black);
+    background-color: var(--green);
+    color: var(--white);
     cursor: pointer;
     padding: 18px;
     width: 100%;
@@ -105,13 +104,13 @@ body::-webkit-scrollbar-thumb {
 }
   
 .active, .collapsible:hover {
-    background-color: var(--white);
-    color: var(--black);
+    background-color: var(--red);
+    color: var(--white);
 }
   
 .collapsible:after {
     content: '\002B';
-    color: var(--black);
+    color: var(--white);
     font-weight: bold;
     float: right;
     margin-left: 5px;
@@ -126,10 +125,10 @@ body::-webkit-scrollbar-thumb {
     max-height: 0;
     overflow: hidden;
     transition: max-height 0.2s ease-out;
-    background-color: var(--white);
+    background-color: var(--red);
     width: 80%;
     margin-left: 10%;
-    color:var(--black);
+    color:var(--white);
     margin-top: -10px;
 }
 
@@ -138,8 +137,8 @@ body::-webkit-scrollbar-thumb {
 }
 
 .start_btn{
-    background-color: var(--red);
-    color: var(--black);
+    background-color: var(--green);
+    color: var(--white);
     width: 40%;
 }
 
@@ -159,9 +158,9 @@ body::-webkit-scrollbar-thumb {
 
 .solution-info{
     height: 80vh;
-    background-color: var(--yellow);
+    background-color: var(--black);
     overflow-y: scroll; 
-    border: 2px solid var(--red);
+    border: 2px solid var(--green);
 }
 
 .nopadding {
@@ -178,14 +177,14 @@ body::-webkit-scrollbar-thumb {
 }
    
 .solution-info::-webkit-scrollbar-thumb {
-    background-color: var(--red);
-    /* //outline: 1px solid var(--red); */
+    background-color: var(--green);
+    /* //outline: 1px solid var(--green); */
     border-radius: 10px;
 }
 
 #go_back{
-    background-color: var(--yellow);
-    color: var(--yellow);
+    background-color: var(--black);
+    color: var(--black);
     border: none;
     margin-left: 40px; 
     display: none;
@@ -226,7 +225,7 @@ svg {
 }
   
 .stroke-still {
-stroke: var(--yellow);
+stroke: var(--black);
 }
 
 .stroke-animation {
@@ -284,24 +283,24 @@ stroke: var(--yellow);
 
 @-webkit-keyframes stroke-color {
 0%  { stroke: #3498DB; }
-24% { stroke: var(--white); }
-25% { stroke: var(--red); }
-49% { stroke: var(--red); }
+24% { stroke: var(--red); }
+25% { stroke: var(--green); }
+49% { stroke: var(--green); }
 50% { stroke: #32326e; }
 74% { stroke: #32326e; }
-75% { stroke: var(--white); }
-99% { stroke: var(--white); }
+75% { stroke: var(--red); }
+99% { stroke: var(--red); }
 }
 
 @keyframes stroke-color {
 0%  { stroke: #3498DB; }
 24% { stroke: #643232; }
-25% { stroke: var(--red); }
-49% { stroke: var(--red); }
+25% { stroke: var(--green); }
+49% { stroke: var(--green); }
 50% { stroke: #32326e; }
 74% { stroke: #32326e; }
-75% { stroke: var(--white); }
-99% { stroke: var(--white); }
+75% { stroke: var(--red); }
+99% { stroke: var(--red); }
 }
   
 

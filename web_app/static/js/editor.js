@@ -6,6 +6,7 @@ let desc = document.getElementById('description');
 let result_section = document.getElementById('result');
 let overall = document.getElementById('overall_score');
 let back = document.getElementById('go_back');
+let collapse_section = document.getElementById('collapse_section');
 
 submitbtn.addEventListener('click', function(){
     submitbtn.style.visibility = 'hidden';
@@ -19,7 +20,8 @@ function reset(){
     submitbtn.style.visibility = 'visible';
     desc.style.display = 'block';
     back.style.display = 'none';
-    result_section.style.display = 'none';
+    overall.style.display = 'none';
+    collapse_section.style.display = 'none';
 }
 
 //Form submission logic
@@ -51,7 +53,6 @@ $("#sub_form").submit(function(e) {
         let result = scores["overall_score"]
         let samp_skels = analysis["samp_skels"]
         //Get sections
-        let collapse_section = document.getElementById('collapse_section');
         let breakdown_section = document.getElementById('breakdown');
         let comparison_section = document.getElementById('comparison');
         let sample_section = document.getElementById('sample_solution');
