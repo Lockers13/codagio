@@ -57,7 +57,10 @@
                                 <p>Sample output: {{ sample_output }} </p>
                             {% endif %}
                             <div class="text-center">
-                                <button id="sub_btn" type="submit" class="btn btn-primary submit_btn text-center">Submit your solution!</button>
+                                <button id="sub_btn" type="submit" class="text-center submit_btn">
+                                    <img src="{% static 'images/submit.png' %}" id="submit_img" alt="Unknown img"/>
+                                    <p class="btn_text">Submit Your Code</p>
+                                </button>
                             </div>
                         </div>
 

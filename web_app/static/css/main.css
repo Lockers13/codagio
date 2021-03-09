@@ -136,14 +136,16 @@ body::-webkit-scrollbar-thumb {
     margin-top: 20px;
 }
 
-.start_btn{
+.go_btn{
     background-color: var(--green);
-    color: var(--white);
+    border: 2px solid var(--green);
+    border-radius: 20px;
+    color: white;
     width: 40%;
 }
 
 .problem_author{
-    margin-top: 30px;
+    margin-top: 10px;
     font-size: 12.5px;
 }
 
@@ -200,21 +202,29 @@ body::-webkit-scrollbar-thumb {
 
 .submit_btn{
     margin-top: 100px;
+    background-color: var(--black);
+    text-decoration: none;
+    border: none;
 }
 
-#problem_info{
-    
+.btn_text{
+    color:var(--green);
+    margin-top: 5px;
+    font-size: 24px;
 }
+
+/* Results Section */
 
 #collapse_section{
-    display:none;
-    margin-bottom: 40px;
+    display: none;
+    margin-bottom: -140px;
 }
 
 /* Loader */
 
 #loader{
     display: none;
+    margin-top: -100px;
 }
 
 svg {
