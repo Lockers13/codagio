@@ -3,6 +3,7 @@ import os
 import platform
 import re
 import json
+from .subprocess_ctrl import run_subprocess_ctrld
 
 class Profiler:
 
@@ -123,11 +124,15 @@ class Profiler:
             # with open(pro_file, 'r') as f:
             #     for line in f.readlines():
             #         print(line)
+
+            timeout_dict = {"keyword": "gtimeout", "timeout": "15"}
             
             # call kernprof as subprocess, redirecting stdout to pipe, and read results
-            process = subprocess.Popen(["kernprof", "-l", "-v", "{0}".format(pro_file), json.dumps(self.__sample_inputs[0])], stdout=subprocess.PIPE)
+            cmd = "kernprof -l -v {0}".format(pro_file)
+            json_str = json.dumps(self.__sample_inputs[0])
             # crucially, readlines() is blocking for pipes
-            output = process.stdout.readlines()
+            output = run_subprocess_ctrld(timeout_dict, cmd, json_str, stage="line_profile")
+
             process_lprof_out(output)
 
             ### clean up ###
@@ -185,10 +190,12 @@ class Profiler:
                 except Exception as e:
                     pass
 
-        # call cProfile as subprocess, redirecting stdout to pipe, and read results, as before
-        process = subprocess.Popen(["python", "-m", "cProfile", "-s", "time", "{0}".format(self.__filename), json.dumps(self.__sample_inputs[0])], stdout=subprocess.PIPE)
-        output = process.stdout.readlines()
+        timeout_dict = {"keyword": "gtimeout", "timeout": "5"}
 
+        # call cProfile as subprocess, redirecting stdout to pipe, and read results, as before
+        cmd = "python -m cProfile -s time {0}".format(self.__filename)
+        json_str = json.dumps(self.__sample_inputs[0])
+        output = run_subprocess_ctrld(timeout_dict, cmd, json_str, stage="c_profile")
         process_cprof_out(output)
 
     def gnu_time_stats(self):

@@ -3,6 +3,8 @@ import subprocess
 import sys
 import os
 import json
+from .subprocess_ctrl import run_subprocess_ctrld
+from django.utils.translation import gettext_lazy as _
 
 class Verifier:
 
@@ -23,17 +25,13 @@ class Verifier:
         Returns list of said hashes."""
 
         sub_hashes = []
-
+        timeout_dict = {"keyword": "gtimeout", "timeout": "5"}
+        cmd = "python {0}".format(self.__filename)
         # Note: number adjustable...based on number of hash samples available for given problem
-        for i in range(len(self.__sample_inputs)):
-            try:
-                process = subprocess.Popen(["python", "{0}".format(self.__filename), json.dumps(self.__sample_inputs[i])], \
-                     stdout=subprocess.PIPE)
-            except Exception as e:
-                print("Exception in verify_output, program processing stage:", str(e))
-                sys.exit(1)
-
-            output = process.stdout.read()
+        
+        for i in range(len(self.__sample_inputs)):  
+            json_str = json.dumps(self.__sample_inputs[i])
+            output = run_subprocess_ctrld(timeout_dict, cmd, json_str)
             stripped_sub = output.decode("utf-8").replace('\n', '').replace(' ', '')
             sub_hash = hashlib.md5(stripped_sub.encode()).hexdigest()
             sub_hashes.append(sub_hash)

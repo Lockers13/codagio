@@ -55,11 +55,17 @@ class AnalysisView(APIView):
         ### remove old basic file and create more sophisticated one for verification and profiling
         os.remove(filename)
         make_utils.make_file(filename, code_data)
-        percentage_score = analyzer.verify(problem)
+        try:
+            percentage_score = analyzer.verify(problem)
+        except Exception as e:
+            return Response("POST NOT OK: {0}".format(str(e)), status=status.HTTP_400_BAD_REQUEST)
         centpourcent = float(percentage_score) == 100.0
         ### only profile submission if all tests are passed
         if centpourcent:
-            analyzer.profile(problem.inputs)
+            try:
+                analyzer.profile(problem.inputs)
+            except Exception as e:
+                return Response("POST NOT OKKK: {0}".format(str(e)), status=status.HTTP_400_BAD_REQUEST)
         analysis = analyzer.get_prog_dict()
         comparison.write_comp(analysis, json.loads(problem.analysis))
         if centpourcent:
