@@ -5,9 +5,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
-from ca_modules import make_utils
+from ca_modules import make_utils, comparison, ast_checker
 from ca_modules.analyzer import Analyzer
-from ca_modules import comparison
 from datetime import datetime
 from .models import Problem, Solution
 from users.models import Profile
@@ -47,13 +46,16 @@ class AnalysisView(APIView):
             f.write(code_data)
         metadata = json.loads(problem.metadata)
         analyzer = Analyzer(filename, metadata)
-        analyzer.visit_ast()
-        ### if the ast_visitor has picked up on any blacklisted imports/functions then return appropriate error status
-        if len(analyzer.get_prog_dict()["UNSAFE"]) > 0:
+        try:
+            analyzer.visit_ast()
+        except Exception as e:
             os.remove(filename)
-            return Response("POST NOT OK: potentially unsafe code!", status=status.HTTP_400_BAD_REQUEST)
-        ### remove old basic file and create more sophisticated one for verification and profiling
-        os.remove(filename)
+            return Response("POST NOT OK: {0}".format(str(e)), status=status.HTTP_400_BAD_REQUEST)
+        ### if the ast_visitor has picked up on any blacklisted imports/functions then return appropriate error status
+        ast_analysis = analyzer.get_prog_dict()
+        validation_result = ast_checker.validate(ast_analysis, filename)
+        if validation_result != True:
+            return validation_result
         make_utils.make_file(filename, code_data)
         try:
             percentage_score = analyzer.verify(problem)

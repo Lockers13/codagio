@@ -10,8 +10,8 @@ def run_subprocess_ctrld(timeout_dict, cmd, json, stage="verification"):
     try:
         process = subprocess.Popen(cmd_list, stdout=subprocess.PIPE)
     except Exception as e:
-        print("Exception in {0}, program processing stage:".format(stage), str(e))
-        sys.exit(1)
+        raise Exception(str(e))
+
     
     output = process.stdout.read() if stage == "verification" else process.stdout.readlines()
     comm = process.communicate()[0]

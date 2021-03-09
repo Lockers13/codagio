@@ -54,14 +54,16 @@ class AstTreeVisitor(ast.NodeVisitor):
         self.__count_hash["level"] = -1
         # count var to record number of primitive operations (e.g. assign, aug_assign, etc.)
         self.__count_hash["nest_level"] = -1
-
-        self.__program_dict["UNSAFE"] = []
         self.__metadata = analyzer.get_meta()
         self.__allowed_abs_imports = self.__metadata.get("constraints").get("allowed_abs_imports", [])
         self.__allowed_rel_imports = self.__metadata.get("constraints").get("allowed_rel_imports", {})
         self.__disallowed_fcalls = set(["exec", "open", "eval"])
         for func in self.__metadata.get("constraints").get("disallowed_fcalls", []):
             self.__disallowed_fcalls.add(func)
+        self.__num_args = int(self.__metadata.get("constraints").get("num_args", 0))
+        self.__program_dict["constraint_violation"] = []
+        
+
 
     def get_program_dict(self):
         return self.__program_dict
@@ -251,6 +253,10 @@ class AstTreeVisitor(ast.NodeVisitor):
 
             for arg in node.args.args:
                 self.__fdef_dict["args"].append(arg.arg)
+            num_args = len(self.__fdef_dict["args"])
+
+            if num_args != self.__num_args:
+                self.__program_dict["constraint_violation"].append({"num_args": "specification={0} - user-code={1}".format(self.__num_args, num_args)})
 
             signature = "def {0}({1}):".format(node.name, ', '.join(self.__fdef_dict["args"]))
             self.__fdef_dict["skeleton"] = []
@@ -265,7 +271,7 @@ class AstTreeVisitor(ast.NodeVisitor):
     def visit_Import(self, node):
         for imp in node.names:
             if imp.name not in self.__allowed_abs_imports:
-               unsafe_entry_list = self.__program_dict["UNSAFE"]
+               unsafe_entry_list = self.__program_dict["constraint_violation"]
                unsafe_entry_list.append({
                     "type": "Absolute import",
                     "name": imp.name
@@ -275,7 +281,7 @@ class AstTreeVisitor(ast.NodeVisitor):
         module = node.module
         rel_imps = self.__allowed_rel_imports.get(module, None)
         if rel_imps is None:
-            unsafe_entry_list = self.__program_dict["UNSAFE"]
+            unsafe_entry_list = self.__program_dict["constraint_violation"]
             unsafe_entry_list.append({
                 "type": "Relative import",
                 "name": "from {0}".format(module)
@@ -283,7 +289,7 @@ class AstTreeVisitor(ast.NodeVisitor):
         else:
             for imp in node.names:
                 if imp.name not in rel_imps:
-                    unsafe_entry_list = self.__program_dict["UNSAFE"]
+                    unsafe_entry_list = self.__program_dict["constraint_violation"]
                     unsafe_entry_list.append({
                         "type": "Relative import",
                         "name": imp.name
@@ -295,7 +301,7 @@ class AstTreeVisitor(ast.NodeVisitor):
         except AttributeError:
             func_name = node.func.attr
         if func_name in self.__disallowed_fcalls:
-            unsafe_entry_list = self.__program_dict["UNSAFE"]
+            unsafe_entry_list = self.__program_dict["constraint_violation"]
             unsafe_entry_list.append({
                 "type": "Disallowed fcall",
                 "name": func_name
