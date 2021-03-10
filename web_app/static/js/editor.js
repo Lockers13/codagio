@@ -152,14 +152,13 @@ function write_lprof(collapsible, fdefs, lprof_str) {
         "<thead><tr><th class='topline' scope='col'>Line #</th><th class='topline' scope='col'># Hits</th><th class='topline' scope='col'>% Time</th><th class='topline' scope='col'>Real Time</th><th class='topline' scope='col'>Contents</th></tr></thead><tbody>"
 
     for(fdef in fdefs) {
-        rt = parseFloat(fdefs[fdef]["cum_time"])
         count = 1
         lprof_dict = fdefs[fdef]["line_profile"]
         for(lprof in lprof_dict) {
             hits = lprof_dict[lprof]["hits"]
             p_time = parseFloat(lprof_dict[lprof]["%time"])
             contents = lprof_dict[lprof]["contents"]
-            real_time = Math.round((rt * p_time + Number.EPSILON) * 1000) / 1000
+            real_time = lprof_dict[lprof]["real_time"] === undefined? 0: lprof_dict[lprof]["real_time"];
             let bar_colour = p_time < 15? (p_time < 10? "green": "orange"): "red";
             lprof_str += "<tr><th scope='row'>" + count++ + "</th>"  +
             "<td style='height:5px;colour:" + bar_colour + ";'>" + hits + "</td>" + 

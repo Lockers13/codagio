@@ -26,8 +26,9 @@ class Verifier:
 
         sub_hashes = []
         platform = sys.platform.lower()
-        timeout_cmd = "gtimeout 5 " if platform == "darwin" else "timeout 5 " if platform == "linux" or platform == "linux2" else ""
-        base_cmd = "{0}python".format(timeout_cmd)
+        VERIF_TIMEOUT = "5"
+        timeout_cmd = "gtimeout {0}".format(VERIF_TIMEOUT) if platform == "darwin" else "timeout {0}".format(VERIF_TIMEOUT) if platform == "linux" or platform == "linux2" else ""
+        base_cmd = "{0} python".format(timeout_cmd)
 
         # Note: number adjustable...based on number of hash samples available for given problem
         

@@ -128,10 +128,11 @@ class Profiler:
 
             
             platform = sys.platform.lower()
+            LPROF_TIMEOUT = "15"
             # call kernprof as subprocess, redirecting stdout to pipe, and read results
-            timeout_cmd = "gtimeout 15 " if platform == "darwin" else "timeout 15 " if platform == "linux" or platform == "linux2" else ""
+            timeout_cmd = "gtimeout {0}".format(LPROF_TIMEOUT) if platform == "darwin" else "timeout {0}".format(LPROF_TIMEOUT) if platform == "linux" or platform == "linux2" else ""
 
-            base_cmd = "{0}kernprof -l -v".format(timeout_cmd)
+            base_cmd = "{0} kernprof -l -v".format(timeout_cmd)
             json_str = json.dumps(self.__sample_inputs[0])
             # crucially, readlines() is blocking for pipes
             output = run_subprocess_ctrld(base_cmd, pro_file, json_str, stage="line_profile")
@@ -194,10 +195,11 @@ class Profiler:
                     pass
 
         platform = sys.platform.lower()
+        CPROF_TIMEOUT = "5"
         # call cProfile as subprocess, redirecting stdout to pipe, and read results, as before
-        timeout_cmd = "gtimeout 5 " if platform == "darwin" else "timeout 5 " if platform == "linux" or platform == "linux2" else ""
+        timeout_cmd = "gtimeout {0}".format(CPROF_TIMEOUT) if platform == "darwin" else "timeout {0}".format(CPROF_TIMEOUT) if platform == "linux" or platform == "linux2" else ""
 
-        base_cmd = "{0}python -m cProfile -s time".format(timeout_cmd)
+        base_cmd = "{0} python -m cProfile -s time".format(timeout_cmd)
         json_str = json.dumps(self.__sample_inputs[0])
         output = run_subprocess_ctrld(base_cmd, self.__filename, json_str, stage="c_profile")
         process_cprof_out(output)
