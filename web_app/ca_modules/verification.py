@@ -25,9 +25,10 @@ class Verifier:
         Returns list of said hashes."""
 
         sub_hashes = []
-
-        timeout_cmd = "gtimeout 5 " if sys.platform == "Darwin" else "timeout 5 " if sys.platform == "linux" or sys.platform == "linux2" else ""
+        platform = sys.platform.lower()
+        timeout_cmd = "gtimeout 5 " if platform == "darwin" else "timeout 5 " if platform == "linux" or platform == "linux2" else ""
         base_cmd = "{0}python".format(timeout_cmd)
+
         # Note: number adjustable...based on number of hash samples available for given problem
         
         for i in range(len(self.__sample_inputs)):  

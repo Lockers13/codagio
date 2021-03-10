@@ -127,9 +127,9 @@ class Profiler:
             #         print(line)
 
             
-            
+            platform = sys.platform.lower()
             # call kernprof as subprocess, redirecting stdout to pipe, and read results
-            timeout_cmd = "gtimeout 15 " if sys.platform == "Darwin" else "timeout 15 " if sys.platform == "linux" or sys.platform == "linux2" else ""
+            timeout_cmd = "gtimeout 15 " if platform == "darwin" else "timeout 15 " if platform == "linux" or platform == "linux2" else ""
 
             base_cmd = "{0}kernprof -l -v".format(timeout_cmd)
             json_str = json.dumps(self.__sample_inputs[0])
@@ -193,8 +193,9 @@ class Profiler:
                 except Exception as e:
                     pass
 
+        platform = sys.platform.lower()
         # call cProfile as subprocess, redirecting stdout to pipe, and read results, as before
-        timeout_cmd = "gtimeout 5 " if sys.platform == "Darwin" else "timeout 5 " if sys.platform == "linux" or sys.platform == "linux2" else ""
+        timeout_cmd = "gtimeout 5 " if platform == "darwin" else "timeout 5 " if platform == "linux" or platform == "linux2" else ""
 
         base_cmd = "{0}python -m cProfile -s time".format(timeout_cmd)
         json_str = json.dumps(self.__sample_inputs[0])
