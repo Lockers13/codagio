@@ -25,13 +25,15 @@ class Verifier:
         Returns list of said hashes."""
 
         sub_hashes = []
-        base_cmd = "gtimeout 5 python"
+
+        timeout_cmd = "gtimeout 5 " if sys.platform == "Darwin" else "timeout 5 " if sys.platform == "linux" or sys.platform == "linux2" else ""
+        base_cmd = "{0}python".format(timeout_cmd)
         # Note: number adjustable...based on number of hash samples available for given problem
         
         for i in range(len(self.__sample_inputs)):  
             json_str = json.dumps(self.__sample_inputs[i])
             output = run_subprocess_ctrld(base_cmd, self.__filename, json_str)
-            stripped_sub = output.decode("utf-8").replace('\n', '').replace(' ', '')
+            stripped_sub = output.decode("utf-8").replace('\n', '').replace(' ', '').replace('\r', '')
             sub_hash = hashlib.md5(stripped_sub.encode()).hexdigest()
             sub_hashes.append(sub_hash)
 

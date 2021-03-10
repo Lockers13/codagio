@@ -3,6 +3,7 @@ import os
 import platform
 import re
 import json
+import sys
 from .subprocess_ctrl import run_subprocess_ctrld
 
 class Profiler:
@@ -128,7 +129,9 @@ class Profiler:
             
             
             # call kernprof as subprocess, redirecting stdout to pipe, and read results
-            base_cmd = "gtimeout 15 kernprof -l -v"
+            timeout_cmd = "gtimeout 15 " if sys.platform == "Darwin" else "timeout 15 " if sys.platform == "linux" or sys.platform == "linux2" else ""
+
+            base_cmd = "{0}kernprof -l -v".format(timeout_cmd)
             json_str = json.dumps(self.__sample_inputs[0])
             # crucially, readlines() is blocking for pipes
             output = run_subprocess_ctrld(base_cmd, pro_file, json_str, stage="line_profile")
@@ -191,7 +194,9 @@ class Profiler:
                     pass
 
         # call cProfile as subprocess, redirecting stdout to pipe, and read results, as before
-        base_cmd = "gtimeout 5 python -m cProfile -s time"
+        timeout_cmd = "gtimeout 5 " if sys.platform == "Darwin" else "timeout 5 " if sys.platform == "linux" or sys.platform == "linux2" else ""
+
+        base_cmd = "{0}python -m cProfile -s time".format(timeout_cmd)
         json_str = json.dumps(self.__sample_inputs[0])
         output = run_subprocess_ctrld(base_cmd, self.__filename, json_str, stage="c_profile")
         process_cprof_out(output)

@@ -67,7 +67,7 @@ $("#sub_form").submit(function(e) {
         if(result == "100.0%") {
             overall.style.color = "#06D6A0"
             overall.innerHTML = "<br>Congratulations, your code passed all our tests!...<br>Now check out some of your feedback below:"
-            write_breakdown(bd_collapse_section, scores)
+            write_breakdown(breakdown_section, scores)
             write_comp(comparison_section, comp_stats, comp_str)
             write_skeleton(sample_section, samp_skels, skel_str)
             write_lprof(profiling_section, fdefs, lprof_str)
