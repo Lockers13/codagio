@@ -96,23 +96,23 @@ WSGI_APPLICATION = 'app.wsgi.application'
 #     }
 # }
 
-
 # DATABASES = {
 #     'default': {
 #         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-#         'NAME': 'cgc',
-#         'USER': 'lorcan',
-#         'PASSWORD': 'fake_james99',
+#         'NAME': 'testDB',
+#         'USER': 'postgres',
+#         'PASSWORD': 'dbpass',
 #         'HOST': 'localhost',
 #     }
 # }
 
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'testDB',
-        'USER': 'postgres',
-        'PASSWORD': 'dbpass',
+        'NAME': 'cgc',
+        'USER': 'lorcan',
+        'PASSWORD': 'fake_james99',
         'HOST': 'localhost',
     }
 }

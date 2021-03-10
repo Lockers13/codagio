@@ -39,7 +39,10 @@ class Analyzer:
             f.write(json.dumps(self.get_prog_dict()))
     
     def visit_ast(self):
-        parsed_tree = ast.parse((open(self.__filename)).read())
+        try:
+            parsed_tree = ast.parse((open(self.__filename)).read())
+        except Exception as e:
+            raise Exception(str(e))
         # initialise ast tree visitor instance
         atv = AstTreeVisitor(self)
         # visit ast-parsed script

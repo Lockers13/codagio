@@ -2,6 +2,8 @@ import json
 import subprocess
 import hashlib
 import sys
+import random
+import string
 
 def make_file(path, code, source="web"):
     def write_prequel(file_obj):
@@ -35,6 +37,8 @@ def make_file(path, code, source="web"):
         program_text = code.split("\n")
     elif source == "file":
         program_text = code
+    elif source == "in_memory":
+        program_text = [line.decode("utf-8") for line in code]
     else:
         print("ERROR: Unrecognized source type...exiting")
         sys.exit(1)
@@ -64,3 +68,20 @@ def gen_sample_hashes(filename, inputs):
 def get_code_from_file(path):
     with open(path, 'r') as f:
         return f.read().splitlines()
+
+def generate_input(input_type, input_length, num_tests):
+    def random_string(length):
+        rand_string = ''.join(random.choice(string.ascii_letters) for i in range(length))
+        return rand_string
+
+    global_inputs = []
+
+    for i in range(num_tests):
+        if input_type == "integer":
+            inp_list = [random.randint(1, 1000) for x in range(input_length)]
+        elif input_type == "float":
+            inp_list = [round(random.uniform(0.0, 1000.0), 2) for x in range(input_length)]
+        elif input_type == "string":
+            inp_list = [random_string(random.randint(1, 10)) for x in range(input_length)]
+        global_inputs.append(inp_list)
+    return json.dumps(global_inputs)

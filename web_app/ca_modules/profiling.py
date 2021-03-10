@@ -3,6 +3,7 @@ import os
 import platform
 import re
 import json
+from .subprocess_ctrl import run_subprocess_ctrld
 
 class Profiler:
 
@@ -11,6 +12,7 @@ class Profiler:
         self.__program_dict = analyzer.get_prog_dict()
         self.__udef_info = self.__get_udef_info()
         self.__sample_inputs = json.loads(inputs)
+        self.__offset = 3 ### this is the number of lines added during preprocessing, whereas calculation of function lineno during ast_visitor stage happens prior to preprocessing, so it must be offset
 
     def __get_udef_info(self):
         """Utility method to make user function defintiion info collected by ast visitor more easily accessible.
@@ -84,6 +86,7 @@ class Profiler:
                         line_info["hits"] = split_line[1]
                         line_info["%time"] = split_line[4]
                         line_info["contents"] = split_line[5]
+                        line_info["real_time"] = str(round(float(fdefs[fdef_k]["cum_time"]) * float(split_line[4])/100, 6))
                     else:
                         line_info["hits"] = "0"
                         line_info["%time"] = "0.0"
@@ -99,7 +102,7 @@ class Profiler:
                     len_sl = len(split_line)
                     if len_sl == 0:
                         in_func = False
-                    elif split_line[0].startswith("=============================================="):
+                    elif split_line[0].startswith("==================="):
                         in_func = True
                     elif not in_func:
                         pass
@@ -116,11 +119,20 @@ class Profiler:
                         write_lprofs(reached=False)
                     elif len_sl == 6:
                         write_lprofs()
+
+            ### ! below is useful for debugging problems with line_profiler! ###
+            # with open(pro_file, 'r') as f:
+            #     for line in f.readlines():
+            #         print(line)
+
+            
             
             # call kernprof as subprocess, redirecting stdout to pipe, and read results
-            process = subprocess.Popen(["kernprof", "-l", "-v", "{0}".format(pro_file), json.dumps(self.__sample_inputs[0])], stdout=subprocess.PIPE)
+            base_cmd = "gtimeout 15 kernprof -l -v"
+            json_str = json.dumps(self.__sample_inputs[0])
             # crucially, readlines() is blocking for pipes
-            output = process.stdout.readlines()
+            output = run_subprocess_ctrld(base_cmd, pro_file, json_str, stage="line_profile")
+
             process_lprof_out(output)
 
             ### clean up ###
@@ -144,7 +156,7 @@ class Profiler:
             return
 
         # get udef linenos from self.udef_info as defined above
-        udef_lines = [self.__udef_info[fdef_name][1] for fdef_name in self.__udef_info.keys()]
+        udef_lines = [(self.__udef_info[fdef_name][1] + self.__offset) for fdef_name in self.__udef_info.keys()]
         pro_token = "@profile"
         pro_file = make_pro_file(self.__filename, udef_lines, pro_token)
         do_profile(pro_file)
@@ -179,9 +191,9 @@ class Profiler:
                     pass
 
         # call cProfile as subprocess, redirecting stdout to pipe, and read results, as before
-        process = subprocess.Popen(["python", "-m", "cProfile", "-s", "time", "{0}".format(self.__filename), json.dumps(self.__sample_inputs[0])], stdout=subprocess.PIPE)
-        output = process.stdout.readlines()
-
+        base_cmd = "gtimeout 5 python -m cProfile -s time"
+        json_str = json.dumps(self.__sample_inputs[0])
+        output = run_subprocess_ctrld(base_cmd, self.__filename, json_str, stage="c_profile")
         process_cprof_out(output)
 
     def gnu_time_stats(self):
