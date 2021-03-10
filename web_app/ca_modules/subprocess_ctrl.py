@@ -1,18 +1,17 @@
 import subprocess
 import os
 
-def run_subprocess_ctrld(timeout_dict, cmd, json, stage="verification"):
-    cmd_list = [timeout_dict["keyword"], timeout_dict["timeout"]]
-    for word in cmd.split(" "):
+def run_subprocess_ctrld(base_cmd, filename, json_arg, stage="verification"):
+    cmd_list = []
+    for word in base_cmd.split(" "):
         cmd_list.append(word)
-    filename = cmd_list[-1]
-    cmd_list.append(json)
+    cmd_list.append(filename)
+    cmd_list.append(json_arg)
     try:
         process = subprocess.Popen(cmd_list, stdout=subprocess.PIPE)
     except Exception as e:
         raise Exception(str(e))
 
-    
     output = process.stdout.read() if stage == "verification" else process.stdout.readlines()
     comm = process.communicate()[0]
     ret = int(process.returncode)

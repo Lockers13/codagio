@@ -25,13 +25,12 @@ class Verifier:
         Returns list of said hashes."""
 
         sub_hashes = []
-        timeout_dict = {"keyword": "gtimeout", "timeout": "5"}
-        cmd = "python {0}".format(self.__filename)
+        base_cmd = "gtimeout 5 python"
         # Note: number adjustable...based on number of hash samples available for given problem
         
         for i in range(len(self.__sample_inputs)):  
             json_str = json.dumps(self.__sample_inputs[i])
-            output = run_subprocess_ctrld(timeout_dict, cmd, json_str)
+            output = run_subprocess_ctrld(base_cmd, self.__filename, json_str)
             stripped_sub = output.decode("utf-8").replace('\n', '').replace(' ', '')
             sub_hash = hashlib.md5(stripped_sub.encode()).hexdigest()
             sub_hashes.append(sub_hash)
