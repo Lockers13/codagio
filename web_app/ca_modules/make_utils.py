@@ -29,8 +29,11 @@ def make_file(path, code, source="web"):
                     "        sys.exit(1)\n",
                     "def main():",
                     "    input_list = prep_input()",
-                    "    for inp in input_list:",
-                    "        print(\"{0} {1}\".format(inp, template_function(inp)))\n",
+                    "    try:",
+                    "        for inp in input_list:",
+                    "            print(\"{0} {1}\".format(inp, template_function(inp)))",
+                    "    except Exception as e:",
+                    "        print('EXCEPTION: semantic error in submitted program: {0}'.format(str(e)))\n",
                     "main()"]
     
     if source == "web":  

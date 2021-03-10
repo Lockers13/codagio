@@ -34,7 +34,10 @@ class Verifier:
         
         for i in range(len(self.__sample_inputs)):  
             json_str = json.dumps(self.__sample_inputs[i])
-            output = run_subprocess_ctrld(base_cmd, self.__filename, json_str)
+            try:
+                output = run_subprocess_ctrld(base_cmd, self.__filename, json_str)
+            except Exception as e:
+                raise Exception(str(e))
             stripped_sub = output.decode("utf-8").replace('\n', '').replace(' ', '').replace('\r', '')
             sub_hash = hashlib.md5(stripped_sub.encode()).hexdigest()
             sub_hashes.append(sub_hash)

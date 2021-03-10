@@ -13,6 +13,10 @@ def run_subprocess_ctrld(base_cmd, filename, json_arg, stage="verification"):
         raise Exception(str(e))
 
     output = process.stdout.read() if stage == "verification" else process.stdout.readlines()
+    if stage == "verification":
+        if output.startswith(b'EXCEPTION'):
+            raise Exception(output.decode("utf-8"))
+
     comm = process.communicate()[0]
     ret = int(process.returncode)
     if ret == 124:
