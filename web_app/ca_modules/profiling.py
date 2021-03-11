@@ -129,8 +129,9 @@ class Profiler:
             
             platform = sys.platform.lower()
             LPROF_TIMEOUT = "15"
+            LPROF_MEMOUT = "1000"
             # call kernprof as subprocess, redirecting stdout to pipe, and read results
-            timeout_cmd = "gtimeout {0}".format(LPROF_TIMEOUT) if platform == "darwin" else "timeout {0}".format(LPROF_TIMEOUT) if platform == "linux" or platform == "linux2" else ""
+            timeout_cmd = "gtimeout {0}".format(LPROF_TIMEOUT) if platform == "darwin" else "timeout {0} -m {1}".format(LPROF_TIMEOUT, LPROF_MEMOUT) if platform == "linux" or platform == "linux2" else ""
 
             base_cmd = "{0} kernprof -l -v".format(timeout_cmd)
             json_str = json.dumps(self.__sample_inputs[0])
@@ -196,8 +197,9 @@ class Profiler:
 
         platform = sys.platform.lower()
         CPROF_TIMEOUT = "5"
+        CPROF_MEMOUT = "500"
         # call cProfile as subprocess, redirecting stdout to pipe, and read results, as before
-        timeout_cmd = "gtimeout {0}".format(CPROF_TIMEOUT) if platform == "darwin" else "timeout {0}".format(CPROF_TIMEOUT) if platform == "linux" or platform == "linux2" else ""
+        timeout_cmd = "gtimeout {0}".format(CPROF_TIMEOUT) if platform == "darwin" else "timeout {0} -m {1}".format(CPROF_TIMEOUT, CPROF_MEMOUT) if platform == "linux" or platform == "linux2" else ""
 
         base_cmd = "{0} python -m cProfile -s time".format(timeout_cmd)
         json_str = json.dumps(self.__sample_inputs[0])
