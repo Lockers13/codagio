@@ -1,3 +1,5 @@
+### A module containing various utilities used at various points throughout the processes of submitting and analyzing problems ###
+
 import json
 import subprocess
 import hashlib
@@ -6,6 +8,10 @@ import random
 import string
 
 def make_file(path, code, source="web"):
+    """Function to create script that is used for verification and profiling purposes
+
+    Returns nothing, writes to disk"""
+
     def write_prequel(file_obj):
         for line in IMPORTS:
             file_obj.write("{0}\n".format(line))
@@ -41,8 +47,7 @@ def make_file(path, code, source="web"):
     elif source == "file":
         program_text = code
     else:
-        print("ERROR: Unrecognized source type...exiting")
-        sys.exit(1)
+        raise Exception("ERROR: Unrecognized source type...exiting")
 
     with open(path, 'w') as f:
         write_prequel(f)
@@ -56,6 +61,10 @@ def make_file(path, code, source="web"):
         write_sequel(f, fname)
 
 def gen_sample_hashes(filename, inputs):
+    """Utility function invoked whenever a reference problem is submitted
+
+    Returns a list of output hashes that are subsequently stored in DB as field associated with given problem"""
+
     hashes = []
     programmatic_inputs = json.loads(inputs)
     for i in range(len(programmatic_inputs)):  
@@ -71,6 +80,10 @@ def get_code_from_file(path):
         return f.read().splitlines()
 
 def generate_input(input_type, input_length, num_tests):
+    """Self-explanatory utility function that generates test input for a submitted reference problem based on metadata specifications
+
+    Returns jsonified list of inputs"""
+    
     def random_string(length):
         rand_string = ''.join(random.choice(string.ascii_letters) for i in range(length))
         return rand_string
