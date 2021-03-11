@@ -40,8 +40,6 @@ def make_file(path, code, source="web"):
         program_text = code.split("\n")
     elif source == "file":
         program_text = code
-    elif source == "in_memory":
-        program_text = [line.decode("utf-8") for line in code]
     else:
         print("ERROR: Unrecognized source type...exiting")
         sys.exit(1)
