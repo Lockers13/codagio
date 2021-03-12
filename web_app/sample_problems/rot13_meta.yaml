@@ -3,7 +3,7 @@ constraints:
   num_args: 1
   allowed_abs_imports: ["string"]
   allowed_rel_imports:
-    string": ["ascii_letters"]
+    string : ["ascii_letters"]
   disallowed_functions": ["eval", "print", "sorted"]
 input_type: "string"
 input_length: 1000

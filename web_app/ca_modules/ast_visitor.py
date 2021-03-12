@@ -57,7 +57,7 @@ class AstTreeVisitor(ast.NodeVisitor):
         self.__metadata = analyzer.get_meta()
         self.__allowed_abs_imports = self.__metadata.get("constraints").get("allowed_abs_imports", [])
         self.__allowed_rel_imports = self.__metadata.get("constraints").get("allowed_rel_imports", {})
-        self.__disallowed_fcalls = set(["exec", "open", "eval"])
+        self.__disallowed_fcalls = set(["exec", "eval"]) ### !!! what about 'open'?
         for func in self.__metadata.get("constraints").get("disallowed_fcalls", []):
             self.__disallowed_fcalls.add(func)
         self.__num_args = int(self.__metadata.get("constraints").get("num_args", 0))

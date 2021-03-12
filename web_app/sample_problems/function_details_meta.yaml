@@ -1,0 +1,10 @@
+difficulty: "Easy"
+constraints:
+  num_args: 1
+  allowed_abs_imports: []
+  allowed_rel_imports:
+    ast : ["parse"]
+  disallowed_functions: ["eval", "print", "sorted"]
+input_type: "file"
+input_length: -1
+num_tests: 3

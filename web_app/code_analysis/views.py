@@ -136,6 +136,7 @@ class SaveProblemView(APIView):
         processed_data = {}
         try:
             processed_data["author_id"] = int(data.get("author_id"))
+            processed_data["input_files"] = data.getlist("input_files", None)
             processed_data["name"] = data.get("name")
             description = data.get("description")
             processed_data["program_file"] = data.get("program")
@@ -156,6 +157,7 @@ class SaveProblemView(APIView):
         ### get data, process it, and handle errors
         data = request.data
         processed_data = self.__process_request_data(data)
+        
         if isinstance(processed_data, Response):
             return processed_data
         ### get author instance from DB
@@ -169,14 +171,13 @@ class SaveProblemView(APIView):
 
         filename = "{0}.py".format(processed_data["name"])
         ### just shortening overly verbose data references
-        input_type = processed_data["metadata"]["input_type"]
-        input_length = processed_data["metadata"]["input_length"]
-        num_tests = processed_data["metadata"]["num_tests"]
+        input_type = processed_data["metadata"].get("input_type", None)
+        input_length = processed_data["metadata"].get("input_length", None)
+        num_tests = processed_data["metadata"].get("num_tests", None)
         ### make basic initial file from uploaded in-memory file obj for the purposes of ast parsing
         with open(filename, 'wb+') as f:
             for chunk in processed_data["program_file"].chunks():
                 f.write(chunk)
-        
         ### create analyzer instance, passing script to be visited by ast_visitor, as well as uploaded metadata...subsequent checks may be overkill - needs review (are you really going to violate your own constraints? maybe by accident...)
         analyzer = Analyzer(filename, processed_data["metadata"])
         ### visit ast, do static analysis, and check for constraint violations
@@ -190,15 +191,25 @@ class SaveProblemView(APIView):
         validation_result = ast_checker.validate(ast_analysis, filename)
         if isinstance(validation_result, Response):
             return validation_result
-        ### make new script capable of being verified and profiled as above
-        make_utils.make_file(filename, processed_data["code"], source="file")
-        ### generate inputs, given metadata
-        json_inputs = make_utils.generate_input(input_type, input_length, num_tests)
-        ### profile uploaded reference problem (will only do cProfile and not line_profile as 'solution' is set to false)
-        analyzer.profile(json_inputs, solution=False)
-        ### get analysis and output hashes, and save to postgres DB in json format
-        analysis = json.dumps(analyzer.get_prog_dict())
-        hashes = make_utils.gen_sample_hashes(filename, json_inputs)
+        if processed_data["input_files"] != [''] and processed_data["input_files"] is not None:
+            make_utils.make_file(filename, processed_data["code"], source="file", input_type="file")
+            file_json_inputs, files = make_utils.handle_uploaded_file_inputs(processed_data)
+            hashes = make_utils.gen_sample_hashes(filename, files, input_type="file")
+            for script in files:
+                os.remove(script)
+            json_inputs = file_json_inputs
+            analysis = json.dumps(analyzer.get_prog_dict())
+        else:
+            ### make new script capable of being verified and profiled as above
+            make_utils.make_file(filename, processed_data["code"], source="file")
+            ### generate inputs, given metadata
+            json_inputs = make_utils.generate_input(input_type, input_length, num_tests)
+            ### profile uploaded reference problem (will only do cProfile and not line_profile as 'solution' is set to false)
+            analyzer.profile(json_inputs, solution=False)
+            analysis = json.dumps(analyzer.get_prog_dict())
+            ### get analysis and output hashes, and save to postgres DB in json format
+            hashes = make_utils.gen_sample_hashes(filename, json_inputs)
+
         problem, created = Problem.objects.update_or_create(
             name=processed_data["name"], author_id=processed_data["author_id"],
             defaults = {

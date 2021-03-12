@@ -18,6 +18,7 @@ class Verifier:
         self.__sample_hashes = json.loads(paragon.hashes)
         self.__sample_inputs = json.loads(paragon.inputs)
         self.__test_stats = self.__detail_inputs()
+        self.__meta = json.loads(paragon.metadata)
         
     def __gen_sub_hashes(self):
         """Private utility method to make hashes from output of provided submission program.
@@ -32,14 +33,13 @@ class Verifier:
         base_cmd = "{0} python".format(timeout_cmd)
 
         # Note: number adjustable...based on number of hash samples available for given problem
-        
         for i in range(len(self.__sample_inputs)):  
             json_str = json.dumps(self.__sample_inputs[i])
             try:
                 output = run_subprocess_ctrld(base_cmd, self.__filename, json_str)
             except Exception as e:
                 raise Exception(str(e))
-            stripped_sub = output.decode("utf-8").replace('\n', '').replace(' ', '').replace('\r', '')
+            stripped_sub = output.decode("utf-8").replace('\n', '').replace(' ', '').replace('\r', '') ### added replacement of '\r' for windows
             sub_hash = hashlib.md5(stripped_sub.encode()).hexdigest()
             sub_hashes.append(sub_hash)
 

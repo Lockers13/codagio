@@ -1,5 +1,6 @@
 ### A module containing various utilities used at various points throughout the processes of submitting and analyzing problems ###
 
+import os
 import json
 import subprocess
 import hashlib
@@ -7,7 +8,7 @@ import sys
 import random
 import string
 
-def make_file(path, code, source="web"):
+def make_file(path, code, source="web", input_type="auto"):
     """Function to create script that is used for verification and profiling purposes
 
     Returns nothing, writes to disk"""
@@ -18,7 +19,8 @@ def make_file(path, code, source="web"):
         file_obj.write("\n")
 
     def write_sequel(file_obj, fname):
-        for line in TEMPLATE_CODE:
+        text_to_write = TEMPLATE_CODE_FILE if input_type == "file" else TEMPLATE_CODE_AUTO
+        for line in text_to_write:
             if "template_function" in line:
                 line = line.replace("template_function", str(fname))
             file_obj.write("{0}\n".format(line))
@@ -27,7 +29,7 @@ def make_file(path, code, source="web"):
     IMPORTS = ["from json import loads as json_load", 
                 "from sys import argv"]
 
-    TEMPLATE_CODE = ["def prep_input():",
+    TEMPLATE_CODE_AUTO = ["def prep_input():",
                     "    try:",
                     "        return json_load(argv[1])",
                     "    except IndexError:",
@@ -42,6 +44,13 @@ def make_file(path, code, source="web"):
                     "        print('EXCEPTION: semantic error in submitted program: {0}'.format(str(e)))\n",
                     "main()"]
     
+    TEMPLATE_CODE_FILE = ["def main():",
+                    "    try:",
+                    "        print(\"{0}\".format(template_function(argv[1])))",
+                    "    except Exception as e:",
+                    "        print('EXCEPTION: semantic error in submitted program: {0}'.format(str(e)))\n",
+                    "main()"]
+
     if source == "web":  
         program_text = code.split("\n")
     elif source == "file":
@@ -52,7 +61,8 @@ def make_file(path, code, source="web"):
     with open(path, 'w') as f:
         write_prequel(f)
         for line in program_text:
-            if line.startswith("def"):
+            split_line = line.split()
+            if len(split_line) > 0 and line.split()[0] == "def":
                 fname = line.split()[1].split("(")[0]
             f.write("{0}\n".format(line))
         if not line.endswith("\n"):
@@ -60,20 +70,30 @@ def make_file(path, code, source="web"):
 
         write_sequel(f, fname)
 
-def gen_sample_hashes(filename, inputs):
+def gen_sample_hashes(filename, inputs, input_type="auto"):
     """Utility function invoked whenever a reference problem is submitted
 
     Returns a list of output hashes that are subsequently stored in DB as field associated with given problem"""
-
-    hashes = []
-    programmatic_inputs = json.loads(inputs)
-    for i in range(len(programmatic_inputs)):  
-        s_process = subprocess.Popen(["python", filename, json.dumps(programmatic_inputs[i])], stdout=subprocess.PIPE)
-        output = s_process.stdout.read().decode("utf-8")
-        output = output.replace(' ', '').replace('\n', '')
+    
+    def process_output(output, hashes):
+        output = output.replace(' ', '').replace('\n', '').replace('None', '') ### <= unsure why this is necessary??
         samp_hash = hashlib.md5(output.encode()).hexdigest()
         hashes.append(samp_hash)
-    return hashes
+
+    hashes = []
+    if input_type == "auto":
+        programmatic_inputs = json.loads(inputs)
+        for i in range(len(programmatic_inputs)):  
+            s_process = subprocess.Popen(["python", filename, json.dumps(programmatic_inputs[i])], stdout=subprocess.PIPE)
+            output = s_process.stdout.read().decode("utf-8")
+            process_output(output, hashes)
+        return hashes
+    elif input_type == "file":
+        for script in inputs:
+            s_process = subprocess.Popen(["python", filename, script], stdout=subprocess.PIPE)
+            output = s_process.stdout.read().decode("utf-8")
+            process_output(output, hashes)
+        return hashes
 
 def get_code_from_file(path):
     with open(path, 'r') as f:
@@ -99,3 +119,16 @@ def generate_input(input_type, input_length, num_tests):
             inp_list = [random_string(random.randint(1, 10)) for x in range(input_length)]
         global_inputs.append(inp_list)
     return json.dumps(global_inputs)
+
+def handle_uploaded_file_inputs(processed_data):
+    input_dict = {}
+    files = []
+    for count, file_obj in enumerate(processed_data.get("input_files")):
+        input_dict["file_{0}".format(count+1)] = ""
+        with open("file_{0}.py".format(count+1), 'w') as g:
+            for chunk in file_obj.chunks():
+                decoded_chunk = chunk.decode("utf-8")
+                input_dict["file_{0}".format(count+1)] += decoded_chunk
+            g.write(decoded_chunk)
+            files.append("file_{0}.py".format(count+1))
+    return json.dumps(input_dict), files

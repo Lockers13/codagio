@@ -12,4 +12,5 @@ class ProblemUploadForm(forms.Form):
     description = forms.CharField(widget=forms.Textarea(attrs={"rows":10, "cols":20}))
     program = forms.FileField()
     meta_file = forms.FileField()
+    input_files = forms.FileField(required=False, widget=forms.ClearableFileInput(attrs={'multiple': True}))
 
