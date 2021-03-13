@@ -121,14 +121,14 @@ def generate_input(input_type, input_length, num_tests):
     return json.dumps(global_inputs)
 
 def handle_uploaded_file_inputs(processed_data):
-    input_dict = {}
+    input_dict = {"files": {}}
     files = []
     for count, file_obj in enumerate(processed_data.get("input_files")):
-        input_dict["file_{0}".format(count+1)] = ""
+        input_dict["files"]["file_{0}".format(count+1)] = ""
         with open("file_{0}.py".format(count+1), 'w') as g:
             for chunk in file_obj.chunks():
                 decoded_chunk = chunk.decode("utf-8")
-                input_dict["file_{0}".format(count+1)] += decoded_chunk
+                input_dict["files"]["file_{0}".format(count+1)] += decoded_chunk
             g.write(decoded_chunk)
             files.append("file_{0}.py".format(count+1))
     return json.dumps(input_dict), files

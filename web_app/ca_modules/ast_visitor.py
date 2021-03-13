@@ -57,7 +57,7 @@ class AstTreeVisitor(ast.NodeVisitor):
         self.__metadata = analyzer.get_meta()
         self.__allowed_abs_imports = self.__metadata.get("constraints").get("allowed_abs_imports", [])
         self.__allowed_rel_imports = self.__metadata.get("constraints").get("allowed_rel_imports", {})
-        self.__disallowed_fcalls = set(["exec", "eval"]) ### !!! what about 'open'?
+        self.__disallowed_fcalls = set(["exec", "eval", "open"]) ### !!! what about 'open'?
         for func in self.__metadata.get("constraints").get("disallowed_fcalls", []):
             self.__disallowed_fcalls.add(func)
         self.__num_args = int(self.__metadata.get("constraints").get("num_args", 0))
@@ -296,13 +296,25 @@ class AstTreeVisitor(ast.NodeVisitor):
                     })
 
     def visit_Call(self, node):
+        def check_safe_open(func_name, node):
+            if func_name == "open":
+                if len(node.args) == 2 and isinstance(node.args[0], ast.Name) and isinstance(node.args[1], ast.Str):
+                    if node.args[0].id in self.__fdef_dict["args"] and node.args[1].s == 'r':
+                        return True
+            return False
+
         try:
             func_name = node.func.id
         except AttributeError:
             func_name = node.func.attr
+        
         if func_name in self.__disallowed_fcalls:
-            unsafe_entry_list = self.__program_dict["constraint_violation"]
-            unsafe_entry_list.append({
-                "type": "Disallowed fcall",
-                "name": func_name
-            })
+            if check_safe_open(func_name, node):
+                pass
+            else:
+                print(func_name)
+                unsafe_entry_list = self.__program_dict["constraint_violation"]
+                unsafe_entry_list.append({
+                    "type": "Disallowed fcall",
+                    "name": func_name
+                })

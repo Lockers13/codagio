@@ -198,6 +198,7 @@ class SaveProblemView(APIView):
             for script in files:
                 os.remove(script)
             json_inputs = file_json_inputs
+            analyzer.profile(json_inputs, solution=False)
             analysis = json.dumps(analyzer.get_prog_dict())
         else:
             ### make new script capable of being verified and profiled as above
