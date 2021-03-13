@@ -1,4 +1,5 @@
 import ast
+import sys
 
 class AstTreeVisitor(ast.NodeVisitor):
     """Class for visiting AST tree. We vist only function definitions, adding each entry to our global program dict,
@@ -31,13 +32,12 @@ class AstTreeVisitor(ast.NodeVisitor):
     """
     
     # private instance var determining what entries to initialize in global program dict
-    __node_types = ["fdefs", "whiles", "ifs", "fors", "assigns", "augassigns", "fcalls", "calls", "ops", "elses", "trys", "exc_handlers", "returns", "else-ifs"]
+    __node_types = ["fdefs", "whiles", "ifs", "fors", "assigns", "augassigns", "fcalls", "calls", "ops", "elses", "trys", "exc_handlers", "returns", "else-ifs", "withs"]
 
-    def __init__(self, analyzer):
+    def __init__(self):
         # create glboal program dict [important!]
-        self.__program_dict = analyzer.get_prog_dict()
+        self.__program_dict = {}
         self.__stock_functions = ["main", "prep_input"]
-        self.__args = analyzer.get_args()
         # create global hash map to keep count of occurrence of given types of nodes (see __parse_categories)
         self.__program_dict["count_hash"] = {}
         self.__count_hash = self.__program_dict["count_hash"]
@@ -103,6 +103,14 @@ class AstTreeVisitor(ast.NodeVisitor):
             self.__fdef_dict["skeleton"].append("{0}{1}".format("    " * self.__count_hash["level"], "else:"))
             self.__program_dict["line_indents"]["line_{0}".format(orelse.lineno-1)] = self.__count_hash["level"]
             self.__process_body(orelse)
+
+    def __process_with(self, node):
+        context_expr = type(node.items[0].context_expr).__name__.lower()
+        node_type = type(node).__name__.lower()
+        self.__fdef_dict["skeleton"].append("{0}{1} {2}:".format("    " * self.__count_hash["level"], node_type, context_expr))
+        self.__program_dict["line_indents"]["line_{0}".format(node.lineno)] = self.__count_hash["level"]
+
+        self.__process_body(node)
 
     def __process_conditional(self, node, elseif=False):
 
@@ -211,6 +219,8 @@ class AstTreeVisitor(ast.NodeVisitor):
                 self.__process_try(body_node)
             elif isinstance(body_node, ast.FunctionDef):
                 self.__nested_fdefs.append(body_node.name)
+            elif isinstance(body_node, ast.With):
+                self.__process_with(body_node)
             else:
                 self.__process_simple_op(body_node)
 
@@ -252,7 +262,7 @@ class AstTreeVisitor(ast.NodeVisitor):
             signature = "def {0}({1}):".format(node.name, ', '.join(self.__fdef_dict["args"]))
             self.__fdef_dict["skeleton"] = []
             self.__fdef_dict["skeleton"].append(signature)
-            for cat in ["whiles", "fors", "ifs", "ops", "calls", "elses", "assigns", "augassigns", "trys", "returns", "else-ifs"]:
+            for cat in ["whiles", "fors", "ifs", "ops", "calls", "elses", "assigns", "augassigns", "trys", "returns", "else-ifs", "withs"]:
                 self.__fdef_dict["num_{0}".format(cat)] = 0
             self.__process_body(node)
             self.__count_hash["level"] -= 1
@@ -302,3 +312,10 @@ class AstTreeVisitor(ast.NodeVisitor):
 
 
         
+
+parsed_tree = ast.parse((open(sys.argv[1])).read())
+# initialise ast tree visitor instance
+atv = AstTreeVisitor()
+# visit ast-parsed script
+atv.visit(parsed_tree)
+print(atv.get_program_dict())

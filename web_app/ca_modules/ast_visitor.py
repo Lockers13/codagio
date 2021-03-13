@@ -31,7 +31,7 @@ class AstTreeVisitor(ast.NodeVisitor):
     """
     
     # private instance var determining what entries to initialize in global program dict
-    __node_types = ["fdefs", "whiles", "ifs", "fors", "assigns", "augassigns", "fcalls", "calls", "ops", "elses", "trys", "exc_handlers", "returns", "else-ifs"]
+    __node_types = ["fdefs", "whiles", "ifs", "fors", "assigns", "augassigns", "fcalls", "calls", "ops", "elses", "trys", "exc_handlers", "returns", "else-ifs", "withs"]
 
     def __init__(self, analyzer):
         # create glboal program dict [important!]
@@ -129,6 +129,14 @@ class AstTreeVisitor(ast.NodeVisitor):
         except IndexError:
             pass
 
+    def __process_with(self, node):
+        context_expr = type(node.items[0].context_expr).__name__.lower()
+        node_type = type(node).__name__.lower()
+        self.__fdef_dict["skeleton"].append("{0}{1} {2}:".format("    " * self.__count_hash["level"], node_type, context_expr))
+        self.__program_dict["line_indents"]["line_{0}".format(node.lineno)] = self.__count_hash["level"]
+
+        self.__process_body(node)
+
     def __process_try(self, node, node_dict):
         node_type = type(node).__name__.lower()
         self.__fdef_dict["skeleton"].append("{0}{1}:".format("    " * self.__count_hash["level"], node_type))
@@ -201,6 +209,8 @@ class AstTreeVisitor(ast.NodeVisitor):
             elif isinstance(body_node, ast.If):
                 self.__process_conditional(body_node)
                 elseif = False
+            elif isinstance(body_node, ast.With):
+                self.__process_with(body_node)
             elif isinstance(body_node, ast.Expr):
                 value = body_node.value
                 if isinstance(value, ast.Call):
@@ -261,7 +271,7 @@ class AstTreeVisitor(ast.NodeVisitor):
             signature = "def {0}({1}):".format(node.name, ', '.join(self.__fdef_dict["args"]))
             self.__fdef_dict["skeleton"] = []
             self.__fdef_dict["skeleton"].append(signature)
-            for cat in ["whiles", "fors", "ifs", "ops", "calls", "elses", "assigns", "augassigns", "trys", "returns", "else-ifs"]:
+            for cat in ["whiles", "fors", "ifs", "ops", "calls", "elses", "assigns", "augassigns", "trys", "returns", "else-ifs", "withs"]:
                 self.__fdef_dict["{0}".format(cat)] = 0
             self.__process_body(node)
             self.__count_hash["level"] -= 1
