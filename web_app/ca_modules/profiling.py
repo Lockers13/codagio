@@ -13,7 +13,15 @@ class Profiler:
         self.__program_dict = analyzer.get_prog_dict()
         self.__udef_info = self.__get_udef_info()
         self.__sample_inputs = json.loads(inputs)
+        self.__input_type = self.__get_input_type()
         self.__offset = 3 ### this is the number of lines added during preprocessing, whereas calculation of function lineno during ast_visitor stage happens prior to preprocessing, so it must be offset
+
+    def __get_input_type(self):
+        if isinstance(self.__sample_inputs, dict):
+            if self.__sample_inputs.get("files", None) is not None:
+                return "file"
+        else:
+            return "auto"
 
     def __get_udef_info(self):
         """Utility method to make user function defintiion info collected by ast visitor more easily accessible.
@@ -121,11 +129,10 @@ class Profiler:
                     elif len_sl == 6:
                         write_lprofs()
 
-            ### ! below is useful for debugging problems with line_profiler! ###
-            # with open(pro_file, 'r') as f:
-            #     for line in f.readlines():
-            #         print(line)
-
+            ## ! below is useful for debugging problems with line_profiler! ###
+            with open(pro_file, 'r') as f:
+                for line in f.readlines():
+                    print(line)
             
             platform = sys.platform.lower()
             LPROF_TIMEOUT = "15"
@@ -134,9 +141,16 @@ class Profiler:
             timeout_cmd = "gtimeout {0}".format(LPROF_TIMEOUT) if platform == "darwin" else "timeout {0} -m {1}".format(LPROF_TIMEOUT, LPROF_MEMOUT) if platform == "linux" or platform == "linux2" else ""
 
             base_cmd = "{0} kernprof -l -v".format(timeout_cmd)
-            json_str = json.dumps(self.__sample_inputs[0])
-            # crucially, readlines() is blocking for pipes
-            output = run_subprocess_ctrld(base_cmd, pro_file, json_str, stage="line_profile")
+
+            if self.__input_type == "file":
+                with open('lprof_script.py', 'w') as f:
+                    f.write(self.__sample_inputs["files"]["file_1"])
+                output = run_subprocess_ctrld(base_cmd, pro_file, "lprof_script.py", stage="line_profile")
+                os.remove("lprof_script.py")
+            else:
+                json_str = json.dumps(self.__sample_inputs[0])
+                # crucially, readlines() is blocking for pipes
+                output = run_subprocess_ctrld(base_cmd, pro_file, json_str, stage="line_profile")
 
             process_lprof_out(output)
 
@@ -157,8 +171,7 @@ class Profiler:
         try:
             import line_profiler
         except ModuleNotFoundError:
-            print("Error: line_profiler module must be installed for line-by-line profiling!")
-            return
+            raise Exception("Error: line_profiler module must be installed for line-by-line profiling!")
 
         # get udef linenos from self.udef_info as defined above
         udef_lines = [(self.__udef_info[fdef_name][1] + self.__offset) for fdef_name in self.__udef_info.keys()]
@@ -201,14 +214,9 @@ class Profiler:
         # call cProfile as subprocess, redirecting stdout to pipe, and read results, as before
         timeout_cmd = "gtimeout {0}".format(CPROF_TIMEOUT) if platform == "darwin" else "timeout {0} -m {1}".format(CPROF_TIMEOUT, CPROF_MEMOUT) if platform == "linux" or platform == "linux2" else ""
         base_cmd = "{0} python -m cProfile -s time".format(timeout_cmd) 
-        files = None
-        try:
-            files = self.__sample_inputs.get("files")
-        except Exception as e:
-            print(str(e))
-        if files is not None:
+        if self.__input_type == "file":
             with open('cprof_script.py', 'w') as f:
-                f.write(files["file_1"])
+                f.write(self.__sample_inputs["files"]["file_1"])
             output = run_subprocess_ctrld(base_cmd, self.__filename, "cprof_script.py", stage="c_profile")
             os.remove("cprof_script.py")
         else:

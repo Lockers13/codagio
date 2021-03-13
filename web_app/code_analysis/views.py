@@ -89,23 +89,46 @@ class AnalysisView(APIView):
         validation_result = ast_checker.validate(ast_analysis, filename)
         if isinstance(validation_result, Response):
             return validation_result
-        ### after discarding first file used during ast analysis, now create full-fledged script capable of processing inputs given from command line etc.
-        make_utils.make_file(filename, processed_data["code_data"])
-        ### subject submission to verification process
+        files = False
         try:
-            percentage_score = analyzer.verify(problem)
+            if "files" in json.loads(problem.inputs).keys():
+                files = True
         except Exception as e:
-            return Response("POST NOT OK: {0}".format(str(e)), status=status.HTTP_400_BAD_REQUEST)
-        ### check if all tests were passed, and only profile submission if so
-        hundred_pc = float(percentage_score) == 100.0
-        if hundred_pc:
+            print(str(e))
+        if files:
+            make_utils.make_file(filename, processed_data["code_data"], input_type="file")
             try:
-                analyzer.profile(problem.inputs)
+                percentage_score = analyzer.verify(problem)
             except Exception as e:
                 return Response("POST NOT OK: {0}".format(str(e)), status=status.HTTP_400_BAD_REQUEST)
-        analysis = analyzer.get_prog_dict()
-        ### write comparison stats with reference problem to analysis dict
-        comparison.write_comp(analysis, json.loads(problem.analysis))
+            ### check if all tests were passed, and only profile submission if so
+            hundred_pc = float(percentage_score) == 100.0
+            if hundred_pc:
+                try:
+                    analyzer.profile(problem.inputs)
+                except Exception as e:
+                    return Response("POST NOT OK: {0}".format(str(e)), status=status.HTTP_400_BAD_REQUEST)
+            analysis = analyzer.get_prog_dict()
+            ### write comparison stats with reference problem to analysis dict
+            comparison.write_comp(analysis, json.loads(problem.analysis))         
+        else:
+            ### after discarding first file used during ast analysis, now create full-fledged script capable of processing inputs given from command line etc.
+            make_utils.make_file(filename, processed_data["code_data"])
+            ### subject submission to verification process
+            try:
+                percentage_score = analyzer.verify(problem)
+            except Exception as e:
+                return Response("POST NOT OK: {0}".format(str(e)), status=status.HTTP_400_BAD_REQUEST)
+            ### check if all tests were passed, and only profile submission if so
+            hundred_pc = float(percentage_score) == 100.0
+            if hundred_pc:
+                try:
+                    analyzer.profile(problem.inputs)
+                except Exception as e:
+                    return Response("POST NOT OK: {0}".format(str(e)), status=status.HTTP_400_BAD_REQUEST)
+            analysis = analyzer.get_prog_dict()
+            ### write comparison stats with reference problem to analysis dict
+            comparison.write_comp(analysis, json.loads(problem.analysis))
         ### only save submitted solution to db if all tests were passed, and hence submission was profiled, etc.
         if hundred_pc:
             solution, created = Solution.objects.update_or_create(
