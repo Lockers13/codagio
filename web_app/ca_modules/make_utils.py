@@ -89,6 +89,10 @@ def gen_sample_outputs(filename, inputs, input_type="auto"):
             s_process = subprocess.Popen(["python", filename, script], stdout=subprocess.PIPE)
             output = s_process.stdout.read().decode("utf-8").replace(' ', '').replace('\r', '').replace('None', '').splitlines()
             outputs.append(output)
+            try:
+                os.remove(script)
+            except:
+                pass
         return outputs
 
 def get_code_from_file(path):

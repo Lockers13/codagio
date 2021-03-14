@@ -36,9 +36,13 @@
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'accounts:logout' %}">Logout</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'code:problem_upload' %}">Upload</a>
-                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown">Upload</a>
+                     <ul class="dropdown-menu">
+                         <li><a class="dropdown-item" href="{% url 'code:problem_upload' problem_cat='default' %}">Default</a></li>
+                         <li><a class="dropdown-item" href="{% url 'code:problem_upload' problem_cat='file_io' %}">File I/O</a></li>
+                     </ul>
+                 </li>
                 {% else %}
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'accounts:login' %}">Login</a>

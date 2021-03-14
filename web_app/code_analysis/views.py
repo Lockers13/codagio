@@ -159,6 +159,7 @@ class SaveProblemView(APIView):
         processed_data = {}
         try:
             processed_data["author_id"] = int(data.get("author_id"))
+            processed_data["category"] = data.get("category")
             processed_data["input_files"] = data.getlist("input_files", None)
             processed_data["name"] = data.get("name")
             description = data.get("description")
@@ -201,8 +202,10 @@ class SaveProblemView(APIView):
         with open(filename, 'wb+') as f:
             for chunk in processed_data["program_file"].chunks():
                 f.write(chunk)
+
         ### create analyzer instance, passing script to be visited by ast_visitor, as well as uploaded metadata...subsequent checks may be overkill - needs review (are you really going to violate your own constraints? maybe by accident...)
         analyzer = Analyzer(filename, processed_data["metadata"])
+
         ### visit ast, do static analysis, and check for constraint violations
         try:
             analyzer.visit_ast()
@@ -214,25 +217,23 @@ class SaveProblemView(APIView):
         validation_result = ast_checker.validate(ast_analysis, filename)
         if isinstance(validation_result, Response):
             return validation_result
-        if processed_data["input_files"] != [''] and processed_data["input_files"] is not None:
+        
+        if processed_data["category"] == "file_io":
             make_utils.make_file(filename, processed_data["code"], source="file", input_type="file")
-            file_json_inputs, files = make_utils.handle_uploaded_file_inputs(processed_data)
+            json_inputs, files = make_utils.handle_uploaded_file_inputs(processed_data)
             outputs = make_utils.gen_sample_outputs(filename, files, input_type="file")
-            for script in files:
-                os.remove(script)
-            json_inputs = file_json_inputs
-            analyzer.profile(json_inputs, solution=False)
-            analysis = json.dumps(analyzer.get_prog_dict())
-        else:
+            
+        elif processed_data["category"] == "default":
             ### make new script capable of being verified and profiled as above
             make_utils.make_file(filename, processed_data["code"], source="file")
             ### generate inputs, given metadata
             json_inputs = make_utils.generate_input(input_type, input_length, num_tests)
-            ### profile uploaded reference problem (will only do cProfile and not line_profile as 'solution' is set to false)
-            analyzer.profile(json_inputs, solution=False)
-            analysis = json.dumps(analyzer.get_prog_dict())
             ### get analysis and output hashes, and save to postgres DB in json format
             outputs = make_utils.gen_sample_outputs(filename, json_inputs)
+
+        ### profile uploaded reference problem (will only do cProfile and not line_profile as 'solution' is set to false)
+        analyzer.profile(json_inputs, solution=False)
+        analysis = json.dumps(analyzer.get_prog_dict())
 
         problem, created = Problem.objects.update_or_create(
             name=processed_data["name"], author_id=processed_data["author_id"],
@@ -278,18 +279,22 @@ def solution_upload(request, prob_id):
 
     return render(request, 'code.html', context)
 
-def problem_upload(request):
+def problem_upload(request, problem_cat):
 
     initial_state = {
         'author_id': request.user.id,
-        'name': 'prime_checker',
+        'category': problem_cat,
     }
 
-    form = submission_forms.ProblemUploadForm(initial=initial_state)
+    if problem_cat == "default":
+        form = submission_forms.DefaultProblemUploadForm(initial=initial_state)
+    elif problem_cat == "file_io":
+        form = submission_forms.IOProblemUploadForm(initial=initial_state)
 
 
     context = { 'title': 'CGC | Home',
                 'form': form,
+                'cat': problem_cat,
                 }
 
     return render(request, 'problem_upload.html', context)
