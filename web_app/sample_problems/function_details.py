@@ -11,8 +11,7 @@ def show_function_details(script):
         visibility = "private" if func_name.startswith("_") else "public"
         for arg in func.args.args:
             params.append(arg.arg)
-        fd_item = "{0}:{1}:{2}".format(func_name, visibility, ",".join(params))
-        if fd_item not in function_details_list:
-            function_details_list.append(fd_item)
-    for function_details in sorted(function_details_list, key=str.lower):
-        print(function_details)
+        function_info = "{0}:{1}:{2}:{3}".format(func.lineno, func_name, visibility, ",".join(params))
+        function_details_list.append(function_info)
+    for fdet in sorted(function_details_list, key=lambda x: int(x.split(":")[0])):
+        print(fdet)

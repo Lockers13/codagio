@@ -6,7 +6,7 @@ class Problem(models.Model):
     author = models.ForeignKey(Profile, on_delete=models.CASCADE)
     name = models.CharField(max_length=50, default=None)
     metadata = JSONField(default=dict)
-    hashes = JSONField()
+    outputs = JSONField()
     inputs = JSONField()
     analysis = JSONField(default=dict)
 

@@ -15,7 +15,7 @@ class Verifier:
     def __init__(self, analyzer, paragon):
         self.__filename = analyzer.get_filename()
         self.__program_dict = analyzer.get_prog_dict()
-        self.__sample_hashes = json.loads(paragon.hashes)
+        self.__sample_outputs = json.loads(paragon.outputs)
         self.__sample_inputs = json.loads(paragon.inputs)
         self.__input_type = self.__get_input_type()
         self.__test_stats = self.__detail_inputs()
@@ -28,12 +28,12 @@ class Verifier:
         else:
             return "auto"
 
-    def __gen_sub_hashes(self):
+    def __gen_sub_outputs(self):
         """Private utility method to make hashes from output of provided submission program.
 
         Returns list of said hashes."""
 
-        sub_hashes = []
+        sub_outputs = []
         platform = sys.platform.lower()
         VERIF_TIMEOUT = "5"
         VERIF_MEMOUT = "500"
@@ -52,14 +52,13 @@ class Verifier:
             cl_param = file_list[i] if len(file_list) != 0 else json.dumps(self.__sample_inputs[i])
             try:
                 output = run_subprocess_ctrld(base_cmd, self.__filename, cl_param)
-                print(output.decode("utf-8").replace('None', ''))
             except Exception as e:
-                raise Exception(str(e))
-            stripped_sub = output.decode("utf-8").replace('\n', '').replace(' ', '').replace('\r', '').replace('None', '') ### added replacement of '\r' for windows
-            sub_hash = hashlib.md5(stripped_sub.encode()).hexdigest()
-            sub_hashes.append(sub_hash)
-            os.remove(file_list[i])
-        return sub_hashes
+                raise Exception("DUHH{0}".format(str(e)))
+            cleaned_split_output = output.decode("utf-8").replace(' ', '').replace('\r', '').replace('None', '').splitlines()
+            sub_outputs.append(cleaned_split_output)
+            if len(file_list) > i:
+                os.remove(file_list[i])
+        return sub_outputs
 
     def __detail_inputs(self):
         if self.__input_type == "file":
@@ -77,15 +76,15 @@ class Verifier:
 
         Returns score as percentage (string) of exact hash matches."""
 
-        sample_hashes = self.__sample_hashes
-        sub_hashes = self.__gen_sub_hashes()
+        sample_outputs = self.__sample_outputs
+        sub_outputs = self.__gen_sub_outputs()
         self.__program_dict["scores"] = {}
         scores = self.__program_dict["scores"]
         test_stats = self.__test_stats
 
         overall_score = 0
-        for count, (sub_hash, samp_hash) in enumerate(zip(sub_hashes, sample_hashes)):
-            if sub_hash == samp_hash:
+        for count, (sub_output, samp_output) in enumerate(zip(sub_outputs, sample_outputs)):
+            if sub_output == samp_output:
                 status = "success"
                 overall_score += 1
             else:
@@ -96,7 +95,7 @@ class Verifier:
             test["input_length"] = test_stats[1][count]
             test["input_type"] = test_stats[2][count]
 
-        percentage_score = round(overall_score/len(sample_hashes), 4) * 100
+        percentage_score = round(overall_score/len(sample_outputs), 4) * 100
         scores["overall_score"] = "{0}%".format(percentage_score)
 
         return percentage_score

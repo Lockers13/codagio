@@ -130,9 +130,9 @@ class Profiler:
                         write_lprofs()
 
             ## ! below is useful for debugging problems with line_profiler! ###
-            with open(pro_file, 'r') as f:
-                for line in f.readlines():
-                    print(line)
+            # with open(pro_file, 'r') as f:
+            #     for line in f.readlines():
+            #         print(line)
             
             platform = sys.platform.lower()
             LPROF_TIMEOUT = "15"

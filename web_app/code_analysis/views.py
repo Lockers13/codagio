@@ -82,7 +82,7 @@ class AnalysisView(APIView):
             analyzer.visit_ast()
         except Exception as e:
             os.remove(filename)
-            return Response("POST NOT OK: {0}".format(str(e)), status=status.HTTP_400_BAD_REQUEST)
+            return Response("POST NOG\QT OK: {0}".format(str(e)), status=status.HTTP_400_BAD_REQUEST)
         ### if the ast_visitor has picked up on any blacklisted imports/functions then return appropriate error status
         ast_analysis = analyzer.get_prog_dict()
         ### validate results of ast analysis by checking length of certain lists that hold violation data, if any
@@ -107,7 +107,7 @@ class AnalysisView(APIView):
                 try:
                     analyzer.profile(problem.inputs)
                 except Exception as e:
-                    return Response("POST NOT OK: {0}".format(str(e)), status=status.HTTP_400_BAD_REQUEST)
+                    return Response("POST NOAAT OK: {0}".format(str(e)), status=status.HTTP_400_BAD_REQUEST)
             analysis = analyzer.get_prog_dict()
             ### write comparison stats with reference problem to analysis dict
             comparison.write_comp(analysis, json.loads(problem.analysis))         
@@ -118,14 +118,14 @@ class AnalysisView(APIView):
             try:
                 percentage_score = analyzer.verify(problem)
             except Exception as e:
-                return Response("POST NOT OK: {0}".format(str(e)), status=status.HTTP_400_BAD_REQUEST)
+                return Response("POST NOT OKRR: {0}".format(str(e)), status=status.HTTP_400_BAD_REQUEST)
             ### check if all tests were passed, and only profile submission if so
             hundred_pc = float(percentage_score) == 100.0
             if hundred_pc:
                 try:
                     analyzer.profile(problem.inputs)
                 except Exception as e:
-                    return Response("POST NOT OK: {0}".format(str(e)), status=status.HTTP_400_BAD_REQUEST)
+                    return Response("PZ OST NOT OK: {0}".format(str(e)), status=status.HTTP_400_BAD_REQUEST)
             analysis = analyzer.get_prog_dict()
             ### write comparison stats with reference problem to analysis dict
             comparison.write_comp(analysis, json.loads(problem.analysis))
@@ -208,7 +208,7 @@ class SaveProblemView(APIView):
             analyzer.visit_ast()
         except Exception as e:
             os.remove(filename)
-            return Response("POST NOT OK: {0}".format(str(e)), status=status.HTTP_400_BAD_REQUEST)
+            return Response("POST NGOT OK: {0}".format(str(e)), status=status.HTTP_400_BAD_REQUEST)
         ### if the ast_visitor has picked up on any constraint violations then return appropriate error response
         ast_analysis = analyzer.get_prog_dict()
         validation_result = ast_checker.validate(ast_analysis, filename)
@@ -217,7 +217,7 @@ class SaveProblemView(APIView):
         if processed_data["input_files"] != [''] and processed_data["input_files"] is not None:
             make_utils.make_file(filename, processed_data["code"], source="file", input_type="file")
             file_json_inputs, files = make_utils.handle_uploaded_file_inputs(processed_data)
-            hashes = make_utils.gen_sample_hashes(filename, files, input_type="file")
+            outputs = make_utils.gen_sample_outputs(filename, files, input_type="file")
             for script in files:
                 os.remove(script)
             json_inputs = file_json_inputs
@@ -232,12 +232,12 @@ class SaveProblemView(APIView):
             analyzer.profile(json_inputs, solution=False)
             analysis = json.dumps(analyzer.get_prog_dict())
             ### get analysis and output hashes, and save to postgres DB in json format
-            hashes = make_utils.gen_sample_hashes(filename, json_inputs)
+            outputs = make_utils.gen_sample_outputs(filename, json_inputs)
 
         problem, created = Problem.objects.update_or_create(
             name=processed_data["name"], author_id=processed_data["author_id"],
             defaults = {
-                'hashes': json.dumps(hashes),
+                'outputs': json.dumps(outputs),
                 'metadata': json.dumps(processed_data["metadata"], default=str),
                 'inputs': json_inputs,
                 'analysis': analysis

@@ -70,30 +70,26 @@ def make_file(path, code, source="web", input_type="auto"):
 
         write_sequel(f, fname)
 
-def gen_sample_hashes(filename, inputs, input_type="auto"):
+def gen_sample_outputs(filename, inputs, input_type="auto"):
     """Utility function invoked whenever a reference problem is submitted
 
     Returns a list of output hashes that are subsequently stored in DB as field associated with given problem"""
     
-    def process_output(output, hashes):
-        output = output.replace(' ', '').replace('\n', '').replace('None', '') ### <= unsure why this is necessary??
-        samp_hash = hashlib.md5(output.encode()).hexdigest()
-        hashes.append(samp_hash)
 
-    hashes = []
+    outputs = []
     if input_type == "auto":
         programmatic_inputs = json.loads(inputs)
         for i in range(len(programmatic_inputs)):  
             s_process = subprocess.Popen(["python", filename, json.dumps(programmatic_inputs[i])], stdout=subprocess.PIPE)
-            output = s_process.stdout.read().decode("utf-8")
-            process_output(output, hashes)
-        return hashes
+            output = s_process.stdout.read().decode("utf-8").replace(' ', '').replace('\r', '').replace('None', '').splitlines()
+            outputs.append(output)
+        return outputs
     elif input_type == "file":
         for script in inputs:
             s_process = subprocess.Popen(["python", filename, script], stdout=subprocess.PIPE)
-            output = s_process.stdout.read().decode("utf-8")
-            process_output(output, hashes)
-        return hashes
+            output = s_process.stdout.read().decode("utf-8").replace(' ', '').replace('\r', '').replace('None', '').splitlines()
+            outputs.append(output)
+        return outputs
 
 def get_code_from_file(path):
     with open(path, 'r') as f:
