@@ -5,6 +5,8 @@ constraints:
   allowed_rel_imports: 
     os: ["listdir", "chdir"]
   disallowed_functions: ["eval", "print", "abs"]
-input_type: "integer"
+input_type:
+  auto:
+    "integer"
 input_length: 1000
 num_tests: 3

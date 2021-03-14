@@ -5,6 +5,8 @@ constraints:
   allowed_rel_imports:
     ast : ["parse", "walk"]
   disallowed_functions: ["eval", "print", "sorted"]
-input_type: "file"
+input_type:
+  file:
+    "string"
 input_length: 1
 num_tests: 3

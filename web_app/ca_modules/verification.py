@@ -17,16 +17,14 @@ class Verifier:
         self.__program_dict = analyzer.get_prog_dict()
         self.__sample_outputs = json.loads(paragon.outputs)
         self.__sample_inputs = json.loads(paragon.inputs)
-        self.__input_type = self.__get_input_type()
-        self.__test_stats = self.__detail_inputs()
         self.__meta = json.loads(paragon.metadata)
+        self.__input_type = self.__get_input_type()
+        print("IT =", self.__get_input_type())
+        self.__test_stats = self.__detail_inputs()
+        
 
     def __get_input_type(self):
-        if isinstance(self.__sample_inputs, dict):
-            if self.__sample_inputs.get("files", None) is not None:
-                return "file"
-        else:
-            return "auto"
+        return next(iter(self.__meta.get("input_type")))
 
     def __gen_sub_outputs(self):
         """Private utility method to make hashes from output of provided submission program.

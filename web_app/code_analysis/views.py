@@ -89,46 +89,27 @@ class AnalysisView(APIView):
         validation_result = ast_checker.validate(ast_analysis, filename)
         if isinstance(validation_result, Response):
             return validation_result
-        files = False
-        try:
-            if "files" in json.loads(problem.inputs).keys():
-                files = True
-        except Exception as e:
-            print(str(e))
-        if files:
+        
+        ### after discarding first file used during ast analysis, now create full-fledged script capable of processing inputs given from command line etc.
+        if next(iter(metadata.get("input_type"))) == "file":
             make_utils.make_file(filename, processed_data["code_data"], input_type="file")
-            try:
-                percentage_score = analyzer.verify(problem)
-            except Exception as e:
-                return Response("POST NOT OK: {0}".format(str(e)), status=status.HTTP_400_BAD_REQUEST)
-            ### check if all tests were passed, and only profile submission if so
-            hundred_pc = float(percentage_score) == 100.0
-            if hundred_pc:
-                try:
-                    analyzer.profile(problem.inputs)
-                except Exception as e:
-                    return Response("POST NOAAT OK: {0}".format(str(e)), status=status.HTTP_400_BAD_REQUEST)
-            analysis = analyzer.get_prog_dict()
-            ### write comparison stats with reference problem to analysis dict
-            comparison.write_comp(analysis, json.loads(problem.analysis))         
-        else:
-            ### after discarding first file used during ast analysis, now create full-fledged script capable of processing inputs given from command line etc.
+        elif next(iter(metadata.get("input_type"))) == "auto":
             make_utils.make_file(filename, processed_data["code_data"])
-            ### subject submission to verification process
+
+        try:
+            percentage_score = analyzer.verify(problem)
+        except Exception as e:
+            return Response("POST NOT OK: {0}".format(str(e)), status=status.HTTP_400_BAD_REQUEST)
+        ### check if all tests were passed, and only profile submission if so
+        hundred_pc = float(percentage_score) == 100.0
+        if hundred_pc:
             try:
-                percentage_score = analyzer.verify(problem)
+                analyzer.profile(problem.inputs)
             except Exception as e:
-                return Response("POST NOT OKRR: {0}".format(str(e)), status=status.HTTP_400_BAD_REQUEST)
-            ### check if all tests were passed, and only profile submission if so
-            hundred_pc = float(percentage_score) == 100.0
-            if hundred_pc:
-                try:
-                    analyzer.profile(problem.inputs)
-                except Exception as e:
-                    return Response("PZ OST NOT OK: {0}".format(str(e)), status=status.HTTP_400_BAD_REQUEST)
-            analysis = analyzer.get_prog_dict()
-            ### write comparison stats with reference problem to analysis dict
-            comparison.write_comp(analysis, json.loads(problem.analysis))
+                return Response("POST NOAAT OK: {0}".format(str(e)), status=status.HTTP_400_BAD_REQUEST)
+        analysis = analyzer.get_prog_dict()
+        ### write comparison stats with reference problem to analysis dict
+        comparison.write_comp(analysis, json.loads(problem.analysis))         
         ### only save submitted solution to db if all tests were passed, and hence submission was profiled, etc.
         if hundred_pc:
             solution, created = Solution.objects.update_or_create(
@@ -195,7 +176,7 @@ class SaveProblemView(APIView):
 
         filename = "{0}.py".format(processed_data["name"])
         ### just shortening overly verbose data references
-        input_type = processed_data["metadata"].get("input_type", None)
+        input_type = list(processed_data["metadata"].get("input_type").values())[0]
         input_length = processed_data["metadata"].get("input_length", None)
         num_tests = processed_data["metadata"].get("num_tests", None)
         ### make basic initial file from uploaded in-memory file obj for the purposes of ast parsing
@@ -222,7 +203,7 @@ class SaveProblemView(APIView):
             make_utils.make_file(filename, processed_data["code"], source="file", input_type="file")
             json_inputs, files = make_utils.handle_uploaded_file_inputs(processed_data)
             outputs = make_utils.gen_sample_outputs(filename, files, input_type="file")
-            
+
         elif processed_data["category"] == "default":
             ### make new script capable of being verified and profiled as above
             make_utils.make_file(filename, processed_data["code"], source="file")

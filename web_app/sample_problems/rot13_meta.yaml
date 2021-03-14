@@ -5,6 +5,8 @@ constraints:
   allowed_rel_imports:
     string : ["ascii_letters"]
   disallowed_functions": ["eval", "print", "sorted"]
-input_type: "string"
+input_type:
+  auto:
+    "string"
 input_length: 1000
 num_tests: 3
