@@ -1,12 +1,18 @@
-def list_functions_and_params(script):
+import ast
+
+def show_function_details(script):
+    function_details_list = []
     with open(script, 'r') as f:
-        script_text = f.readlines()
-        for line in script_text:
-            private = False
-            split_line = line.split()
-            if len(split_line) > 0 and split_line[0] == "def":
-                if split_line[1].startswith("_"):
-                    private = True
-                fname = split_line[1].split("(")[0]
-                params = line.split("(")[1].split("):")[0].replace(", ", ",")
-                print("{0}:{1}:{2}".format(fname, "private" if private else "public", params))
+        parsed_ast = ast.parse(f.read())
+    functions = [n for n in ast.walk(parsed_ast) if isinstance(n, ast.FunctionDef)]
+    for func in functions:
+        params = []
+        func_name = func.name
+        visibility = "private" if func_name.startswith("_") else "public"
+        for arg in func.args.args:
+            params.append(arg.arg)
+        fd_item = "{0}:{1}:{2}".format(func_name, visibility, ",".join(params))
+        if fd_item not in function_details_list:
+            function_details_list.append(fd_item)
+    for function_details in sorted(function_details_list, key=str.lower):
+        print(function_details)

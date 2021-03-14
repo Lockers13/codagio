@@ -52,6 +52,7 @@ class Verifier:
             cl_param = file_list[i] if len(file_list) != 0 else json.dumps(self.__sample_inputs[i])
             try:
                 output = run_subprocess_ctrld(base_cmd, self.__filename, cl_param)
+                print(output.decode("utf-8").replace('None', ''))
             except Exception as e:
                 raise Exception(str(e))
             stripped_sub = output.decode("utf-8").replace('\n', '').replace(' ', '').replace('\r', '').replace('None', '') ### added replacement of '\r' for windows
