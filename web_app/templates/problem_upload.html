@@ -1,32 +1,37 @@
-{% extends "base.html" %} {% load static %} {% load crispy_forms_tags %} {% block title %}CGC - Code for Code's Sake{% endblock %} {% block head %}
+{% extends "base.html" %} 
+{% load static %} 
+{% load crispy_forms_tags %}
 
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="preconnect" href="https://fonts.gstatic.com">
-    <link rel="stylesheet" href="{% static 'css/problem_upload.css' %}">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;700;800&display=swap" rel="stylesheet">
-</head>
-{% endblock %} {% block content %}
-    <div>
-        <br><h2><u>Upload Your Problem Below:</u></h2><br><br>
-        <form id="prob_form" action="" method="post" enc="multipart/form-data">
-            {% csrf_token %}
+{% block content %}
+    
+    <div class="row no-gutters">
+        <div class="col-sm-12 col-md-12 col-lg-12 col-xl-12 nopadding">
             <div>
-                <div class="form-group col-md-6 mb-0">{{ form.author_id }}</div><br><br>
-                <div class="form-group col-md-6 mb-0">Problem Name: {{ form.name }}</div><br><br>
-                <div class="form-group col-md-6 mb-0">Metadata File (.yaml format): {{ form.meta_file }}</div><br><br>
-                <div class="form-group col-md-6 mb-0">Problem Script: {{ form.program }}</div><br><br>
-                {% if cat == 'file_io' %}
-                    <div class="form-group col-md-6 mb-0">Custom Inputs Files: {{ form.input_files }}</div><br><br>
-                {% endif %}
-                <div class="form-group col-md-6 mb-0">Problem Description: {{ form.description }}</div>
-                {{ form.category }}
-            </div><br><br>
-            <button id="sub_btn" type="submit" class="btn btn-primary">Upload your problem!</button>
-        </form>
+                <h2 class="text-center">Upload Your Problem Below:</h2>
+            </div>
+            <div class="text-left upload_form">
+                <form id="prob_form" action="" method="post" enc="multipart/form-data">
+                    {% csrf_token %}
+                    <div>
+                        <div class="form-group col-sm-12 col-md-12 col-lg-12 col-xl-12">{{ form.author_id }}</div>
+                        <div class="form-group col-sm-12 col-md-12 col-lg-12 col-xl-12 item"><span class="input_title">Problem Name:</span> <span class="problem_name">{{ form.name }}</span></div>
+                        <div class="form-group col-sm-12 col-md-12 col-lg-12 col-xl-12 item"><span class="input_title">Metadata File (.yaml format):</span> {{ form.meta_file }}</div>
+                        <div class="form-group col-sm-12 col-md-12 col-lg-12 col-xl-12 item"><span class="input_title">Problem Script:</span> {{ form.program }}</div>
+                        {% if cat == 'file_io' %}
+                            <div class="form-group col-sm-12 col-md-12 col-lg-12 col-xl-12 item"><span class="input_title">Custom Inputs Files:</span> {{ form.input_files }}</div>
+                        {% endif %}
+                        <div class="form-group col-sm-12 col-md-12 col-lg-12 col-xl-12 item"><span class="input_title">Problem Description:</span><span class="problem_desc">{{ form.description }}</span></div>
+                        {{ form.category }}
+                    </div>
+                    <div class="text-center">
+                        <button id="sub_btn" type="submit" class="submit_form_btn">Upload your problem!</button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
 
 
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-<script type="text/javascript" src="{% static 'js/problem_upload.js' %}"></script> {% endblock %}
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script type="text/javascript" src="{% static 'js/problem_upload.js' %}"></script> 
+{% endblock %}

@@ -327,6 +327,58 @@ stroke: var(--black);
 }
 
 
+/* Upload Form Section */
+
+.upload_form{
+    margin-left: 100px;
+}
+
+.input_title{
+    font-size: 30px;
+    color: var(--green);
+}
+
+.problem_name input{
+    margin: 40px 0px;
+    width: 80%;
+    background-color: var(--black);
+    text-decoration: none;
+    border-style:solid;
+    border-style:none;
+    border-bottom: 3px solid var(--red);
+    color: var(--white);
+    font-size: 24px;
+}
+
+textarea:focus, input:focus{
+    outline: none;
+}
+
+.problem_desc textarea{
+    margin: 40px 0px;
+    width: 90%;
+    background-color: var(--black);
+    text-decoration: none;
+    border-style:solid;
+    border-style:none;
+    border: 3px solid var(--red);
+    color: var(--white);
+    font-size: 24px;
+}
+
+.item{
+    margin: 50px 0px;
+}
+
+.submit_form_btn{
+    background-color: var(--green);
+    border: 2px solid var(--green);
+    border-radius: 20px;
+    color: white;
+    width: 80%;  
+    margin-right: 10%;
+}
+
 
 
 /* Footer Section */
