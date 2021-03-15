@@ -12,7 +12,6 @@ from .models import Problem, Solution
 from users.models import Profile
 from django.shortcuts import render, redirect
 from . import forms as submission_forms
-from code_analysis.models import Problem
 from django.contrib.auth.models import User
 import yaml
 
@@ -52,7 +51,7 @@ class AnalysisView(APIView):
 
 
         processed_data = self.__process_request_data(request)
-
+        ### if an error response was returned from processing function, then return it from this view
         if isinstance(processed_data, Response):
             return processed_data
         ### get problem instance from DB
@@ -75,7 +74,7 @@ class AnalysisView(APIView):
         ### make basic initial file from code_data for the sole purposes of ast parsing
         with open(filename, 'w') as f:
             f.write(processed_data["code_data"])
-        ### analyze submitted solution against reference problem metadata
+        ### analyze submitted solution (at ast level) against reference problem metadata - passing metadata allows us to access constraint variables
         metadata = json.loads(problem.metadata)
         analyzer = Analyzer(filename, metadata)
         try:
@@ -83,32 +82,36 @@ class AnalysisView(APIView):
         except Exception as e:
             os.remove(filename)
             return Response("POST NOG\QT OK: {0}".format(str(e)), status=status.HTTP_400_BAD_REQUEST)
-        ### if the ast_visitor has picked up on any blacklisted imports/functions then return appropriate error status
+        
+        ### if the ast_visitor has picked up on any constraint violations then return appropriate error status
         ast_analysis = analyzer.get_prog_dict()
         ### validate results of ast analysis by checking length of certain lists that hold violation data, if any
         validation_result = ast_checker.validate(ast_analysis, filename)
         if isinstance(validation_result, Response):
             return validation_result
         
-        ### after discarding first file used during ast analysis, now create full-fledged script capable of processing inputs given from command line etc.
-        if next(iter(metadata.get("input_type"))) == "file":
+        ### after discarding first file used during ast analysis, now create full-fledged script capable of processing inputs passed from command line (cf. verification stage)
+        ### but first check what kind of problem input we are dealing with (viz. 'auto generated', 'file io', etc.)
+        input_type = next(iter(metadata.get("input_type")))
+        if input_type == "file":
             make_utils.make_file(filename, processed_data["code_data"], input_type="file")
-        elif next(iter(metadata.get("input_type"))) == "auto":
+        elif input_type == "auto":
             make_utils.make_file(filename, processed_data["code_data"])
-
+        ### verify the submitted solution against the appropriate reference problem
         try:
             percentage_score = analyzer.verify(problem)
         except Exception as e:
             return Response("POST NOT OK: {0}".format(str(e)), status=status.HTTP_400_BAD_REQUEST)
-        ### check if all tests were passed, and only profile submission if so
+        ### check if all tests were passed, and only profile submission if so (both lprof and cprof)
         hundred_pc = float(percentage_score) == 100.0
         if hundred_pc:
             try:
                 analyzer.profile(problem.inputs)
             except Exception as e:
                 return Response("POST NOAAT OK: {0}".format(str(e)), status=status.HTTP_400_BAD_REQUEST)
+        ### get analysis dict
         analysis = analyzer.get_prog_dict()
-        ### write comparison stats with reference problem to analysis dict
+        ### write comparison stats (with reference problem) to analysis dict
         comparison.write_comp(analysis, json.loads(problem.analysis))         
         ### only save submitted solution to db if all tests were passed, and hence submission was profiled, etc.
         if hundred_pc:
@@ -118,12 +121,12 @@ class AnalysisView(APIView):
                 defaults={'analysis': json.dumps(analysis), 'date_submitted': datetime.now()}
             )
             solution.save()
-        ### discard preprocessed script
+        ### discard preprocessed executable script
         try:
             os.remove(filename)
         except FileNotFoundError:
             pass
-        ### return analysis in form of http response
+        ### return analysis within successful http response
         return Response(json.dumps(analysis), status=status.HTTP_200_OK)
 
 class SaveProblemView(APIView):
@@ -162,7 +165,7 @@ class SaveProblemView(APIView):
         ### get data, process it, and handle errors
         data = request.data
         processed_data = self.__process_request_data(data)
-        
+        ### if an error response was returned from processing function, then return it from this view
         if isinstance(processed_data, Response):
             return processed_data
         ### get author instance from DB
@@ -175,11 +178,13 @@ class SaveProblemView(APIView):
             return Response("POST NOT OK: author db exception = {0}".format(str(e)), status=status.HTTP_400_BAD_REQUEST)
 
         filename = "{0}.py".format(processed_data["name"])
+
         ### just shortening overly verbose data references
-        input_type = list(processed_data["metadata"].get("input_type").values())[0]
+        input_type = next(iter(processed_data["metadata"].get("input_type")))
         input_length = processed_data["metadata"].get("input_length", None)
         num_tests = processed_data["metadata"].get("num_tests", None)
         ### make basic initial file from uploaded in-memory file obj for the purposes of ast parsing
+        ### chunk-wise write in order to prevent against massive file uploads overloading server
         with open(filename, 'wb+') as f:
             for chunk in processed_data["program_file"].chunks():
                 f.write(chunk)
@@ -192,42 +197,47 @@ class SaveProblemView(APIView):
             analyzer.visit_ast()
         except Exception as e:
             os.remove(filename)
-            return Response("POST NGOT OK: {0}".format(str(e)), status=status.HTTP_400_BAD_REQUEST)
+            return Response("POST NOT OK: {0}".format(str(e)), status=status.HTTP_400_BAD_REQUEST)
         ### if the ast_visitor has picked up on any constraint violations then return appropriate error response
         ast_analysis = analyzer.get_prog_dict()
         validation_result = ast_checker.validate(ast_analysis, filename)
         if isinstance(validation_result, Response):
             return validation_result
         
+        ### Depending on the type of uploaded problem, the processes for making an executable script, generating inputs, and generating outputs, will be different
+        ### These different eventualities are handled below
         if processed_data["category"] == "file_io":
+            ### make new script capable of being verified and profiled
             make_utils.make_file(filename, processed_data["code"], source="file", input_type="file")
-            json_inputs, files = make_utils.handle_uploaded_file_inputs(processed_data)
+            ### generate file inputs, given processed data
+            problem_inputs, files = make_utils.handle_uploaded_file_inputs(processed_data)
+            ### generate sample outputs, given file inputs
             outputs = make_utils.gen_sample_outputs(filename, files, input_type="file")
 
         elif processed_data["category"] == "default":
-            ### make new script capable of being verified and profiled as above
+            ### make new script capable of being verified and profiled
             make_utils.make_file(filename, processed_data["code"], source="file")
-            ### generate inputs, given metadata
-            json_inputs = make_utils.generate_input(input_type, input_length, num_tests)
-            ### get analysis and output hashes, and save to postgres DB in json format
-            outputs = make_utils.gen_sample_outputs(filename, json_inputs)
+            ### auto-generate inputs, given relevant metadata
+            problem_inputs = make_utils.generate_input(input_type, input_length, num_tests)
+            ### generate sample outputs, given auto-generated inputs
+            outputs = make_utils.gen_sample_outputs(filename, problem_inputs)
 
         ### profile uploaded reference problem (will only do cProfile and not line_profile as 'solution' is set to false)
-        analyzer.profile(json_inputs, solution=False)
+        analyzer.profile(problem_inputs, solution=False)
+        ### get final analysis dict
         analysis = json.dumps(analyzer.get_prog_dict())
-
+        ### save uploaded problem, with associated inputs, outputs, and metadata to DB
         problem, created = Problem.objects.update_or_create(
             name=processed_data["name"], author_id=processed_data["author_id"],
             defaults = {
                 'outputs': json.dumps(outputs),
                 'metadata': json.dumps(processed_data["metadata"], default=str),
-                'inputs': json_inputs,
+                'inputs': problem_inputs,
                 'analysis': analysis
                 }
             )
-
         problem.save()
-        ### finally remove artificially generated script from disk and return success response
+        ### finally remove previously generated executable script from disk and return success response
         try:
             os.remove(filename)
         except FileNotFoundError:
@@ -235,8 +245,11 @@ class SaveProblemView(APIView):
         return Response("POST OK", status=status.HTTP_200_OK)
 
 
-def solution_upload(request, prob_id):
+### below are to function based views for determining which forms are presented to users when they choose
+### either to upload a solution, or upload a problem
 
+def solution_upload(request, prob_id):
+    ### get problem (and all associated metadata) from DB, and set initial state accordingly
     problem = Problem.objects.get(id = prob_id)
     metadata = json.loads(problem.metadata)
     difficulty = metadata['difficulty']
@@ -247,10 +260,10 @@ def solution_upload(request, prob_id):
         'problem_id': prob_id,
         'solution': "",
     }
-
+    ### load appropriate form
     form = submission_forms.SolutionSubmissionForm(initial=initial_state)
 
-
+    ### set template context
     context = { 'title': 'CGC | Home',
                 'form': form,
                 'difficulty':difficulty,
@@ -261,18 +274,19 @@ def solution_upload(request, prob_id):
     return render(request, 'code.html', context)
 
 def problem_upload(request, problem_cat):
-
+    ### obviously, since the user is creating a problem, there is no problem data to retrieve from DB
+    ### nevertheless we minimally set the initial state of the form with the small amount of data we do have
     initial_state = {
         'author_id': request.user.id,
         'category': problem_cat,
     }
-
+    ### check the type of problem being uploaded, and load appropriate form
     if problem_cat == "default":
         form = submission_forms.DefaultProblemUploadForm(initial=initial_state)
     elif problem_cat == "file_io":
         form = submission_forms.IOProblemUploadForm(initial=initial_state)
 
-
+    ### set template context
     context = { 'title': 'CGC | Home',
                 'form': form,
                 'cat': problem_cat,
