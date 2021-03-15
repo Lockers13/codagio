@@ -15,7 +15,8 @@ class Profiler:
         self.__sample_inputs = json.loads(inputs)
         self.__input_type = self.__get_input_type()
         self.__offset = 3 ### this is the number of lines added during preprocessing, whereas calculation of function lineno during ast_visitor stage happens prior to preprocessing, so it must be offset
-
+    ### metadata is not passed into profiler, so we get the input type by checking the key of the input dict
+    ### Note: auto generated input should also be passed to DB as lists inside a dict with key 'auto' => this mod will require changes in several places
     def __get_input_type(self):
         if isinstance(self.__sample_inputs, dict):
             if self.__sample_inputs.get("files", None) is not None:

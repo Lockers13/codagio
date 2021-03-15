@@ -7,6 +7,7 @@ import hashlib
 import sys
 import random
 import string
+from . import subprocess_ctrl as spc
 
 def make_file(path, code, source="web", input_type="auto"):
     """Function to create script that is used for verification and profiling purposes
@@ -73,22 +74,27 @@ def make_file(path, code, source="web", input_type="auto"):
 def gen_sample_outputs(filename, inputs, input_type="auto"):
     """Utility function invoked whenever a reference problem is submitted
 
-    Returns a list of output hashes that are subsequently stored in DB as field associated with given problem"""
+    Returns a list of outputs that are subsequently stored in DB as field associated with given problem"""
     
-
+    platform = sys.platform.lower()
+    SAMPUP_TIMEOUT = "5"
+    SAMPUP_MEMOUT = "500"
+    timeout_cmd = "gtimeout {0}".format(SAMPUP_TIMEOUT) if platform == "darwin" else "timeout {0} -m {1}".format(SAMPUP_TIMEOUT, SAMPUP_MEMOUT) if platform == "linux" or platform == "linux2" else ""
+    base_cmd = "{0} python".format(timeout_cmd)
+    #run_subprocess_ctrld(base_cmd, filename, json_arg, stage="sample_upload")
     outputs = []
     if input_type == "auto":
         programmatic_inputs = json.loads(inputs)
         for i in range(len(programmatic_inputs)):  
-            s_process = subprocess.Popen(["python", filename, json.dumps(programmatic_inputs[i])], stdout=subprocess.PIPE)
-            output = s_process.stdout.read().decode("utf-8").replace(' ', '').replace('\r', '').replace('None', '').splitlines()
-            outputs.append(output)
+            output = spc.run_subprocess_ctrld(base_cmd, filename, json.dumps(programmatic_inputs[i]))
+            cleaned_split_output = output.decode("utf-8").replace('\r', '').replace('None', '').splitlines()
+            outputs.append(cleaned_split_output)
         return outputs
     elif input_type == "file":
         for script in inputs:
-            s_process = subprocess.Popen(["python", filename, script], stdout=subprocess.PIPE)
-            output = s_process.stdout.read().decode("utf-8").replace(' ', '').replace('\r', '').replace('None', '').splitlines()
-            outputs.append(output)
+            output = spc.run_subprocess_ctrld(base_cmd, filename, script)
+            cleaned_split_output = output.decode("utf-8").replace('\r', '').replace('None', '').splitlines()
+            outputs.append(cleaned_split_output)
             try:
                 os.remove(script)
             except:
@@ -109,7 +115,6 @@ def generate_input(input_type, input_length, num_tests):
         return rand_string
 
     global_inputs = []
-
     for i in range(num_tests):
         if input_type == "integer":
             inp_list = [random.randint(1, 1000) for x in range(input_length)]

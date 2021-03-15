@@ -179,10 +179,6 @@ class SaveProblemView(APIView):
 
         filename = "{0}.py".format(processed_data["name"])
 
-        ### just shortening overly verbose data references
-        input_type = next(iter(processed_data["metadata"].get("input_type")))
-        input_length = processed_data["metadata"].get("input_length", None)
-        num_tests = processed_data["metadata"].get("num_tests", None)
         ### make basic initial file from uploaded in-memory file obj for the purposes of ast parsing
         ### chunk-wise write in order to prevent against massive file uploads overloading server
         with open(filename, 'wb+') as f:
@@ -215,6 +211,10 @@ class SaveProblemView(APIView):
             outputs = make_utils.gen_sample_outputs(filename, files, input_type="file")
 
         elif processed_data["category"] == "default":
+            ### just shortening overly verbose data references
+            input_type = processed_data["metadata"].get("input_type")["auto"]
+            input_length = processed_data["metadata"].get("input_length", None)
+            num_tests = processed_data["metadata"].get("num_tests", None)
             ### make new script capable of being verified and profiled
             make_utils.make_file(filename, processed_data["code"], source="file")
             ### auto-generate inputs, given relevant metadata
