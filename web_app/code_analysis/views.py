@@ -135,6 +135,19 @@ class SaveProblemView(APIView):
     ### only allow 'post' requests to this api endpoint
     http_method_names = ['post']
 
+    def __validate_custom_inputs(self, custom_input):
+        try:
+            jsonified_input = json.loads(custom_input)
+            if len(jsonified_input) > 3:
+                return Response("POST NOT OK: Too many tests!", status=status.HTTP_400_BAD_REQUEST)
+            else:
+                for json_input in jsonified_input:
+                    if not isinstance(json_input, list):
+                        return Response("POST NOT OK: Incorrectly formatted custom inputs!", status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response("POST NOT OK: {0}".format(str(e)), status=status.HTTP_400_BAD_REQUEST)
+        return True
+
     def __process_request_data(self, data):
         """Utility function to process received request data. Takes data object (dict) as argument
 
@@ -219,6 +232,9 @@ class SaveProblemView(APIView):
             ### or whether they are to be auto generated as per specifications of metadata file
             if processed_data["custom_inputs"] is not None:
                 problem_inputs = processed_data["custom_inputs"].read().decode("utf-8")
+                validated_input = self.__validate_custom_inputs(problem_inputs)
+                if isinstance(validated_input, Response):
+                    return validated_input
             else:
                 ### just shortening overly verbose data references
                 input_type = processed_data["metadata"].get("input_type")["auto"]
