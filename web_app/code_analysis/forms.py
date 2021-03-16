@@ -1,5 +1,8 @@
 from django import forms
 
+CHOICES=[('Auto','Auto'),
+         ('Custom','Custom')]
+
 class SolutionSubmissionForm(forms.Form):
     problem_id = forms.IntegerField(widget=forms.HiddenInput(), required=True)
     user_id = forms.IntegerField(widget=forms.HiddenInput(), required=True)
@@ -21,3 +24,5 @@ class DefaultProblemUploadForm(forms.Form):
     program = forms.FileField()
     meta_file = forms.FileField()
     category = forms.CharField(widget=forms.HiddenInput(), required=True)
+    input_type = forms.ChoiceField(widget = forms.Select(), choices = ([('Auto','Auto'),
+         ('Custom','Custom') ]), initial='Auto', required = True)

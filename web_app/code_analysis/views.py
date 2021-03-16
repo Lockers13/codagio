@@ -145,6 +145,7 @@ class SaveProblemView(APIView):
             processed_data["author_id"] = int(data.get("author_id"))
             processed_data["category"] = data.get("category")
             processed_data["input_files"] = data.getlist("input_files", None)
+            processed_data["custom_inputs"] = data.get("custom_inputs", None)
             processed_data["name"] = data.get("name")
             description = data.get("description")
             processed_data["program_file"] = data.get("program")
@@ -164,6 +165,7 @@ class SaveProblemView(APIView):
 
         ### get data, process it, and handle errors
         data = request.data
+        print("HEYO DATA =>", data)
         processed_data = self.__process_request_data(data)
         ### if an error response was returned from processing function, then return it from this view
         if isinstance(processed_data, Response):
@@ -211,14 +213,19 @@ class SaveProblemView(APIView):
             outputs = make_utils.gen_sample_outputs(filename, files, input_type="file")
 
         elif processed_data["category"] == "default":
-            ### just shortening overly verbose data references
-            input_type = processed_data["metadata"].get("input_type")["auto"]
-            input_length = processed_data["metadata"].get("input_length", None)
-            num_tests = processed_data["metadata"].get("num_tests", None)
             ### make new script capable of being verified and profiled
             make_utils.make_file(filename, processed_data["code"], source="file")
-            ### auto-generate inputs, given relevant metadata
-            problem_inputs = make_utils.generate_input(input_type, input_length, num_tests)
+            ### check whether custom inputs are provided (in json format), 
+            ### or whether they are to be auto generated as per specifications of metadata file
+            if processed_data["custom_inputs"] is not None:
+                problem_inputs = processed_data["custom_inputs"].read().decode("utf-8")
+            else:
+                ### just shortening overly verbose data references
+                input_type = processed_data["metadata"].get("input_type")["auto"]
+                input_length = processed_data["metadata"].get("input_length", None)
+                num_tests = processed_data["metadata"].get("num_tests", None)
+                ### auto-generate inputs, given relevant metadata
+                problem_inputs = make_utils.generate_input(input_type, input_length, num_tests)
             ### generate sample outputs, given auto-generated inputs
             outputs = make_utils.gen_sample_outputs(filename, problem_inputs)
 
@@ -245,7 +252,7 @@ class SaveProblemView(APIView):
         return Response("POST OK", status=status.HTTP_200_OK)
 
 
-### below are to function based views for determining which forms are presented to users when they choose
+### below are two function based views for determining which forms are presented to users when they choose
 ### either to upload a solution, or upload a problem
 
 def solution_upload(request, prob_id):
@@ -260,6 +267,7 @@ def solution_upload(request, prob_id):
         'problem_id': prob_id,
         'solution': "",
     }
+
     ### load appropriate form
     form = submission_forms.SolutionSubmissionForm(initial=initial_state)
 
