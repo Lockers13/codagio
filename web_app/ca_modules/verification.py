@@ -22,9 +22,7 @@ class Verifier:
     def __get_sample_inputs_and_type(self, inputs):
 
         input_dict = inputs
-        print("idddddd =", type(input_dict))
         input_type = next(iter(input_dict))
-        print("ittttt =", input_type)
         if input_type == "files":
             inputs = input_dict
         elif input_type == "default":
@@ -45,12 +43,10 @@ class Verifier:
         timeout_cmd = "gtimeout {0}".format(VERIF_TIMEOUT) if platform == "darwin" else "timeout {0} -m {1}".format(VERIF_TIMEOUT, VERIF_MEMOUT) if platform == "linux" or platform == "linux2" else ""
         base_cmd = "{0} python".format(timeout_cmd)
         file_list = []
-        print(self.__input_type)
 
         ### if input_type is 'file', then iterate over input dict, writing each file to disk as 'file1, file2, filen'
         if self.__input_type == "files":
             for k, v in self.__sample_inputs["files"].items():
-                print(k, v)
                 with open("{0}.py".format(k), 'w') as f:
                     f.write(v)
                 file_list.append("{0}.py".format(k))
@@ -58,11 +54,9 @@ class Verifier:
             pass
         # if we are dealing with files, then we loop over those files, otherwise we loop over the auto generated inputs
         loop_len = len(file_list) if len(file_list) != 0 else len(self.__sample_inputs)
-        print(file_list)
         for i in range(loop_len): 
             ### at this point, the argument we pass from command line is either a script, or an auto-generated piece of json
             cl_param = file_list[i] if self.__input_type == "files" else json.dumps(self.__sample_inputs[i])
-            print(cl_param)
             try:
                 output = run_subprocess_ctrld(base_cmd, self.__filename, cl_param)
             except Exception as e:
@@ -116,7 +110,6 @@ class Verifier:
             test["status"] = status
             test["input_length"] = test_stats[1][count]
             test["input_type"] = test_stats[2][count]
-        print(test)
 
         ### store score as string
         percentage_score = round(overall_score/len(sample_outputs), 4) * 100

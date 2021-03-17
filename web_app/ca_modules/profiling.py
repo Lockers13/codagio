@@ -218,7 +218,6 @@ class Profiler:
         # call cProfile as subprocess, redirecting stdout to pipe, and read results, as before
         timeout_cmd = "gtimeout {0}".format(CPROF_TIMEOUT) if platform == "darwin" else "timeout {0} -m {1}".format(CPROF_TIMEOUT, CPROF_MEMOUT) if platform == "linux" or platform == "linux2" else ""
         base_cmd = "{0} python -m cProfile -s time".format(timeout_cmd) 
-        print(self.__input_type)
         if self.__input_type == "files":
             with open('cprof_script.py', 'w') as f:
                 f.write(self.__sample_inputs["files"]["file_1"])
