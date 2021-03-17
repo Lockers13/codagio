@@ -101,7 +101,7 @@ class AnalysisView(APIView):
         try:
             percentage_score = analyzer.verify(problem)
         except Exception as e:
-            return Response("POST NOT OK: {0}".format(str(e)), status=status.HTTP_400_BAD_REQUEST)
+            return Response("POST NObT OK: {0}".format(str(e)), status=status.HTTP_400_BAD_REQUEST)
         ### check if all tests were passed, and only profile submission if so (both lprof and cprof)
         hundred_pc = float(percentage_score) == 100.0
         if hundred_pc:
@@ -137,12 +137,12 @@ class SaveProblemView(APIView):
 
     def __validate_custom_inputs(self, custom_input):
         try:
-            jsonified_input = json.loads(custom_input)
-            if len(jsonified_input) > 3:
+            custom_input
+            if len(custom_input) > 3:
                 return Response("POST NOT OK: Too many tests!", status=status.HTTP_400_BAD_REQUEST)
             else:
-                for json_input in jsonified_input:
-                    if not isinstance(json_input, list):
+                for inp in custom_input:
+                    if not isinstance(inp, list):
                         return Response("POST NOT OK: Incorrectly formatted custom inputs!", status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             return Response("POST NOT OK: {0}".format(str(e)), status=status.HTTP_400_BAD_REQUEST)
@@ -157,7 +157,7 @@ class SaveProblemView(APIView):
         try:
             processed_data["author_id"] = int(data.get("author_id"))
             processed_data["category"] = data.get("category")
-            processed_data["input_files"] = data.getlist("input_files", None)
+            processed_data["extra_input_files"] = data.getlist("extra_input_files", None)
             processed_data["custom_inputs"] = data.get("custom_inputs", None)
             processed_data["name"] = data.get("name")
             description = data.get("description")
@@ -178,7 +178,6 @@ class SaveProblemView(APIView):
 
         ### get data, process it, and handle errors
         data = request.data
-        print("HEYO DATA =>", data)
         processed_data = self.__process_request_data(data)
         ### if an error response was returned from processing function, then return it from this view
         if isinstance(processed_data, Response):
@@ -214,7 +213,7 @@ class SaveProblemView(APIView):
         validation_result = ast_checker.validate(ast_analysis, filename)
         if isinstance(validation_result, Response):
             return validation_result
-        
+
         ### Depending on the type of uploaded problem, the processes for making an executable script, generating inputs, and generating outputs, will be different
         ### These different eventualities are handled below
         if processed_data["category"] == "file_io":
@@ -224,17 +223,21 @@ class SaveProblemView(APIView):
             problem_inputs, files = make_utils.handle_uploaded_file_inputs(processed_data)
             ### generate sample outputs, given file inputs
             outputs = make_utils.gen_sample_outputs(filename, files, input_type="file")
+            input_hash = problem_inputs
 
         elif processed_data["category"] == "default":
+            input_hash = {}
+            input_hash["default"] = {}
             ### make new script capable of being verified and profiled
             make_utils.make_file(filename, processed_data["code"], source="file")
             ### check whether custom inputs are provided (in json format), 
             ### or whether they are to be auto generated as per specifications of metadata file
             if processed_data["custom_inputs"] is not None:
-                problem_inputs = processed_data["custom_inputs"].read().decode("utf-8")
+                problem_inputs = json.loads(processed_data["custom_inputs"].read().decode("utf-8"))
                 validated_input = self.__validate_custom_inputs(problem_inputs)
                 if isinstance(validated_input, Response):
                     return validated_input
+                input_hash["default"]["custom"] = problem_inputs
             else:
                 ### just shortening overly verbose data references
                 input_type = processed_data["metadata"].get("input_type")["auto"]
@@ -242,20 +245,23 @@ class SaveProblemView(APIView):
                 num_tests = processed_data["metadata"].get("num_tests", None)
                 ### auto-generate inputs, given relevant metadata
                 problem_inputs = make_utils.generate_input(input_type, input_length, num_tests)
+                input_hash["default"]["auto"] = problem_inputs
             ### generate sample outputs, given auto-generated inputs
             outputs = make_utils.gen_sample_outputs(filename, problem_inputs)
 
+        input_hash = json.dumps(input_hash)
         ### profile uploaded reference problem (will only do cProfile and not line_profile as 'solution' is set to false)
-        analyzer.profile(problem_inputs, solution=False)
+        analyzer.profile(input_hash, solution=False)
         ### get final analysis dict
         analysis = json.dumps(analyzer.get_prog_dict())
+        
         ### save uploaded problem, with associated inputs, outputs, and metadata to DB
         problem, created = Problem.objects.update_or_create(
             name=processed_data["name"], author_id=processed_data["author_id"],
             defaults = {
                 'outputs': json.dumps(outputs),
                 'metadata': json.dumps(processed_data["metadata"], default=str),
-                'inputs': problem_inputs,
+                'inputs': input_hash,
                 'analysis': analysis
                 }
             )

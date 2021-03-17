@@ -12,17 +12,20 @@ class Profiler:
         self.__filename = analyzer.get_filename()
         self.__program_dict = analyzer.get_prog_dict()
         self.__udef_info = self.__get_udef_info()
-        self.__sample_inputs = json.loads(inputs)
-        self.__input_type = self.__get_input_type()
+        self.__sample_inputs, self.__input_type = self.__get_sample_inputs_and_type(inputs)
         self.__offset = 3 ### this is the number of lines added during preprocessing, whereas calculation of function lineno during ast_visitor stage happens prior to preprocessing, so it must be offset
     ### metadata is not passed into profiler, so we get the input type by checking the key of the input dict
     ### Note: auto generated input should also be passed to DB as lists inside a dict with key 'auto' => this mod will require changes in several places
-    def __get_input_type(self):
-        if isinstance(self.__sample_inputs, dict):
-            if self.__sample_inputs.get("files", None) is not None:
-                return "file"
-        else:
-            return "auto"
+    
+    def __get_sample_inputs_and_type(self, inputs):
+        input_dict = json.loads(inputs)
+        input_type = next(iter(input_dict))
+        if input_type == "files":
+            inputs = input_dict
+        elif input_type == "default":
+            custom_or_auto = next(iter(input_dict[input_type]))
+            inputs = input_dict[input_type][custom_or_auto]
+        return inputs, input_type
 
     def __get_udef_info(self):
         """Utility method to make user function defintiion info collected by ast visitor more easily accessible.
@@ -143,12 +146,12 @@ class Profiler:
 
             base_cmd = "{0} kernprof -l -v".format(timeout_cmd)
 
-            if self.__input_type == "file":
+            if self.__input_type == "files":
                 with open('lprof_script.py', 'w') as f:
                     f.write(self.__sample_inputs["files"]["file_1"])
                 output = run_subprocess_ctrld(base_cmd, pro_file, "lprof_script.py", stage="line_profile")
                 os.remove("lprof_script.py")
-            else:
+            elif self.__input_type == "default":
                 json_str = json.dumps(self.__sample_inputs[0])
                 # crucially, readlines() is blocking for pipes
                 output = run_subprocess_ctrld(base_cmd, pro_file, json_str, stage="line_profile")
@@ -215,12 +218,13 @@ class Profiler:
         # call cProfile as subprocess, redirecting stdout to pipe, and read results, as before
         timeout_cmd = "gtimeout {0}".format(CPROF_TIMEOUT) if platform == "darwin" else "timeout {0} -m {1}".format(CPROF_TIMEOUT, CPROF_MEMOUT) if platform == "linux" or platform == "linux2" else ""
         base_cmd = "{0} python -m cProfile -s time".format(timeout_cmd) 
-        if self.__input_type == "file":
+        print(self.__input_type)
+        if self.__input_type == "files":
             with open('cprof_script.py', 'w') as f:
                 f.write(self.__sample_inputs["files"]["file_1"])
             output = run_subprocess_ctrld(base_cmd, self.__filename, "cprof_script.py", stage="c_profile")
             os.remove("cprof_script.py")
-        else:
+        elif self.__input_type == "default":
             json_str = json.dumps(self.__sample_inputs[0])
             output = run_subprocess_ctrld(base_cmd, self.__filename, json_str, stage="c_profile")
 

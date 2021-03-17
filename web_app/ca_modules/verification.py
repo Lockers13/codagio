@@ -16,15 +16,21 @@ class Verifier:
         self.__filename = analyzer.get_filename()
         self.__program_dict = analyzer.get_prog_dict()
         self.__sample_outputs = json.loads(paragon.outputs)
-        self.__sample_inputs = json.loads(paragon.inputs)
         self.__meta = json.loads(paragon.metadata)
-        self.__input_type = self.__get_input_type()
-        self.__test_stats = self.__detail_inputs()
-        
+        self.__sample_inputs, self.__input_type = self.__get_sample_inputs_and_type(json.loads(paragon.inputs))
 
-    def __get_input_type(self):
-        ### only one key in meta[input_type] dict so, this gets the name of that single key
-        return next(iter(self.__meta.get("input_type")))
+    def __get_sample_inputs_and_type(self, inputs):
+
+        input_dict = inputs
+        print("idddddd =", type(input_dict))
+        input_type = next(iter(input_dict))
+        print("ittttt =", input_type)
+        if input_type == "files":
+            inputs = input_dict
+        elif input_type == "default":
+            custom_or_auto = next(iter(input_dict[input_type]))
+            inputs = input_dict[input_type][custom_or_auto]
+        return inputs, input_type
 
     def __gen_sub_outputs(self):
         """Private utility method to make hashes from output of provided submission program.
@@ -39,25 +45,28 @@ class Verifier:
         timeout_cmd = "gtimeout {0}".format(VERIF_TIMEOUT) if platform == "darwin" else "timeout {0} -m {1}".format(VERIF_TIMEOUT, VERIF_MEMOUT) if platform == "linux" or platform == "linux2" else ""
         base_cmd = "{0} python".format(timeout_cmd)
         file_list = []
+        print(self.__input_type)
 
         ### if input_type is 'file', then iterate over input dict, writing each file to disk as 'file1, file2, filen'
-
-        if self.__input_type == "file":
+        if self.__input_type == "files":
             for k, v in self.__sample_inputs["files"].items():
+                print(k, v)
                 with open("{0}.py".format(k), 'w') as f:
                     f.write(v)
                 file_list.append("{0}.py".format(k))
-
+        elif self.__input_type == "default":
+            pass
         # if we are dealing with files, then we loop over those files, otherwise we loop over the auto generated inputs
         loop_len = len(file_list) if len(file_list) != 0 else len(self.__sample_inputs)
-        
+        print(file_list)
         for i in range(loop_len): 
             ### at this point, the argument we pass from command line is either a script, or an auto-generated piece of json
-            cl_param = file_list[i] if len(file_list) != 0 else json.dumps(self.__sample_inputs[i])
+            cl_param = file_list[i] if self.__input_type == "files" else json.dumps(self.__sample_inputs[i])
+            print(cl_param)
             try:
                 output = run_subprocess_ctrld(base_cmd, self.__filename, cl_param)
             except Exception as e:
-                raise Exception("{0}".format(str(e)))
+                raise Exception("hhh{0}".format(str(e)))
             ### clean up the returned output of subprocess - '\r' for windows, and 'None' because sometimes python sp.Popen adds this at the end (probably return value)
             cleaned_split_output = output.decode("utf-8").replace('\r', '').replace('None', '').splitlines()
             sub_outputs.append(cleaned_split_output)
@@ -71,12 +80,12 @@ class Verifier:
 
         Returns tuple of relevant datapoints"""
 
-        if self.__input_type == "file":
+        if self.__input_type == "files":
             num_tests = len(self.__sample_inputs["files"].keys())
             ### one liner to get number of lines in each file (in a list => [len(file1), len(file2), len(fileN)])
             input_lengths = ["# lines: {0}".format(len(v.splitlines())) for k,v in self.__sample_inputs["files"].items()]
             input_types = ["file" for x in range(num_tests)]
-        elif self.__input_type == "auto":
+        elif self.__input_type == "default":
             num_tests = len(self.__sample_inputs)
             input_lengths = [len(inp) for inp in self.__sample_inputs]
             input_types = [type(inp[0]).__name__.lower() for inp in self.__sample_inputs]
@@ -92,7 +101,7 @@ class Verifier:
         self.__program_dict["scores"] = {}
         scores = self.__program_dict["scores"]
         ### stores input details (cf. __init__)
-        test_stats = self.__test_stats
+        test_stats = self.__detail_inputs()
 
         overall_score = 0
         ### loop to compare sub output with sample output in one go, as if they were two columns, one beside the other
@@ -107,6 +116,7 @@ class Verifier:
             test["status"] = status
             test["input_length"] = test_stats[1][count]
             test["input_type"] = test_stats[2][count]
+        print(test)
 
         ### store score as string
         percentage_score = round(overall_score/len(sample_outputs), 4) * 100

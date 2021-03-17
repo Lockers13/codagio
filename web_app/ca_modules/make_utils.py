@@ -84,7 +84,7 @@ def gen_sample_outputs(filename, inputs, input_type="auto"):
     #run_subprocess_ctrld(base_cmd, filename, json_arg, stage="sample_upload")
     outputs = []
     if input_type == "auto":
-        programmatic_inputs = json.loads(inputs)
+        programmatic_inputs = inputs
         for i in range(len(programmatic_inputs)):  
             output = spc.run_subprocess_ctrld(base_cmd, filename, json.dumps(programmatic_inputs[i]))
             cleaned_split_output = output.decode("utf-8").replace('\r', '').replace('None', '').splitlines()
@@ -123,12 +123,12 @@ def generate_input(input_type, input_length, num_tests):
         elif input_type == "string":
             inp_list = [random_string(random.randint(1, 10)) for x in range(input_length)]
         global_inputs.append(inp_list)
-    return json.dumps(global_inputs)
+    return global_inputs
 
 def handle_uploaded_file_inputs(processed_data):
     input_dict = {"files": {}}
     files = []
-    for count, file_obj in enumerate(processed_data.get("input_files")):
+    for count, file_obj in enumerate(processed_data.get("extra_input_files")):
         input_dict["files"]["file_{0}".format(count+1)] = ""
         with open("file_{0}.py".format(count+1), 'w') as g:
             for chunk in file_obj.chunks():
@@ -136,4 +136,4 @@ def handle_uploaded_file_inputs(processed_data):
                 input_dict["files"]["file_{0}".format(count+1)] += decoded_chunk
             g.write(decoded_chunk)
             files.append("file_{0}.py".format(count+1))
-    return json.dumps(input_dict), files
+    return input_dict, files

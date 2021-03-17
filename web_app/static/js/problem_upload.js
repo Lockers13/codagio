@@ -16,7 +16,7 @@ $("#prob_form").submit(function(e) {
     }
 
     var input_elems =[]
-    var name_str_list = ["program", "meta_file", "custom_inputs", "input_files"]
+    var name_str_list = ["program", "meta_file", "custom_inputs", "extra_input_files"]
 
     for(let index = 0; index < name_str_list.length; index++) {
         get_elem_if_any(name_str_list[index], input_elems)

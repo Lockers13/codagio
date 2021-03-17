@@ -15,7 +15,7 @@ class IOProblemUploadForm(forms.Form):
     category = forms.CharField(widget=forms.HiddenInput(), required=True)
     program = forms.FileField()
     meta_file = forms.FileField()
-    input_files = forms.FileField(required=True, widget=forms.ClearableFileInput(attrs={'multiple': True}))
+    extra_input_files = forms.FileField(required=True, widget=forms.ClearableFileInput(attrs={'multiple': True}))
 
 class DefaultProblemUploadForm(forms.Form):
     author_id = forms.IntegerField(widget=forms.HiddenInput(), required=True)
