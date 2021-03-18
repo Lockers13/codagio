@@ -21,6 +21,17 @@ class AnalysisView(APIView):
     ### only 'post' requests to this API endpoint are allowed
     http_method_names = ['post']
 
+    def __load_problem_json(self, problem):
+        problem_data = {}
+        try:
+            problem_data["metadata"] = json.loads(problem.metadata)
+            problem_data["inputs"] = json.loads(problem.inputs)
+            problem_data["outputs"] = json.loads(problem.outputs)
+            problem_data["analysis"] = json.loads(problem.analysis)
+        except Exception as e:
+            return Response("POST NOT OK: Error during loading of problem json - {0}".format(str(e)), status=status.HTTP_400_BAD_REQUEST)
+        return problem_data
+
     def __process_request_data(self, request):
         """Quick utility function that groups together the processing of request data. Allows for easier handling of exceptions
         Takes request object as argument
@@ -49,7 +60,6 @@ class AnalysisView(APIView):
                 )
             return True
 
-
         processed_data = self.__process_request_data(request)
         ### if an error response was returned from processing function, then return it from this view
         if isinstance(processed_data, Response):
@@ -59,6 +69,11 @@ class AnalysisView(APIView):
             problem = Problem.objects.filter(id=processed_data["prob_id"]).first()
         except Exception as e:
             return Response("POST NOT OK: reference problem db exception = {0}".format(str(e)), status=status.HTTP_400_BAD_REQUEST)
+        
+        problem_data = self.__load_problem_json(problem)
+
+        if isinstance(problem_data, Response):
+            return problem_data
 
         prob_name = problem.name
         ### get user instance from DB
@@ -74,9 +89,9 @@ class AnalysisView(APIView):
         ### make basic initial file from code_data for the sole purposes of ast parsing
         with open(filename, 'w') as f:
             f.write(processed_data["code_data"])
+
         ### analyze submitted solution (at ast level) against reference problem metadata - passing metadata allows us to access constraint variables
-        metadata = json.loads(problem.metadata)
-        analyzer = Analyzer(filename, metadata)
+        analyzer = Analyzer(filename, problem_data["metadata"])
         try:
             analyzer.visit_ast()
         except Exception as e:
@@ -92,27 +107,27 @@ class AnalysisView(APIView):
         
         ### after discarding first file used during ast analysis, now create full-fledged script capable of processing inputs passed from command line (cf. verification stage)
         ### but first check what kind of problem input we are dealing with (viz. 'auto generated', 'file io', etc.)
-        input_type = next(iter(metadata.get("input_type")))
+        input_type = next(iter(problem_data["metadata"].get("input_type")))
         if input_type == "file":
             make_utils.make_file(filename, processed_data["code_data"], input_type="file")
         elif input_type == "auto":
             make_utils.make_file(filename, processed_data["code_data"])
         ### verify the submitted solution against the appropriate reference problem
         try:
-            percentage_score = analyzer.verify(problem)
+            percentage_score = analyzer.verify(problem_data)
         except Exception as e:
             return Response("POST NObT OK: {0}".format(str(e)), status=status.HTTP_400_BAD_REQUEST)
         ### check if all tests were passed, and only profile submission if so (both lprof and cprof)
         hundred_pc = float(percentage_score) == 100.0
         if hundred_pc:
             try:
-                analyzer.profile(problem.inputs)
+                analyzer.profile(problem_data["inputs"])
             except Exception as e:
                 return Response("POST NOAAT OK: {0}".format(str(e)), status=status.HTTP_400_BAD_REQUEST)
         ### get analysis dict
         analysis = analyzer.get_prog_dict()
         ### write comparison stats (with reference problem) to analysis dict
-        comparison.write_comp(analysis, json.loads(problem.analysis))         
+        comparison.write_comp(analysis, problem_data["analysis"])         
         ### only save submitted solution to db if all tests were passed, and hence submission was profiled, etc.
         if hundred_pc:
             solution, created = Solution.objects.update_or_create(
@@ -145,7 +160,7 @@ class SaveProblemView(APIView):
                     if not isinstance(inp, list):
                         return Response("POST NOT OK: Incorrectly formatted custom inputs!", status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
-            return Response("POST NOT OK: {0}".format(str(e)), status=status.HTTP_400_BAD_REQUEST)
+            return Response("POST 1NOT OK: {0}".format(str(e)), status=status.HTTP_400_BAD_REQUEST)
         return True
 
     def __process_request_data(self, data):
@@ -194,11 +209,11 @@ class SaveProblemView(APIView):
         filename = "{0}.py".format(processed_data["name"])
 
         ### make basic initial file from uploaded in-memory file obj for the purposes of ast parsing
-        ### chunk-wise write in order to prevent against massive file uploads overloading server
+        ### chunkwise writing is unnecessay since we impose file size restrictions of the client side, but we leave it in anyway (as probably more efficient to deal with bytes rather than decoded strings)
         with open(filename, 'wb+') as f:
             for chunk in processed_data["program_file"].chunks():
                 f.write(chunk)
-
+    
         ### create analyzer instance, passing script to be visited by ast_visitor, as well as uploaded metadata...subsequent checks may be overkill - needs review (are you really going to violate your own constraints? maybe by accident...)
         analyzer = Analyzer(filename, processed_data["metadata"])
 
@@ -207,10 +222,11 @@ class SaveProblemView(APIView):
             analyzer.visit_ast()
         except Exception as e:
             os.remove(filename)
-            return Response("POST NOT OK: {0}".format(str(e)), status=status.HTTP_400_BAD_REQUEST)
+            return Response("POST NOfdbT OK: {0}".format(str(e)), status=status.HTTP_400_BAD_REQUEST)
         ### if the ast_visitor has picked up on any constraint violations then return appropriate error response
         ast_analysis = analyzer.get_prog_dict()
         validation_result = ast_checker.validate(ast_analysis, filename)
+        
         if isinstance(validation_result, Response):
             return validation_result
 
@@ -246,14 +262,13 @@ class SaveProblemView(APIView):
                 ### auto-generate inputs, given relevant metadata
                 problem_inputs = make_utils.generate_input(input_type, input_length, num_tests)
                 input_hash["default"]["auto"] = problem_inputs
-            ### generate sample outputs, given auto-generated inputs
+            ### generate sample outputs, given auto-generated or custom inputs
             outputs = make_utils.gen_sample_outputs(filename, problem_inputs)
 
-        input_hash = json.dumps(input_hash)
         ### profile uploaded reference problem (will only do cProfile and not line_profile as 'solution' is set to false)
         analyzer.profile(input_hash, solution=False)
         ### get final analysis dict
-        analysis = json.dumps(analyzer.get_prog_dict())
+        analysis = analyzer.get_prog_dict()
         
         ### save uploaded problem, with associated inputs, outputs, and metadata to DB
         problem, created = Problem.objects.update_or_create(
@@ -261,8 +276,8 @@ class SaveProblemView(APIView):
             defaults = {
                 'outputs': json.dumps(outputs),
                 'metadata': json.dumps(processed_data["metadata"], default=str),
-                'inputs': input_hash,
-                'analysis': analysis
+                'inputs': json.dumps(input_hash),
+                'analysis': json.dumps(analysis)
                 }
             )
         problem.save()
@@ -272,7 +287,6 @@ class SaveProblemView(APIView):
         except FileNotFoundError:
             pass
         return Response("POST OK", status=status.HTTP_200_OK)
-
 
 ### below are two function based views for determining which forms are presented to users when they choose
 ### either to upload a solution, or upload a problem

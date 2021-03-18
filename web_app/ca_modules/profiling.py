@@ -18,7 +18,7 @@ class Profiler:
     ### Note: auto generated input should also be passed to DB as lists inside a dict with key 'auto' => this mod will require changes in several places
     
     def __get_sample_inputs_and_type(self, inputs):
-        input_dict = json.loads(inputs)
+        input_dict = inputs
         input_type = next(iter(input_dict))
         if input_type == "files":
             inputs = input_dict
