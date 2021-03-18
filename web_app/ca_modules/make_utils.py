@@ -9,7 +9,7 @@ import random
 import string
 from . import subprocess_ctrl as spc
 
-def make_file(path, code, source="web", input_type="auto"):
+def make_file(path, code, input_type="auto"):
     """Function to create script that is used for verification and profiling purposes
 
     Returns nothing, writes to disk"""
@@ -20,7 +20,14 @@ def make_file(path, code, source="web", input_type="auto"):
         file_obj.write("\n")
 
     def write_sequel(file_obj, fname):
-        text_to_write = TEMPLATE_CODE_FILE if input_type == "file" else TEMPLATE_CODE_AUTO
+        
+        if input_type == "file":
+            text_to_write = TEMPLATE_CODE_FILE 
+        elif input_type == "auto":
+            text_to_write = TEMPLATE_CODE_AUTO
+        elif input_type == "file_with_data":
+            text_to_write = TEMPLATE_CODE_FILE_WITH_DATA
+
         for line in text_to_write:
             if "template_function" in line:
                 line = line.replace("template_function", str(fname))
@@ -47,17 +54,20 @@ def make_file(path, code, source="web", input_type="auto"):
     
     TEMPLATE_CODE_FILE = ["def main():",
                     "    try:",
-                    "        print(\"{0}\".format(template_function(argv[1])))",
+                    "        template_function(argv[1])",
+                    "    except Exception as e:",
+                    "        print('EXCEPTION: semantic error in submitted program: {0}'.format(str(e)))\n",
+                    "main()"]
+    
+    TEMPLATE_CODE_FILE_WITH_DATA = ["def main():",
+                    "    try:",
+                    "        template_function(argv[1], argv[2])",
                     "    except Exception as e:",
                     "        print('EXCEPTION: semantic error in submitted program: {0}'.format(str(e)))\n",
                     "main()"]
 
-    if source == "web":  
-        program_text = code.split("\n")
-    elif source == "file":
-        program_text = code
-    else:
-        raise Exception("ERROR: Unrecognized source type...exiting")
+    program_text = code
+
 
     with open(path, 'w') as f:
         write_prequel(f)
@@ -71,7 +81,7 @@ def make_file(path, code, source="web", input_type="auto"):
 
         write_sequel(f, fname)
 
-def gen_sample_outputs(filename, inputs, input_type="auto"):
+def gen_sample_outputs(filename, inputs, data=None, input_type="auto"):
     """Utility function invoked whenever a reference problem is submitted
 
     Returns a list of outputs that are subsequently stored in DB as field associated with given problem"""
@@ -81,7 +91,6 @@ def gen_sample_outputs(filename, inputs, input_type="auto"):
     SAMPUP_MEMOUT = "500"
     timeout_cmd = "gtimeout {0}".format(SAMPUP_TIMEOUT) if platform == "darwin" else "timeout {0} -m {1}".format(SAMPUP_TIMEOUT, SAMPUP_MEMOUT) if platform == "linux" or platform == "linux2" else ""
     base_cmd = "{0} python".format(timeout_cmd)
-    #run_subprocess_ctrld(base_cmd, filename, json_arg, stage="sample_upload")
     outputs = []
     if input_type == "auto":
         programmatic_inputs = inputs
@@ -93,6 +102,16 @@ def gen_sample_outputs(filename, inputs, input_type="auto"):
     elif input_type == "file":
         for script in inputs:
             output = spc.run_subprocess_ctrld(base_cmd, filename, script)
+            cleaned_split_output = output.decode("utf-8").replace('\r', '').replace('None', '').splitlines()
+            outputs.append(cleaned_split_output)
+            try:
+                os.remove(script)
+            except:
+                pass
+        return outputs
+    elif input_type == "file_with_data":
+        for script in inputs:
+            output = spc.run_subprocess_ctrld(base_cmd, filename, script, data=data)
             cleaned_split_output = output.decode("utf-8").replace('\r', '').replace('None', '').splitlines()
             outputs.append(cleaned_split_output)
             try:

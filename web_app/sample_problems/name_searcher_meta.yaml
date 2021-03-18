@@ -1,0 +1,12 @@
+difficulty: "Easy"
+constraints:
+  num_args: 2
+  allowed_abs_imports: ["random", "string"]
+  allowed_rel_imports:
+    json : ["loads"]
+  disallowed_functions: []
+input_type:
+  file:
+    "string"
+input_length: 1
+num_tests: 3

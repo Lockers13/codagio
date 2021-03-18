@@ -1,4 +1,4 @@
-const MAX_FILE_UPLOAD_SIZE = 100000
+const MAX_FILE_UPLOAD_SIZE = 1000000
 
 $("#prob_form").submit(function(e) {
     e.preventDefault();
@@ -16,7 +16,7 @@ $("#prob_form").submit(function(e) {
     }
 
     var input_elems =[]
-    var name_str_list = ["program", "meta_file", "custom_inputs", "extra_input_files"]
+    var name_str_list = ["program", "meta_file", "custom_inputs", "extra_input_files", "data_file"]
 
     for(let index = 0; index < name_str_list.length; index++) {
         get_elem_if_any(name_str_list[index], input_elems)
