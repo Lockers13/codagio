@@ -18,7 +18,7 @@
                         <div class="form-group col-sm-12 col-md-12 col-lg-12 col-xl-12 item"><span class="input_title">Metadata File (.yaml format):</span> {{ form.meta_file }}</div>
                         <div class="form-group col-sm-12 col-md-12 col-lg-12 col-xl-12 item"><span class="input_title">Problem Script:</span> {{ form.program }}</div>
                         {% if cat == 'file_io' %}
-                           <div class="form-group col-sm-12 col-md-12 col-lg-12 col-xl-12 item"><span class="input_title">Extra Input Files:</span> {{ form.extra_input_files }}</div>
+                           <div class="form-group col-sm-12 col-md-12 col-lg-12 col-xl-12 item"><span class="input_title">Target File:</span> {{ form.target_file }}</div>
                            <div class="form-group col-sm-12 col-md-12 col-lg-12 col-xl-12 item"><span class="input_title">Optional Data File:</span> {{ form.data_file }}</div>
                         {% elif cat == 'default' %}
                         <div id="input_type_select">

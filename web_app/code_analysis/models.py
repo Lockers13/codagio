@@ -9,7 +9,7 @@ class Problem(models.Model):
     outputs = JSONField()
     inputs = JSONField()
     analysis = JSONField(default=dict)
-    data = JSONField(default=dict)
+    supplied_data = JSONField(default=list)
 
 class Solution(models.Model):
     submitter = models.ForeignKey(Profile, on_delete=models.CASCADE)

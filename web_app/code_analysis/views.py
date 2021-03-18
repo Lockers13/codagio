@@ -28,6 +28,12 @@ class AnalysisView(APIView):
             problem_data["inputs"] = json.loads(problem.inputs)
             problem_data["outputs"] = json.loads(problem.outputs)
             problem_data["analysis"] = json.loads(problem.analysis)
+            supplied_data = json.loads(problem.supplied_data)
+            if supplied_data != []:
+                problem_data["supplied_data"] = supplied_data
+            else:
+                problem_data["supplied_data"] = None
+                
         except Exception as e:
             return Response("POST NOT OK: Error during loading of problem json - {0}".format(str(e)), status=status.HTTP_400_BAD_REQUEST)
         return problem_data
@@ -172,7 +178,7 @@ class SaveProblemView(APIView):
         try:
             processed_data["author_id"] = int(data.get("author_id"))
             processed_data["category"] = data.get("category")
-            processed_data["extra_input_files"] = data.getlist("extra_input_files", None)
+            processed_data["target_file"] = data.getlist("target_file", None)
             processed_data["data_file"] = data.get("data_file", None)
             processed_data["custom_inputs"] = data.get("custom_inputs", None)
             processed_data["name"] = data.get("name")
@@ -292,7 +298,7 @@ class SaveProblemView(APIView):
                 'metadata': json.dumps(processed_data["metadata"], default=str),
                 'inputs': json.dumps(input_hash),
                 'analysis': json.dumps(analysis),
-                'data': datapoints
+                'supplied_data': datapoints
                 }
             )
         problem.save()

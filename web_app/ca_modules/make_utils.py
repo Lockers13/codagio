@@ -147,7 +147,7 @@ def generate_input(input_type, input_length, num_tests):
 def handle_uploaded_file_inputs(processed_data):
     input_dict = {"files": {}}
     files = []
-    for count, file_obj in enumerate(processed_data.get("extra_input_files")):
+    for count, file_obj in enumerate(processed_data.get("target_file")):
         input_dict["files"]["file_{0}".format(count+1)] = ""
         with open("file_{0}.py".format(count+1), 'w') as g:
             for chunk in file_obj.chunks():
