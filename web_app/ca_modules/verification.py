@@ -18,6 +18,7 @@ class Verifier:
         self.__sample_outputs = problem_data["outputs"]
         self.__meta = problem_data["metadata"]
         self.__sample_inputs, self.__input_type = self.__get_sample_inputs_and_type(problem_data["inputs"])
+        self.__init_data = problem_data["init_data"]
 
     def __get_sample_inputs_and_type(self, inputs):
 
@@ -50,24 +51,41 @@ class Verifier:
                 with open("{0}.py".format(k), 'w') as f:
                     f.write(v)
                 file_list.append("{0}.py".format(k))
+            for target_file in file_list:
+                if self.__init_data is not None:
+                    try:
+                        output = run_subprocess_ctrld(base_cmd, self.__filename, target_file, init_data=self.__init_data)
+                    except Exception as e:
+                        raise Exception("hhh{0}".format(str(e)))
+                else:
+                    try:
+                        output = run_subprocess_ctrld(base_cmd, self.__filename, target_file)
+                        print("OP =>", output)
+                    except Exception as e:
+                        raise Exception("hhh{0}".format(str(e)))           
+                ### clean up the returned output of subprocess - '\r' for windows, and 'None' because sometimes python sp.Popen adds this at the end (probably return value)
+                cleaned_split_output = output.decode("utf-8").replace('\r', '').replace('None', '').splitlines()
+                sub_outputs.append(cleaned_split_output)
+                ### remove throwaway files after uploaded script has been run on them => if they exist!
+                os.remove(target_file)
+            return sub_outputs
         elif self.__input_type == "default":
-            pass
-        # if we are dealing with files, then we loop over those files, otherwise we loop over the auto generated inputs
-        loop_len = len(file_list) if len(file_list) != 0 else len(self.__sample_inputs)
-        for i in range(loop_len): 
-            ### at this point, the argument we pass from command line is either a script, or an auto-generated piece of json
-            cl_param = file_list[i] if self.__input_type == "files" else json.dumps(self.__sample_inputs[i])
-            try:
-                output = run_subprocess_ctrld(base_cmd, self.__filename, cl_param)
-            except Exception as e:
-                raise Exception("hhh{0}".format(str(e)))
-            ### clean up the returned output of subprocess - '\r' for windows, and 'None' because sometimes python sp.Popen adds this at the end (probably return value)
-            cleaned_split_output = output.decode("utf-8").replace('\r', '').replace('None', '').splitlines()
-            sub_outputs.append(cleaned_split_output)
-            ### remove throwaway files after uploaded script has been run on them => if they exist!
-            if len(file_list) > i:
-                os.remove(file_list[i])
-        return sub_outputs
+            for i in range(len(self.__sample_inputs)):
+                if self.__init_data is not None:
+                    try:
+                        output = run_subprocess_ctrld(base_cmd, self.__filename, json.dumps(self.__sample_inputs[i]), self.__init_data)
+                    except Exception as e:
+                        raise Exception("hhh{0}".format(str(e)))
+                else:
+                    try:
+                        output = run_subprocess_ctrld(base_cmd, self.__filename, json.dumps(self.__sample_inputs[i]))
+                    except Exception as e:
+                        raise Exception("hhh{0}".format(str(e)))                   
+                ### clean up the returned output of subprocess - '\r' for windows, and 'None' because sometimes python sp.Popen adds this at the end (probably return value)
+                cleaned_split_output = output.decode("utf-8").replace('\r', '').replace('None', '').splitlines()
+                sub_outputs.append(cleaned_split_output)
+                ### remove throwaway files after uploaded script has been run on them => if they exist!
+            return sub_outputs
 
     def __detail_inputs(self):
         """Utility function to get info about input type, length, etc.

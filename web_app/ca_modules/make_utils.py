@@ -9,7 +9,7 @@ import random
 import string
 from . import subprocess_ctrl as spc
 
-def make_file(path, code, input_type="auto"):
+def make_file(path, code, input_type="auto", init_data=False):
     """Function to create script that is used for verification and profiling purposes
 
     Returns nothing, writes to disk"""
@@ -22,11 +22,12 @@ def make_file(path, code, input_type="auto"):
     def write_sequel(file_obj, fname):
         
         if input_type == "file":
-            text_to_write = TEMPLATE_CODE_FILE 
+            if init_data:
+                text_to_write = TEMPLATE_CODE_FILE_WITH_DATA
+            else:
+                text_to_write = TEMPLATE_CODE_FILE 
         elif input_type == "auto":
             text_to_write = TEMPLATE_CODE_AUTO
-        elif input_type == "file_with_data":
-            text_to_write = TEMPLATE_CODE_FILE_WITH_DATA
 
         for line in text_to_write:
             if "template_function" in line:
@@ -81,7 +82,7 @@ def make_file(path, code, input_type="auto"):
 
         write_sequel(f, fname)
 
-def gen_sample_outputs(filename, inputs, data=None, input_type="auto"):
+def gen_sample_outputs(filename, inputs, init_data=None, input_type="auto"):
     """Utility function invoked whenever a reference problem is submitted
 
     Returns a list of outputs that are subsequently stored in DB as field associated with given problem"""
@@ -101,17 +102,11 @@ def gen_sample_outputs(filename, inputs, data=None, input_type="auto"):
         return outputs
     elif input_type == "file":
         for script in inputs:
-            output = spc.run_subprocess_ctrld(base_cmd, filename, script)
-            cleaned_split_output = output.decode("utf-8").replace('\r', '').replace('None', '').splitlines()
-            outputs.append(cleaned_split_output)
-            try:
-                os.remove(script)
-            except:
-                pass
-        return outputs
-    elif input_type == "file_with_data":
-        for script in inputs:
-            output = spc.run_subprocess_ctrld(base_cmd, filename, script, data=data)
+            if init_data is not None:
+                output = spc.run_subprocess_ctrld(base_cmd, filename, script, init_data=init_data)
+                print("OP =>", output)
+            else:
+                output = spc.run_subprocess_ctrld(base_cmd, filename, script)
             cleaned_split_output = output.decode("utf-8").replace('\r', '').replace('None', '').splitlines()
             outputs.append(cleaned_split_output)
             try:

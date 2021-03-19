@@ -24,16 +24,11 @@ class AnalysisView(APIView):
     def __load_problem_json(self, problem):
         problem_data = {}
         try:
+            problem_data["init_data"] = problem.init_data
             problem_data["metadata"] = json.loads(problem.metadata)
             problem_data["inputs"] = json.loads(problem.inputs)
             problem_data["outputs"] = json.loads(problem.outputs)
-            problem_data["analysis"] = json.loads(problem.analysis)
-            supplied_data = json.loads(problem.supplied_data)
-            if supplied_data != []:
-                problem_data["supplied_data"] = supplied_data
-            else:
-                problem_data["supplied_data"] = None
-                
+            problem_data["analysis"] = json.loads(problem.analysis)        
         except Exception as e:
             return Response("POST NOT OK: Error during loading of problem json - {0}".format(str(e)), status=status.HTTP_400_BAD_REQUEST)
         return problem_data
@@ -115,7 +110,10 @@ class AnalysisView(APIView):
         ### but first check what kind of problem input we are dealing with (viz. 'auto generated', 'file io', etc.)
         input_type = next(iter(problem_data["metadata"].get("input_type")))
         if input_type == "file":
-            make_utils.make_file(filename, processed_data["code_data"].split("\n"), input_type="file")
+            if problem_data["init_data"] is not None:
+                make_utils.make_file(filename, processed_data["code_data"].split("\n"), input_type="file", init_data=True)
+            else:
+                make_utils.make_file(filename, processed_data["code_data"].split("\n"), input_type="file")
         elif input_type == "auto":
             make_utils.make_file(filename, processed_data["code_data"].split("\n"))
         ### verify the submitted solution against the appropriate reference problem
@@ -127,7 +125,10 @@ class AnalysisView(APIView):
         hundred_pc = float(percentage_score) == 100.0
         if hundred_pc:
             try:
-                analyzer.profile(problem_data["inputs"])
+                if problem_data["init_data"] is not None:
+                    analyzer.profile(problem_data["inputs"], init_data=problem_data["init_data"])
+                else:
+                    analyzer.profile(problem_data["inputs"])                   
             except Exception as e:
                 return Response("POST NOAAT OK: {0}".format(str(e)), status=status.HTTP_400_BAD_REQUEST)
         ### get analysis dict
@@ -241,11 +242,11 @@ class SaveProblemView(APIView):
         ### These different eventualities are handled below
         if processed_data["category"] == "file_io":
             if processed_data["data_file"] is not None and processed_data["data_file"] != "":
-                make_utils.make_file(filename, processed_data["code"], input_type="file_with_data")
+                make_utils.make_file(filename, processed_data["code"], input_type="file", init_data=True)
                 problem_inputs, files = make_utils.handle_uploaded_file_inputs(processed_data)
                 ### generate sample outputs, given file inputs
-                datapoints = processed_data["data_file"].read().decode("utf-8")
-                outputs = make_utils.gen_sample_outputs(filename, files, data=datapoints, input_type="file_with_data")
+                init_data = processed_data["data_file"].read().decode("utf-8")
+                outputs = make_utils.gen_sample_outputs(filename, files, init_data=init_data, input_type="file")
                 input_hash = problem_inputs
             else:
                 ### make new script capable of being verified and profiled
@@ -255,6 +256,7 @@ class SaveProblemView(APIView):
                 ### generate sample outputs, given file inputs
                 outputs = make_utils.gen_sample_outputs(filename, files, input_type="file")
                 input_hash = problem_inputs
+                init_data = None
 
         elif processed_data["category"] == "default":
             input_hash = {}
@@ -278,17 +280,18 @@ class SaveProblemView(APIView):
                 problem_inputs = make_utils.generate_input(input_type, input_length, num_tests)
                 input_hash["default"]["auto"] = problem_inputs
             ### generate sample outputs, given auto-generated or custom inputs
+            init_data = None
             outputs = make_utils.gen_sample_outputs(filename, problem_inputs)
 
         ### profile uploaded reference problem (will only do cProfile and not line_profile as 'solution' is set to false)
-        analyzer.profile(input_hash, solution=False)
+        analyzer.profile(input_hash, solution=False, init_data=init_data)
         ### get final analysis dict
         analysis = analyzer.get_prog_dict()
 
         try:
-            datapoints
+            init_data
         except Exception as e:
-            datapoints = []
+            init_data = json.dumps(None)
         
         ### save uploaded problem, with associated inputs, outputs, and metadata to DB
         problem, created = Problem.objects.update_or_create(
@@ -298,7 +301,7 @@ class SaveProblemView(APIView):
                 'metadata': json.dumps(processed_data["metadata"], default=str),
                 'inputs': json.dumps(input_hash),
                 'analysis': json.dumps(analysis),
-                'supplied_data': datapoints
+                'init_data': init_data
                 }
             )
         problem.save()

@@ -8,11 +8,12 @@ from .subprocess_ctrl import run_subprocess_ctrld
 
 class Profiler:
 
-    def __init__(self, analyzer, inputs):
+    def __init__(self, analyzer, inputs, init_data=None):
         self.__filename = analyzer.get_filename()
         self.__program_dict = analyzer.get_prog_dict()
         self.__udef_info = self.__get_udef_info()
         self.__sample_inputs, self.__input_type = self.__get_sample_inputs_and_type(inputs)
+        self.__init_data = init_data
         self.__offset = 3 ### this is the number of lines added during preprocessing, whereas calculation of function lineno during ast_visitor stage happens prior to preprocessing, so it must be offset
     ### metadata is not passed into profiler, so we get the input type by checking the key of the input dict
     ### Note: auto generated input should also be passed to DB as lists inside a dict with key 'auto' => this mod will require changes in several places
@@ -149,7 +150,10 @@ class Profiler:
             if self.__input_type == "files":
                 with open('lprof_script.py', 'w') as f:
                     f.write(self.__sample_inputs["files"]["file_1"])
-                output = run_subprocess_ctrld(base_cmd, pro_file, "lprof_script.py", stage="line_profile")
+                if self.__init_data is not None:
+                    output = run_subprocess_ctrld(base_cmd, pro_file, "lprof_script.py", init_data=self.__init_data, stage="line_profile")
+                else:
+                    output = run_subprocess_ctrld(base_cmd, pro_file, "lprof_script.py", stage="line_profile")
                 os.remove("lprof_script.py")
             elif self.__input_type == "default":
                 json_str = json.dumps(self.__sample_inputs[0])
@@ -221,7 +225,10 @@ class Profiler:
         if self.__input_type == "files":
             with open('cprof_script.py', 'w') as f:
                 f.write(self.__sample_inputs["files"]["file_1"])
-            output = run_subprocess_ctrld(base_cmd, self.__filename, "cprof_script.py", stage="c_profile")
+            if self.__init_data is not None:
+                output = run_subprocess_ctrld(base_cmd, self.__filename, "cprof_script.py", init_data=self.__init_data, stage="c_profile")
+            else:
+                output = run_subprocess_ctrld(base_cmd, self.__filename, "cprof_script.py", stage="c_profile")
             os.remove("cprof_script.py")
         elif self.__input_type == "default":
             json_str = json.dumps(self.__sample_inputs[0])
