@@ -104,7 +104,6 @@ def gen_sample_outputs(filename, inputs, init_data=None, input_type="auto"):
         for script in inputs:
             if init_data is not None:
                 output = spc.run_subprocess_ctrld(base_cmd, filename, script, init_data=init_data)
-                print("OP =>", output)
             else:
                 output = spc.run_subprocess_ctrld(base_cmd, filename, script)
             cleaned_split_output = output.decode("utf-8").replace('\r', '').replace('None', '').splitlines()

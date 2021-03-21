@@ -10,3 +10,4 @@ input_type:
     "string"
 input_length: 1
 num_tests: 3
+category: file_io

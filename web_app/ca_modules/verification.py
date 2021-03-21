@@ -60,7 +60,6 @@ class Verifier:
                 else:
                     try:
                         output = run_subprocess_ctrld(base_cmd, self.__filename, target_file)
-                        print("OP =>", output)
                     except Exception as e:
                         raise Exception("hhh{0}".format(str(e)))           
                 ### clean up the returned output of subprocess - '\r' for windows, and 'None' because sometimes python sp.Popen adds this at the end (probably return value)
@@ -108,6 +107,21 @@ class Verifier:
 
         Returns score as percentage (string) of exact matches (this point may need reviewing)."""
 
+        def get_failure_stats():
+            num_failures = 0
+            failure_dict = {}
+            first_mismatch = ""
+            for line_count, (line_sub, line_samp) in enumerate(zip(sub_output, samp_output)):
+                if line_sub != line_samp:
+                    if first_mismatch == "":
+                        first_mismatch = "Your output : {0} vs Expected output: {1}".format(line_sub, line_samp)
+                    num_failures += 1
+            failure_dict["num_failures"] = num_failures
+            failure_dict["num_tests"] = int(test_stats[1][count])
+            failure_dict["failure_rate"] = round((int(num_failures)/int(test_stats[1][count])) * 100, 2)
+            failure_dict["first_mismatch"] = first_mismatch
+            return failure_dict
+
         sample_outputs = self.__sample_outputs
         sub_outputs = self.__gen_sub_outputs()
         self.__program_dict["scores"] = {}
@@ -122,12 +136,15 @@ class Verifier:
                 status = "success"
                 overall_score += 1
             else:
+                failure_dict = get_failure_stats()
                 status = "failure"
             scores["test_{0}".format(count+1)] = {}
             test = scores["test_{0}".format(count+1)]
             test["status"] = status
             test["input_length"] = test_stats[1][count]
             test["input_type"] = test_stats[2][count]
+            if status == "failure":
+                test["failure_stats"] = failure_dict
 
         ### store score as string
         percentage_score = round(overall_score/len(sample_outputs), 4) * 100

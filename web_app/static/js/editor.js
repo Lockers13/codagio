@@ -100,7 +100,7 @@ function write_breakdown(collapsible, scores) {
     collapsible.innerHTML = ""
     let breakdown = "<p style='text-align:left;margin:20px 0px 20px 0px;' class='lead'>Let's see where you went right and where you went wrong </p>" + 
                 "<table style='align:left;max-width:80%;margin-left:auto;margin-right:auto;' class='table table-dark'>" + 
-                "<thead><tr><th class='topline scope='col'>Test #</th><th class='topline' scope='col'>Status</th><th class='topline' scope='col'>Input Length</th><th class='topline' scope='col'>Input Type</th></tr></thead><tbody>"
+                "<thead><tr><th class='topline scope='col'>Test #</th><th class='topline' scope='col'>Status</th><th class='topline' scope='col'>Input Length</th><th class='topline' scope='col'>Input Type</th><th class='topline' scope='col'>Failure Stats</th></tr></thead><tbody>"
     let count = 1;
     for (test_key in scores) {
         if(test_key == "overall_score")
@@ -108,7 +108,13 @@ function write_breakdown(collapsible, scores) {
         breakdown += "<tr><th scope='row'>" + count++ + "</th>"  +
             "<td>" + scores[test_key]["status"] + "</td>" + 
             "<td>" + scores[test_key]["input_length"] + "</td>" +
-            "<td>" + scores[test_key]["input_type"] + "</td></tr>"
+            "<td>" + scores[test_key]["input_type"] + "</td>"
+        if(scores[test_key]["failure_stats"] != undefined) {
+            for (fail_key in scores[test_key]["failure_stats"]) {
+                breakdown += "<td>" + scores[test_key]["failure_stats"][fail_key] + "</td>"
+            }
+        }
+            breakdown += "</tr>"
     }
     breakdown += "</tbody></table></p>"
     collapsible.innerHTML += breakdown

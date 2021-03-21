@@ -10,3 +10,4 @@ input_type:
     "string"
 input_length: 1000
 num_tests: 3
+category: ["string_manipulation", "encryption"]
