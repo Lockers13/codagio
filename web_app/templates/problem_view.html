@@ -1,0 +1,39 @@
+{% extends "base.html" %} 
+{% load static %}
+{% block content %}
+    
+<div class="home">
+
+    <div class="container" id="problems">
+        <br>
+        <h1 style="text-align:center;text-transform:capitalize;"><u>{{ category }}</u></h1>
+        <br>
+        {% for problem in problems %}
+        <button type="button" class="collapsible">{{ problem.name }} ({{ problem.metadata.difficulty }}) </button>
+        <div class="content">
+            <p class="problem_desc">{{ problem.metadata.description }}</p>
+            <a href="{% url 'code:solution' prob_id=problem.id %}">
+                <div class="text-center">
+                    <button type="button" class="text-center go_btn">
+                        Get started
+                    </button>
+                </div>
+            </a>
+            <p class="problem_author"> Created by {{ problem.author__user__username }}</p>
+        </div>
+
+        {% endfor %} 
+    </div>
+
+
+
+</div>
+
+
+<script type="text/javascript" src="{% static 'js/collapse.js' %}"></script>
+<script type="text/javascript" src="placeholder"></script>
+<script type="text/javascript" src="placeholder"></script>
+{% endblock %}
+
+
+

@@ -69,7 +69,6 @@ def make_file(path, code, input_type="auto", init_data=False):
 
     program_text = code
 
-
     with open(path, 'w') as f:
         write_prequel(f)
         for line in program_text:
@@ -150,3 +149,9 @@ def handle_uploaded_file_inputs(processed_data):
             g.write(decoded_chunk)
             files.append("file_{0}.py".format(count+1))
     return input_dict, files
+
+def json_reorder(hashmap):
+    new_hm = {}
+    for k in sorted(hashmap, key=lambda item: (len(item), item), reverse=False):
+        new_hm[k] = hashmap[k]
+    return new_hm

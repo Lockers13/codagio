@@ -21,14 +21,14 @@ class AnalysisView(APIView):
     ### only 'post' requests to this API endpoint are allowed
     http_method_names = ['post']
 
-    def __load_problem_json(self, problem):
+    def __load_problem_data(self, problem):
         problem_data = {}
         try:
             problem_data["init_data"] = problem.init_data
-            problem_data["metadata"] = json.loads(problem.metadata)
-            problem_data["inputs"] = json.loads(problem.inputs)
-            problem_data["outputs"] = json.loads(problem.outputs)
-            problem_data["analysis"] = json.loads(problem.analysis)        
+            problem_data["metadata"] = problem.metadata
+            problem_data["inputs"] = problem.inputs
+            problem_data["outputs"] = problem.outputs
+            problem_data["analysis"] = problem.analysis        
         except Exception as e:
             return Response("POST NOT OK: Error during loading of problem json - {0}".format(str(e)), status=status.HTTP_400_BAD_REQUEST)
         return problem_data
@@ -71,7 +71,7 @@ class AnalysisView(APIView):
         except Exception as e:
             return Response("POST NOT OK: reference problem db exception = {0}".format(str(e)), status=status.HTTP_400_BAD_REQUEST)
         
-        problem_data = self.__load_problem_json(problem)
+        problem_data = self.__load_problem_data(problem)
 
         if isinstance(problem_data, Response):
             return problem_data
@@ -140,7 +140,7 @@ class AnalysisView(APIView):
             solution, created = Solution.objects.update_or_create(
                 submitter_id=processed_data["uid"],
                 problem_id=processed_data["prob_id"],
-                defaults={'analysis': json.dumps(analysis), 'date_submitted': datetime.now()}
+                defaults={'analysis': analysis, 'date_submitted': datetime.now()}
             )
             solution.save()
         ### discard preprocessed executable script
@@ -189,7 +189,7 @@ class SaveProblemView(APIView):
             meta_file = data.get("meta_file")
             processed_data["metadata"] = yaml.full_load(meta_file.read())
             processed_data["metadata"]["description"] = description
-            processed_data["metadata"]["date_created"] = datetime.now()
+            processed_data["date_submitted"] = datetime.now()
         except Exception as e:
             return Response("POST NOT OK: Error during intial processing of uploaded data - {0}".format(str(e)), status=status.HTTP_400_BAD_REQUEST)
         return processed_data
@@ -291,17 +291,19 @@ class SaveProblemView(APIView):
         try:
             init_data
         except Exception as e:
-            init_data = json.dumps(None)
+            init_data = None
         
         ### save uploaded problem, with associated inputs, outputs, and metadata to DB
         problem, created = Problem.objects.update_or_create(
             name=processed_data["name"], author_id=processed_data["author_id"],
             defaults = {
-                'outputs': json.dumps(outputs),
-                'metadata': json.dumps(processed_data["metadata"], default=str),
-                'inputs': json.dumps(input_hash),
-                'analysis': json.dumps(analysis),
-                'init_data': init_data
+                'outputs': outputs,
+                'metadata': processed_data["metadata"],
+                'inputs': input_hash,
+                'analysis': analysis,
+                'init_data': init_data,
+                'category': processed_data["metadata"].get("category", "default"),
+                'date_submitted': processed_data["date_submitted"],
                 }
             )
         problem.save()
@@ -318,7 +320,7 @@ class SaveProblemView(APIView):
 def solution_upload(request, prob_id):
     ### get problem (and all associated metadata) from DB, and set initial state accordingly
     problem = Problem.objects.get(id = prob_id)
-    metadata = json.loads(problem.metadata)
+    metadata = problem.metadata
     difficulty = metadata['difficulty']
     description = metadata['description']
 
@@ -361,3 +363,9 @@ def problem_upload(request, problem_cat):
                 }
 
     return render(request, 'problem_upload.html', context)
+
+def problem_view(request, category):
+    problems = Problem.objects.filter(metadata__category__contains=category).all()
+    ### turn inner json dict into python dict before passing to template
+    context = {'title': 'CGC: Code For Code\'s Sake', 'problems': problems, 'category': category}
+    return render(request, 'problem_view.html', context)

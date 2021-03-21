@@ -2,7 +2,7 @@
     --black:#101010;
     --green:#06D6A0;
     --white:#FFFFFF;
-    --red: #FF3E6C;
+    --blue: #1d2b5b;
 }
 
 html {
@@ -104,7 +104,7 @@ body::-webkit-scrollbar-thumb {
 }
   
 .active, .collapsible:hover {
-    background-color: var(--red);
+    background-color: var(--blue);
     color: var(--white);
 }
   
@@ -125,7 +125,7 @@ body::-webkit-scrollbar-thumb {
     max-height: 0;
     overflow: hidden;
     transition: max-height 0.2s ease-out;
-    background-color: var(--red);
+    background-color: var(--blue);
     width: 80%;
     margin-left: 10%;
     color:var(--white);
@@ -293,13 +293,13 @@ stroke: var(--black);
 
 @-webkit-keyframes stroke-color {
 0%  { stroke: #3498DB; }
-24% { stroke: var(--red); }
+24% { stroke: var(--blue); }
 25% { stroke: var(--green); }
 49% { stroke: var(--green); }
 50% { stroke: #32326e; }
 74% { stroke: #32326e; }
-75% { stroke: var(--red); }
-99% { stroke: var(--red); }
+75% { stroke: var(--blue); }
+99% { stroke: var(--blue); }
 }
 
 @keyframes stroke-color {
@@ -309,8 +309,8 @@ stroke: var(--black);
 49% { stroke: var(--green); }
 50% { stroke: #32326e; }
 74% { stroke: #32326e; }
-75% { stroke: var(--red); }
-99% { stroke: var(--red); }
+75% { stroke: var(--blue); }
+99% { stroke: var(--blue); }
 }
   
 
@@ -345,7 +345,7 @@ stroke: var(--black);
     text-decoration: none;
     border-style:solid;
     border-style:none;
-    border-bottom: 3px solid var(--red);
+    border-bottom: 3px solid var(--blue);
     color: var(--white);
     font-size: 24px;
 }
@@ -361,7 +361,7 @@ textarea:focus, input:focus{
     text-decoration: none;
     border-style:solid;
     border-style:none;
-    border: 3px solid var(--red);
+    border: 3px solid var(--blue);
     color: var(--white);
     font-size: 24px;
 }
@@ -386,4 +386,8 @@ textarea:focus, input:focus{
 footer{
     margin-top: 80px;
     margin-bottom: 20px;
+}
+
+p field_desc {
+    color:white;
 }

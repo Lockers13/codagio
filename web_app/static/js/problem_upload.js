@@ -3,7 +3,7 @@ const MAX_FILE_UPLOAD_SIZE = 1000000
 $("#prob_form").submit(function(e) {
     e.preventDefault();
     
-    // checking uploaded file sizes are all under 100KB 
+    // checking uploaded file sizes are all under 100KB
 
     function get_elem_if_any(name_str, elem_list) {
         try {
@@ -26,6 +26,10 @@ $("#prob_form").submit(function(e) {
     for(let k = 0; k < input_elems.length; k++) {
         try {
             var files = input_elems[k].files
+            if(files.length > 3) {
+                alert("Sorry, only a maximum of 3 target files is allowed!")
+                return
+            }
             upload_files.push(files)
         }
         catch (err) {

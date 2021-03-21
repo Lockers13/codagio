@@ -117,8 +117,11 @@ class Verifier:
                         first_mismatch = "Your output : {0} vs Expected output: {1}".format(line_sub, line_samp)
                     num_failures += 1
             failure_dict["num_failures"] = num_failures
-            failure_dict["num_tests"] = int(test_stats[1][count])
-            failure_dict["failure_rate"] = round((int(num_failures)/int(test_stats[1][count])) * 100, 2)
+            failure_dict["num_tests"] = test_stats[1][count]
+            try:
+                failure_dict["failure_rate"] = round((int(num_failures)/int(test_stats[1][count])) * 100, 2)
+            except Exception as e:
+                failure_dict["failure_rate"] = "File IO"
             failure_dict["first_mismatch"] = first_mismatch
             return failure_dict
 

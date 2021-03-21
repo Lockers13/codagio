@@ -10,6 +10,7 @@ class Problem(models.Model):
     inputs = JSONField()
     analysis = JSONField(default=dict)
     init_data = JSONField(null=True)
+    date_submitted = models.DateField()
 
 class Solution(models.Model):
     submitter = models.ForeignKey(Profile, on_delete=models.CASCADE)

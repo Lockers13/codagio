@@ -2,35 +2,79 @@
 {% load static %}
 {% block content %}
     
-    <div class="home">
-        <div class="text-center showcase">
-            <h1 class="cgc-title"> CGC </h1>
-            <h1 class="second-title">Codē Gratia Codis</h1>
-            <p>Or in plain english...code for code's sake!</p>
-            <a href="#problems"><button class="scroll-down-btn" id="scroll-down-btn"> <img src="{% static 'images/scroll-down.png' %}"/></button></a>
-        </div>
+<div class="home">
+    <div class="text-center showcase">
+        <h1 class="cgc-title"> CGC </h1>
+        <h1 class="second-title">Codē Gratia Codis</h1>
+        <p>Or in plain english...code for code's sake!</p>
+        <a href="#problems"><button class="scroll-down-btn" id="scroll-down-btn"> <img src="{% static 'images/scroll-down.png' %}"/></button></a>
+    </div>
 
-        <div class="container" id="problems">
-            {% for problem in problems %}
-            <button type="button" class="collapsible">{{ problem.name }} ({{ problem.metadata.difficulty }}) </button>
-            <div class="content">
-                <p class="problem_desc">{{ problem.metadata.description }}</p>
-                <a href="{% url 'code:solution' prob_id=problem.id %}">
-                    <div class="text-center">
-                        <button type="button" class="text-center go_btn">
-                            Get started
-                        </button>
+    <div class="container">
+        <button type="button" class="collapsible">View Problems</button>
+        <div class="content">
+            <p class="problem_desc"></p>
+            <a href="#">
+                <div class="row">
+                    <div class="col-lg-4">
+                    <a href="{% url 'code:problem_view' category='mathematics' %}" class="field_desc">
+                      <img class="rounded-circle" src="{% static 'images/math_pi.png' %}" alt="Generic placeholder image" width="140" height="140">
+                      <br><br>
+                      <h2>Mathematics</h2><br>
+                      <p style="color:white;">Donec sed odio dui. Etiam porta sem malesuada magna mollis euismod. Nullam id dolor id nibh ultricies vehicula ut id elit. Morbi leo risus, porta ac consectetur ac, vestibulum at eros. Praesent commodo cursus magna.</p>
+                    </a>
                     </div>
-                </a>
-                <p class="problem_author"> Created by {{ problem.author__user__username }}</p>
-            </div>
-
-            {% endfor %} 
+                    <div class="col-lg-4">
+                    <a href="{% url 'code:problem_view' category='string_manipulation' %}" class="field_desc">
+                      <img class="rounded-circle" src="{% static 'images/string_manipulation.png' %}"  alt="Generic placeholder image" width="140" height="140">
+                      <br><br>
+                      <h2>String Manipulation</h2><br>
+                      <p style="color:white;">Duis mollis, est non commodo luctus, nisi erat porttitor ligula, eget lacinia odio sem nec elit. Cras mattis consectetur purus sit amet fermentum. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh.</p>
+                    </a>
+                    </div>
+                    <div class="col-lg-4">
+                    <a href="{% url 'code:problem_view' category='file_io' %}" class="field_desc">
+                      <img class="rounded-circle" src="{% static 'images/file_io.png' %}"  alt="Generic placeholder image" width="140" height="140">
+                      <br><br>
+                      <h2>File I/O</h2><br>
+                      <p style="color:white;">Donec sed odio dui. Cras justo odio, dapibus ac facilisis in, egestas eget quam. Vestibulum id ligula porta felis euismod semper. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus.</p>
+                      </a>
+                    </div>
+                </div>
+            </a>
+            <p class="problem_author"></p>
+        </div>
+        <button type="button" class="collapsible">Brush up on your theory</button>
+        <div class="content">
+            <p class="problem_desc"></p>
+            <a href="{% url 'code:problem_view' category='mathematics' %}">
+                <div class="text-center">
+                    <button type="button" class="text-center go_btn">
+                        Enter
+                    </button>
+                </div>
+            </a>
+            <p class="problem_author"></p>
+        </div>
+        <button type="button" class="collapsible">Share your thoughts in our forum</button>
+        <div class="content">
+            <p class="problem_desc"></p>
+            <a href="{% url 'code:problem_view' category='mathematics' %}">
+                <div class="text-center">
+                    <button type="button" class="text-center go_btn">
+                        Enter
+                    </button>
+                </div>
+            </a>
+            <p class="problem_author"></p>
         </div>
     </div>
 
 
-    <script type="text/javascript" src="{% static 'js/collapse.js' %}"></script>
-    <script type="text/javascript" src="placeholder"></script>
-    <script type="text/javascript" src="placeholder"></script>
+</div>
+
+
+<script type="text/javascript" src="{% static 'js/collapse.js' %}"></script>
+<script type="text/javascript" src="placeholder"></script>
+<script type="text/javascript" src="placeholder"></script>
 {% endblock %}
