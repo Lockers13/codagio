@@ -15,6 +15,10 @@ from . import forms as submission_forms
 from django.contrib.auth.models import User
 import yaml
 
+### NB: When hashmaps (dicts) are saved as jsonb to postgres, their keys are ordered by length, and then alphabetically
+### This is a change from the order in which they are created on our python backend, and if we need to make our pythonic dicts
+### conform to the ordering of the ones retrieved from our db, then we can use 'make_utils.json_reorder(hashmap)'
+
 class AnalysisView(APIView):
     """Class based view for handling the analysis of submitted solutions"""
 

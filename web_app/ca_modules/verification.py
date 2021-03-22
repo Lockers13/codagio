@@ -47,10 +47,11 @@ class Verifier:
 
         ### if input_type is 'file', then iterate over input dict, writing each file to disk as 'file1, file2, filen'
         if self.__input_type == "files":
-            for k, v in self.__sample_inputs["files"].items():
-                with open("{0}.py".format(k), 'w') as f:
-                    f.write(v)
-                file_list.append("{0}.py".format(k))
+            for i in range(len(self.__sample_inputs["files"].keys())):
+                key = "file_{0}".format(i+1) 
+                with open("{0}.py".format(key), 'w') as f:
+                    f.write(self.__sample_inputs["files"][key])
+                file_list.append("{0}.py".format(key))
             for target_file in file_list:
                 if self.__init_data is not None:
                     try:
@@ -93,8 +94,9 @@ class Verifier:
 
         if self.__input_type == "files":
             num_tests = len(self.__sample_inputs["files"].keys())
-            ### one liner to get number of lines in each file (in a list => [len(file1), len(file2), len(fileN)])
-            input_lengths = ["# lines: {0}".format(len(v.splitlines())) for k,v in self.__sample_inputs["files"].items()]
+            ### get number of lines in each file (in a list => [len(file1), len(file2), len(fileN)])
+            num_keys = len(self.__sample_inputs["files"].keys())
+            input_lengths = ["# lines: {0}".format(len(self.__sample_inputs["files"]["file_{0}".format(i+1)].splitlines())) for i in range(num_keys)]
             input_types = ["file" for x in range(num_tests)]
         elif self.__input_type == "default":
             num_tests = len(self.__sample_inputs)
