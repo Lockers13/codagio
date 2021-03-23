@@ -115,12 +115,16 @@ class AnalysisView(APIView):
         input_type = next(iter(problem_data["metadata"].get("input_type")))
         if input_type == "file":
             if problem_data["init_data"] is not None:
-                make_utils.make_file(filename, processed_data["code_data"].split("\n"), input_type="file", init_data=True)
+                make_utils.make_file(filename, processed_data["code_data"].splitlines(), input_type="file", init_data=True)
             else:
-                make_utils.make_file(filename, processed_data["code_data"].split("\n"), input_type="file")
-        elif input_type == "auto":
-            make_utils.make_file(filename, processed_data["code_data"].split("\n"))
+                make_utils.make_file(filename, processed_data["code_data"].splitlines(), input_type="file")
+        elif input_type == "auto" or input_type == "custom":
+            try:
+                make_utils.make_file(filename, processed_data["code_data"].splitlines())
+            except Exception as e:
+                print(str(e))
         ### verify the submitted solution against the appropriate reference problem
+
         try:
             percentage_score = analyzer.verify(problem_data)
         except Exception as e:
@@ -136,6 +140,7 @@ class AnalysisView(APIView):
             except Exception as e:
                 return Response("POST NOAAT OK: {0}".format(str(e)), status=status.HTTP_400_BAD_REQUEST)
         ### get analysis dict
+
         analysis = analyzer.get_prog_dict()
         ### write comparison stats (with reference problem) to analysis dict
         comparison.write_comp(analysis, problem_data["analysis"])         
@@ -162,16 +167,16 @@ class SaveProblemView(APIView):
     http_method_names = ['post']
 
     def __validate_custom_inputs(self, custom_input):
-        try:
-            custom_input
-            if len(custom_input) > 3:
-                return Response("POST NOT OK: Too many tests!", status=status.HTTP_400_BAD_REQUEST)
-            else:
-                for inp in custom_input:
-                    if not isinstance(inp, list):
-                        return Response("POST NOT OK: Incorrectly formatted custom inputs!", status=status.HTTP_400_BAD_REQUEST)
-        except Exception as e:
-            return Response("POST 1NOT OK: {0}".format(str(e)), status=status.HTTP_400_BAD_REQUEST)
+        # try:
+        #     custom_input
+        #     if len(custom_input) > 3:
+        #         return Response("POST NOT OK: Too many tests!", status=status.HTTP_400_BAD_REQUEST)
+        #     else:
+        #         for inp in custom_input:
+        #             if not isinstance(inp, list):
+        #                 return Response("POST NOT OK: Incorrectly formatted custom inputs!", status=status.HTTP_400_BAD_REQUEST)
+        # except Exception as e:
+        #     return Response("POST 1NOT OK: {0}".format(str(e)), status=status.HTTP_400_BAD_REQUEST)
         return True
 
     def __process_request_data(self, data):
@@ -284,8 +289,9 @@ class SaveProblemView(APIView):
                 problem_inputs = make_utils.generate_input(input_type, input_length, num_tests)
                 input_hash["default"]["auto"] = problem_inputs
             ### generate sample outputs, given auto-generated or custom inputs
-            init_data = None
+            init_data = None  
             outputs = make_utils.gen_sample_outputs(filename, problem_inputs)
+ 
 
         ### profile uploaded reference problem (will only do cProfile and not line_profile as 'solution' is set to false)
         analyzer.profile(input_hash, solution=False, init_data=init_data)
@@ -306,7 +312,6 @@ class SaveProblemView(APIView):
                 'inputs': input_hash,
                 'analysis': analysis,
                 'init_data': init_data,
-                'category': processed_data["metadata"].get("category", "default"),
                 'date_submitted': processed_data["date_submitted"],
                 }
             )

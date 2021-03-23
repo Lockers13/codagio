@@ -27,7 +27,7 @@ def run_subprocess_ctrld(base_cmd, filename, json_arg, stage="verification", ini
     ### manually catch semantic error in submitted program by reading printed output that we control if an eexception is caught during its execution
     if stage == "verification":
         if b'EXCEPTION' in output:
-            raise Exception("Exception: semantic error in submitted program")
+            raise Exception("Exception: semantic error in submitted program: {0}".format(str(output)))
     ### get return code of subprocess: if it is 124, then command has timed out - see 'man timeout'
     comm = process.communicate()[0]
     ret = int(process.returncode)

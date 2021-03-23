@@ -107,7 +107,7 @@ class AstTreeVisitor(ast.NodeVisitor):
             self.__fdef_dict["elses"] += 1
             self.__fdef_dict["skeleton"].append("{0}{1}".format("    " * self.__count_hash["level"], "else:"))
             self.__program_dict["line_indents"]["line_{0}".format(orelse.lineno-1)] = self.__count_hash["level"]
-            self.__process_body(orelse)
+            self.__process_body(orelse, in_else=True)
 
     def __process_conditional(self, node, elseif=False):
 
@@ -137,7 +137,7 @@ class AstTreeVisitor(ast.NodeVisitor):
 
         self.__process_body(node)
 
-    def __process_try(self, node, node_dict):
+    def __process_try(self, node):
         node_type = type(node).__name__.lower()
         self.__fdef_dict["skeleton"].append("{0}{1}:".format("    " * self.__count_hash["level"], node_type))
         self.__program_dict["line_indents"]["line_{0}".format(node.lineno)] = self.__count_hash["level"]
@@ -187,7 +187,7 @@ class AstTreeVisitor(ast.NodeVisitor):
         self.__process_body(node)
         self.__count_hash["nest_level"] -= 1
 
-    def __process_body(self, node):
+    def __process_body(self, node, in_else=False):
 
         """Utility method to recursively process the body of any given AST construct containing a body. 
         At the highest level, we start by processing the body of function definitions, then the bodies 
@@ -232,11 +232,14 @@ class AstTreeVisitor(ast.NodeVisitor):
         # increment indentation level count before entering any node body
         self.__count_hash["level"] += 1
         # if there are multiple body elems, iterate through them; else process single body elem
-        try:
-            for body_node in node.body:
-                do_body(body_node)
-        except AttributeError as e:
+        if in_else:
             do_body(node)
+        else:
+            try:
+                for body_node in node.body:
+                    do_body(body_node)
+            except AttributeError as e:
+                do_body(node)
 
         # decrement indentation level count upon exiting any node body            
         self.__count_hash["level"] -= 1

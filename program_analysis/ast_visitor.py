@@ -102,7 +102,7 @@ class AstTreeVisitor(ast.NodeVisitor):
             self.__fdef_dict["num_elses"] += 1
             self.__fdef_dict["skeleton"].append("{0}{1}".format("    " * self.__count_hash["level"], "else:"))
             self.__program_dict["line_indents"]["line_{0}".format(orelse.lineno-1)] = self.__count_hash["level"]
-            self.__process_body(orelse)
+            self.__process_body(orelse, else_clause=True)
 
     def __process_with(self, node):
         context_expr = type(node.items[0].context_expr).__name__.lower()
@@ -129,10 +129,10 @@ class AstTreeVisitor(ast.NodeVisitor):
         try:
             orelse = node.orelse[0]
             self.__process_orelse(node, orelse)
-        except IndexError:
-            pass
+        except IndexError as e:
+            print(str(e))
 
-    def __process_try(self, node, node_dict):
+    def __process_try(self, node):
         node_type = type(node).__name__.lower()
         self.__fdef_dict["skeleton"].append("{0}{1}:".format("    " * self.__count_hash["level"], node_type))
         self.__program_dict["line_indents"]["line_{0}".format(node.lineno)] = self.__count_hash["level"]
@@ -182,7 +182,7 @@ class AstTreeVisitor(ast.NodeVisitor):
         self.__process_body(node)
         self.__count_hash["nest_level"] -= 1
 
-    def __process_body(self, node):
+    def __process_body(self, node, else_clause=False):
 
         """Utility method to recursively process the body of any given AST construct containing a body. 
         At the highest level, we start by processing the body of function definitions, then the bodies 
@@ -227,11 +227,15 @@ class AstTreeVisitor(ast.NodeVisitor):
         # increment indentation level count before entering any node body
         self.__count_hash["level"] += 1
         # if there are multiple body elems, iterate through them; else process single body elem
-        try:
-            for body_node in node.body:
-                do_body(body_node)
-        except AttributeError as e:
+        if else_clause:
+            print(node)
             do_body(node)
+        else:
+            try:
+                for body_node in node.body:
+                    do_body(body_node)
+            except AttributeError as e:
+                do_body(node)
 
         # decrement indentation level count upon exiting any node body            
         self.__count_hash["level"] -= 1
@@ -312,10 +316,10 @@ class AstTreeVisitor(ast.NodeVisitor):
 
 
         
-
 parsed_tree = ast.parse((open(sys.argv[1])).read())
 # initialise ast tree visitor instance
 atv = AstTreeVisitor()
 # visit ast-parsed script
 atv.visit(parsed_tree)
-print(atv.get_program_dict())
+for skel in atv.get_program_dict()['fdefs']['fdef_1']['skeleton']:
+    print(skel)

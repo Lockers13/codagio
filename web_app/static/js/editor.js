@@ -44,7 +44,6 @@ $("#sub_form").submit(function(e) {
     .done(function(resp_data) {
         let analysis = JSON.parse(resp_data)
         console.log(analysis)
-
         //Get results
         let scores = analysis["scores"]
         let comp_stats = analysis["comp_stats"][0]
@@ -57,6 +56,9 @@ $("#sub_form").submit(function(e) {
         let comparison_section = document.getElementById('comparison');
         let sample_section = document.getElementById('sample_solution');
         let profiling_section = document.getElementById('line_profiling');
+        let failure_section = document.getElementById('fail_stats');
+        let fail_btn = document.getElementById('fail_btn');
+        let lp_btn = document.getElementById('lp_btn');
         // make global collapsible visible
         loader.style.display = 'none';
         back.style.display = 'block';
@@ -70,10 +72,11 @@ $("#sub_form").submit(function(e) {
             write_breakdown(breakdown_section, scores)
             write_comp(comparison_section, comp_stats, comp_str)
             write_skeleton(sample_section, samp_skels, skel_str)
-            write_lprof(profiling_section, fdefs, lprof_str)
-            
+            write_lprof(profiling_section, fdefs, lprof_str)   
+            fail_btn.style.visibility = "hidden"
         }
         else {
+            fail_btn.style.visibility = "visible"
             overall.style.color = "#FF3E6C"
             overall.innerHTML = "<br>Oops, looks like your code doesn't produce the correct outputs...<br><br>Please Try again! But first, why not check out some feedback below?"
             // do quick marks breakdown and comparison on failure
@@ -81,6 +84,7 @@ $("#sub_form").submit(function(e) {
             write_comp(comparison_section, comp_stats, comp_str)
             write_skeleton(sample_section, samp_skels, skel_str)
             profiling_section.innerHTML ="<p class='text-center' style='margin:20px 0px;'>Sorry, you have to pass all tests to qualify for line profiling!<p>"
+            write_failure(failure_section, scores)
             }
         })
     .fail(function(resp_data) {
@@ -95,6 +99,33 @@ $("#sub_form").submit(function(e) {
     })
 
 });
+
+function swap(node1, node2) {
+    const afterNode2 = node2.nextElementSibling;
+    const parent = node2.parentNode;
+    node1.replaceWith(node2);
+    parent.insertBefore(node1, afterNode2);
+}
+
+function write_failure(collapsible, scores) {
+    collapsible.innerHTML = ""
+    let breakdown = "<p style='text-align:left;margin:20px 0px 20px 0px;' class='lead'>Let's take a closer look at where you went wrong</p>" + 
+                "<table style='align:left;max-width:80%;margin-left:auto;margin-right:auto;' class='table table-dark'>" + 
+                "<thead><tr><th class='topline scope='col'>Test #</th><th class='topline' scope='col'># Inputs</th><th class='topline' scope='col'># Failures</th><th class='topline' scope='col'>Failure Rate</th><th class='topline' scope='col'>Sample Failure</th></tr></thead><tbody>"
+    var count = 1;
+    for (test_key in scores) {
+        if(test_key == "overall_score") 
+            continue
+        breakdown += "<tr><td>" + count++ + "</td>"
+        let fail_hash = scores[test_key]["failure_stats"]
+        breakdown += "<td>" + fail_hash["num_tests"] + "</td>" +
+            "<td>" + fail_hash["num_failures"] + "</td>" + 
+            "<td>" + fail_hash["failure_rate"] + "</td>" + 
+            "<td>" + fail_hash["first_mismatch"] + "</td></tr>"
+    }
+    breakdown += "</tbody></table></p>"
+    collapsible.innerHTML += breakdown
+}
 
 function write_breakdown(collapsible, scores) {
     collapsible.innerHTML = ""

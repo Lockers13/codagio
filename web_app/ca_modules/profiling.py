@@ -97,15 +97,24 @@ class Profiler:
                     fdefs[fdef_k]["line_profile"]["line_{0}".format(int(split_line[0]) - fnum)] = {}
                     line_info = fdefs[fdef_k]["line_profile"]["line_{0}".format(int(split_line[0]) - fnum)]
                     if reached:
-                        line_info["hits"] = split_line[1]
-                        line_info["%time"] = split_line[4]
-                        line_info["contents"] = split_line[5]
-                        line_info["real_time"] = str(round(float(fdefs[fdef_k]["cum_time"]) * float(split_line[4])/100, 6))
+                        print("Line =>", split_line)
+                        try:
+                            line_info["hits"] = float(split_line[1])
+                            line_info["%time"] = float(split_line[4])
+                            line_info["contents"] = split_line[5]
+                            line_info["real_time"] = str(round(float(fdefs[fdef_k]["cum_time"]) * float(split_line[4])/100, 6))
+                        except Exception as e:
+                            new_split = line.split(maxsplit=1)
+                            line_info["hits"] = "0"
+                            line_info["%time"] = "0.0"
+                            line_info["contents"] = new_split[1]
+                            line_info["real_time"] = "0.0"
                     else:
                         line_info["hits"] = "0"
                         line_info["%time"] = "0.0"
                         contents = "" if split_line[1] == "0.0" else split_line[1]
                         line_info["contents"] = contents
+                        line_info["real_time"] = "0.0"
 
                 fdefs = self.__program_dict["fdefs"]
                 in_func = False
@@ -116,7 +125,7 @@ class Profiler:
                     len_sl = len(split_line)
                     if len_sl == 0:
                         in_func = False
-                    elif split_line[0].startswith("==================="):
+                    elif split_line[0].startswith("======"):
                         in_func = True
                     elif not in_func:
                         pass
