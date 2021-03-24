@@ -137,15 +137,27 @@ class AstTreeVisitor(ast.NodeVisitor):
         self.__fdef_dict["skeleton"].append("{0}{1}:".format("    " * self.__count_hash["level"], node_type))
         self.__program_dict["line_indents"]["line_{0}".format(node.lineno)] = self.__count_hash["level"]
 
+        if len(node.handlers) == 0:
+            self.__process_body(node)
+        else:
+            for handler in node.handlers:
+                self.__process_body(node)
+                self.__count_hash["exc_handlers"] += 1
+                self.__fdef_dict["skeleton"].append("{0}{1}:".format("    " * self.__count_hash["level"], type(handler).__name__.lower()))
+                self.__process_body(handler)
+                # for body in handler.body:
+                #     self.__process_body(body)
+        
+
+    def __process_fdef(self, node):
+        parameters = []
+        for arg in node.args.args:
+            parameters.append(arg.arg)
+        signature = "def {0}({1}):".format(node.name, ', '.join(parameters))
+        self.__fdef_dict["skeleton"].append("{0}{1}".format("    " * self.__count_hash["level"], signature))
+        self.__program_dict["line_indents"]["line_{0}".format(node.lineno)] = self.__count_hash["level"]
         self.__process_body(node)
-
-        for handler in node.handlers:
-            self.__count_hash["exc_handlers"] += 1
-            self.__fdef_dict["skeleton"].append("{0}{1}:".format("    " * self.__count_hash["level"], type(handler).__name__.lower()))
-
-            for body in handler.body:
-                self.__process_body(body)
-
+        
     def __process_loop(self, node, nested=False):
         """Utility method to recursively process any 'while', 'for' or 'if' node encountered in a function def,
         where by 'process' we mean => write pertinent info to appropriate place in prog dict.
@@ -219,6 +231,7 @@ class AstTreeVisitor(ast.NodeVisitor):
                 self.__process_try(body_node)
             elif isinstance(body_node, ast.FunctionDef):
                 self.__nested_fdefs.append(body_node.name)
+                self.__process_fdef(body_node)
             elif isinstance(body_node, ast.With):
                 self.__process_with(body_node)
             else:
@@ -304,7 +317,10 @@ class AstTreeVisitor(ast.NodeVisitor):
         try:
             func_name = node.func.id
         except AttributeError:
-            func_name = node.func.attr
+            try:
+                func_name = node.func.attr
+            except:
+                func_name = node.func.slice
         if func_name in self.__disallowed_fcalls:
             unsafe_entry_list = self.__program_dict["UNSAFE"]
             unsafe_entry_list.append({
@@ -321,5 +337,5 @@ parsed_tree = ast.parse((open(sys.argv[1])).read())
 atv = AstTreeVisitor()
 # visit ast-parsed script
 atv.visit(parsed_tree)
-for skel in atv.get_program_dict()['fdefs']['fdef_1']['skeleton']:
-    print(skel)
+for line in atv.get_program_dict()['fdefs']['fdef_1']['skeleton']:
+    print(line)

@@ -97,7 +97,6 @@ class Profiler:
                     fdefs[fdef_k]["line_profile"]["line_{0}".format(int(split_line[0]) - fnum)] = {}
                     line_info = fdefs[fdef_k]["line_profile"]["line_{0}".format(int(split_line[0]) - fnum)]
                     if reached:
-                        print("Line =>", split_line)
                         try:
                             line_info["hits"] = float(split_line[1])
                             line_info["%time"] = float(split_line[4])
@@ -143,7 +142,7 @@ class Profiler:
                     elif len_sl == 6:
                         write_lprofs()
 
-            ## ! below is useful for debugging problems with line_profiler! ###
+            # ! below is useful for debugging problems with line_profiler! ###
             # with open(pro_file, 'r') as f:
             #     for line in f.readlines():
             #         print(line)

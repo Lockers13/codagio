@@ -9,7 +9,7 @@ import random
 import string
 from . import subprocess_ctrl as spc
 
-def make_file(path, code, input_type="auto", init_data=False):
+def make_file(path, code, input_type="auto", init_data=False, main_function=None):
     """Function to create script that is used for verification and profiling purposes
 
     Returns nothing, writes to disk"""
@@ -74,7 +74,9 @@ def make_file(path, code, input_type="auto", init_data=False):
         for line in program_text:
             split_line = line.split()
             if len(split_line) > 0 and line.split()[0] == "def":
-                fname = line.split()[1].split("(")[0]
+                func_name = line.split()[1].split("(")[0]
+                if func_name == main_function:
+                    fname = func_name
             f.write("{0}\n".format(line))
         if not line.endswith("\n"):
             f.write("\n")

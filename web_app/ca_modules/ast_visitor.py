@@ -62,7 +62,8 @@ class AstTreeVisitor(ast.NodeVisitor):
             self.__disallowed_fcalls.add(func)
         self.__num_args = int(self.__metadata.get("constraints").get("num_args", 0))
         self.__program_dict["constraint_violation"] = []
-        
+ 
+
 
 
     def get_program_dict(self):
@@ -142,14 +143,16 @@ class AstTreeVisitor(ast.NodeVisitor):
         self.__fdef_dict["skeleton"].append("{0}{1}:".format("    " * self.__count_hash["level"], node_type))
         self.__program_dict["line_indents"]["line_{0}".format(node.lineno)] = self.__count_hash["level"]
 
-        self.__process_body(node)
-
-        for handler in node.handlers:
-            self.__count_hash["exc_handlers"] += 1
-            self.__fdef_dict["skeleton"].append("{0}{1}:".format("    " * self.__count_hash["level"], type(handler).__name__.lower()))
-
-            for body in handler.body:
-                self.__process_body(body)
+        if len(node.handlers) == 0:
+            self.__process_body(node)
+        else:
+            for handler in node.handlers:
+                self.__process_body(node)
+                self.__count_hash["exc_handlers"] += 1
+                self.__fdef_dict["skeleton"].append("{0}{1}:".format("    " * self.__count_hash["level"], type(handler).__name__.lower()))
+                self.__process_body(handler)
+                # for body in handler.body:
+                #     self.__process_body(body)
 
     def __process_loop(self, node, nested=False):
         """Utility method to recursively process any 'while', 'for' or 'if' node encountered in a function def,
@@ -187,6 +190,15 @@ class AstTreeVisitor(ast.NodeVisitor):
         self.__process_body(node)
         self.__count_hash["nest_level"] -= 1
 
+    def __process_fdef(self, node):
+        parameters = []
+        for arg in node.args.args:
+            parameters.append(arg.arg)
+        signature = "def {0}({1}):".format(node.name, ', '.join(parameters))
+        self.__fdef_dict["skeleton"].append("{0}{1}".format("    " * self.__count_hash["level"], signature))
+        self.__program_dict["line_indents"]["line_{0}".format(node.lineno)] = self.__count_hash["level"]
+        self.__process_body(node)
+
     def __process_body(self, node, in_else=False):
 
         """Utility method to recursively process the body of any given AST construct containing a body. 
@@ -217,7 +229,13 @@ class AstTreeVisitor(ast.NodeVisitor):
                     self.__increment_counts(value)
                     self.__program_dict["line_indents"]["line_{0}".format(value.lineno)] = self.__count_hash["level"]
                     func = value.func
-                    func_name = func.id if isinstance(func, ast.Name) else func.attr
+                    try:
+                        func_name = func.id
+                    except AttributeError:
+                        try:
+                            func_name = func.attr
+                        except:
+                            func_name = ""
                 else:
                     func_name = ""
                 node_type = type(value).__name__.lower()
@@ -226,6 +244,7 @@ class AstTreeVisitor(ast.NodeVisitor):
                 self.__process_try(body_node)
             elif isinstance(body_node, ast.FunctionDef):
                 self.__nested_fdefs.append(body_node.name)
+                self.__process_fdef(body_node)
             else:
                 self.__process_simple_op(body_node)
 
@@ -311,6 +330,7 @@ class AstTreeVisitor(ast.NodeVisitor):
     def visit_Call(self, node):
         def check_safe_open(func_name, node):
             if func_name == "open":
+                print(self.__fdef_dict["args"])
                 if len(node.args) == 2 and isinstance(node.args[0], ast.Name) and isinstance(node.args[1], ast.Str):
                     if node.args[0].id in self.__fdef_dict["args"] and node.args[1].s == 'r':
                         return True
@@ -319,13 +339,15 @@ class AstTreeVisitor(ast.NodeVisitor):
         try:
             func_name = node.func.id
         except AttributeError:
-            func_name = node.func.attr
+            try:
+                func_name = node.func.attr
+            except:
+                func_name = node.func.slice
         
         if func_name in self.__disallowed_fcalls:
             if check_safe_open(func_name, node):
                 pass
             else:
-                print(func_name)
                 unsafe_entry_list = self.__program_dict["constraint_violation"]
                 unsafe_entry_list.append({
                     "type": "Disallowed fcall",

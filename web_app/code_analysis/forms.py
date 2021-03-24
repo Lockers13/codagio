@@ -25,5 +25,4 @@ class DefaultProblemUploadForm(forms.Form):
     program = forms.FileField()
     meta_file = forms.FileField()
     category = forms.CharField(widget=forms.HiddenInput(), required=True)
-    input_type = forms.ChoiceField(widget = forms.Select(), choices = ([('Auto','Auto'),
-         ('Custom','Custom') ]), initial='Auto', required = True)
+    inputs = forms.FileField()

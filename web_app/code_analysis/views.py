@@ -100,7 +100,7 @@ class AnalysisView(APIView):
         try:
             analyzer.visit_ast()
         except Exception as e:
-            os.remove(filename)
+            #os.remove(filename)
             return Response("POST NOG\QT OK: {0}".format(str(e)), status=status.HTTP_400_BAD_REQUEST)
         
         ### if the ast_visitor has picked up on any constraint violations then return appropriate error status
@@ -115,12 +115,12 @@ class AnalysisView(APIView):
         input_type = next(iter(problem_data["metadata"].get("input_type")))
         if input_type == "file":
             if problem_data["init_data"] is not None:
-                make_utils.make_file(filename, processed_data["code_data"].splitlines(), input_type="file", init_data=True)
+                make_utils.make_file(filename, processed_data["code_data"].splitlines(), input_type="file", init_data=True, main_function=problem_data["metadata"]["main_function"])
             else:
-                make_utils.make_file(filename, processed_data["code_data"].splitlines(), input_type="file")
+                make_utils.make_file(filename, processed_data["code_data"].splitlines(), input_type="file", main_function=problem_data["metadata"]["main_function"])
         elif input_type == "auto" or input_type == "custom":
             try:
-                make_utils.make_file(filename, processed_data["code_data"].splitlines())
+                make_utils.make_file(filename, processed_data["code_data"].splitlines(), main_function=problem_data["metadata"]["main_function"])
             except Exception as e:
                 print(str(e))
         ### verify the submitted solution against the appropriate reference problem
@@ -190,7 +190,6 @@ class SaveProblemView(APIView):
             processed_data["category"] = data.get("category")
             processed_data["target_file"] = data.getlist("target_file", None)
             processed_data["data_file"] = data.get("data_file", None)
-            processed_data["custom_inputs"] = data.get("custom_inputs", None)
             processed_data["name"] = data.get("name")
             description = data.get("description")
             processed_data["program_file"] = data.get("program")
@@ -199,6 +198,7 @@ class SaveProblemView(APIView):
             processed_data["metadata"] = yaml.full_load(meta_file.read())
             processed_data["metadata"]["description"] = description
             processed_data["date_submitted"] = datetime.now()
+            processed_data["inputs"] = data.get("inputs", None)
         except Exception as e:
             return Response("POST NOT OK: Error during intial processing of uploaded data - {0}".format(str(e)), status=status.HTTP_400_BAD_REQUEST)
         return processed_data
@@ -210,10 +210,14 @@ class SaveProblemView(APIView):
 
         ### get data, process it, and handle errors
         data = request.data
+        print(data)
         processed_data = self.__process_request_data(data)
         ### if an error response was returned from processing function, then return it from this view
         if isinstance(processed_data, Response):
             return processed_data
+        if processed_data["metadata"]["main_function"] in ["main", "prep_input"]:
+            return Response("POST NOT OK: main_function cannot be called 'main' or 'prep_input'", status=status.HTTP_400_BAD_REQUEST)
+
         ### get author instance from DB
         try:
             author = User.objects.filter(id=processed_data.get("author_id")).first()
@@ -251,7 +255,7 @@ class SaveProblemView(APIView):
         ### These different eventualities are handled below
         if processed_data["category"] == "file_io":
             if processed_data["data_file"] is not None and processed_data["data_file"] != "":
-                make_utils.make_file(filename, processed_data["code"], input_type="file", init_data=True)
+                make_utils.make_file(filename, processed_data["code"], input_type="file", init_data=True, main_function=processed_data["metadata"]["main_function"])
                 problem_inputs, files = make_utils.handle_uploaded_file_inputs(processed_data)
                 ### generate sample outputs, given file inputs
                 init_data = processed_data["data_file"].read().decode("utf-8")
@@ -259,7 +263,7 @@ class SaveProblemView(APIView):
                 input_hash = problem_inputs
             else:
                 ### make new script capable of being verified and profiled
-                make_utils.make_file(filename, processed_data["code"], input_type="file")
+                make_utils.make_file(filename, processed_data["code"], input_type="file", main_function=processed_data["metadata"]["main_function"])
                 ### generate file inputs, given processed data
                 problem_inputs, files = make_utils.handle_uploaded_file_inputs(processed_data)
                 ### generate sample outputs, given file inputs
@@ -271,23 +275,25 @@ class SaveProblemView(APIView):
             input_hash = {}
             input_hash["default"] = {}
             ### make new script capable of being verified and profiled
-            make_utils.make_file(filename, processed_data["code"])
+            make_utils.make_file(filename, processed_data["code"], main_function=processed_data["metadata"]["main_function"])
             ### check whether custom inputs are provided (in json format), 
             ### or whether they are to be auto generated as per specifications of metadata file
-            if processed_data["custom_inputs"] is not None:
-                problem_inputs = json.loads(processed_data["custom_inputs"].read().decode("utf-8"))
-                validated_input = self.__validate_custom_inputs(problem_inputs)
-                if isinstance(validated_input, Response):
-                    return validated_input
-                input_hash["default"]["custom"] = problem_inputs
-            else:
-                ### just shortening overly verbose data references
-                input_type = processed_data["metadata"].get("input_type")["auto"]
-                input_length = processed_data["metadata"].get("input_length", None)
-                num_tests = processed_data["metadata"].get("num_tests", None)
-                ### auto-generate inputs, given relevant metadata
-                problem_inputs = make_utils.generate_input(input_type, input_length, num_tests)
-                input_hash["default"]["auto"] = problem_inputs
+
+            problem_inputs = json.loads(processed_data["inputs"].read().decode("utf-8"))
+            validated_input = self.__validate_custom_inputs(problem_inputs)
+            if isinstance(validated_input, Response):
+                return validated_input
+            input_hash["default"]["custom"] = problem_inputs
+
+            # else:
+            #     ### just shortening overly verbose data references
+            #     input_type = processed_data["metadata"].get("input_type")["auto"]
+            #     input_length = processed_data["metadata"].get("input_length", None)
+            #     num_tests = processed_data["metadata"].get("num_tests", None)
+            #     ### auto-generate inputs, given relevant metadata
+            #     problem_inputs = make_utils.generate_input(input_type, input_length, num_tests)
+            #     input_hash["default"]["auto"] = problem_inputs
+
             ### generate sample outputs, given auto-generated or custom inputs
             init_data = None  
             outputs = make_utils.gen_sample_outputs(filename, problem_inputs)

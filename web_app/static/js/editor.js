@@ -176,6 +176,7 @@ function write_skeleton(collapsible, skels, skel_str) {
             real_str = skeleton[j].replace(/\s/g, '&nbsp')
             skel_str += "" + real_str + "<br>"
         }
+        skel_str += "<br>"
     }
     skel_str += "</p>"
     collapsible.innerHTML += skel_str
@@ -186,9 +187,10 @@ function write_lprof(collapsible, fdefs, lprof_str) {
     lprof_str += 
         "<p style='text-align:left; margin:20px 0px;' class='lead'>Check out the performance of your code in more detail </p>" + 
         "<table style='align:left;max-width:80%;margin-left:auto;margin-right:auto;' class='table table-dark'>" + 
-        "<thead><tr><th class='topline' scope='col'>Line #</th><th class='topline' scope='col'># Hits</th><th class='topline' scope='col'>% Time</th><th class='topline' scope='col'>Real Time</th><th class='topline' scope='col'>Contents</th></tr></thead><tbody>"
+        "<thead><tr><th class='topline' scope='col'>Line #</th><th class='topline' scope='col'># Hits</th><th class='topline' scope='col'>% Time</th><th class='topline' scope='col'>Real Time</th><th class='topline' scope='col'>Contents</th></tr></thead>"
 
     for(fdef in fdefs) {
+        lprof_str += "<tbody>"
         count = 1
         lprof_dict = fdefs[fdef]["line_profile"]
         for(lprof in lprof_dict) {
@@ -203,9 +205,10 @@ function write_lprof(collapsible, fdefs, lprof_str) {
             "<td style='height:5px;colour:" + bar_colour + ";'>" + real_time + "</td>" +
             "<td style='height:5px;colour:" + bar_colour + ";'>" + contents + "</td></tr>"
             }
+        lprof_str += "</tbody>"
         }
-        lprof_str += "</tbody></table></p>"
-        collapsible.innerHTML += lprof_str
+    lprof_str += "</table></p>"
+    collapsible.innerHTML += lprof_str
     }
 
 

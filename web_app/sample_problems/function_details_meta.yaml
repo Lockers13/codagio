@@ -11,3 +11,4 @@ input_type:
 input_length: 1
 num_tests: 3
 category: file_io
+main_function: "show_function_details"

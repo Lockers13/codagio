@@ -14,19 +14,18 @@
                     {% csrf_token %}
                     <div>
                         <div class="form-group col-sm-12 col-md-12 col-lg-12 col-xl-12">{{ form.author_id }}</div>
-                        <div class="form-group col-sm-12 col-md-12 col-lg-12 col-xl-12 item"><span class="input_title">Problem Name:</span> <span class="problem_name">{{ form.name }}</span></div>
-                        <div class="form-group col-sm-12 col-md-12 col-lg-12 col-xl-12 item"><span class="input_title">Metadata File (.yaml format):</span> {{ form.meta_file }}</div>
-                        <div class="form-group col-sm-12 col-md-12 col-lg-12 col-xl-12 item"><span class="input_title">Problem Script:</span> {{ form.program }}</div>
+                        <div class="form-group col-sm-12 col-md-12 col-lg-12 col-xl-12 item"><span class="input_title">Problem Name:</span> <span class="problem_name">&nbsp&nbsp{{ form.name }}</span></div>
+                        <div class="form-group col-sm-12 col-md-12 col-lg-12 col-xl-12 item"><span class="input_title">Metadata File (.yaml format):</span>&nbsp&nbsp{{ form.meta_file }}</div>
+                        <div class="form-group col-sm-12 col-md-12 col-lg-12 col-xl-12 item"><span class="input_title">Problem Script:</span>&nbsp&nbsp{{ form.program }}</div>
                         {% if cat == 'file_io' %}
-                           <div class="form-group col-sm-12 col-md-12 col-lg-12 col-xl-12 item"><span class="input_title">Target File(s) - maximum 3:</span> {{ form.target_file }}</div>
-                           <div class="form-group col-sm-12 col-md-12 col-lg-12 col-xl-12 item"><span class="input_title">Optional Data File:</span> {{ form.data_file }}</div>
+                           <div class="form-group col-sm-12 col-md-12 col-lg-12 col-xl-12 item"><span class="input_title">Target File(s) - maximum 3:</span>&nbsp&nbsp{{ form.target_file }}</div>
+                           <div class="form-group col-sm-12 col-md-12 col-lg-12 col-xl-12 item"><span class="input_title">Optional Data File:</span>&nbsp&nbsp{{ form.data_file }}</div>
                         {% elif cat == 'default' %}
                         <div id="input_type_select">
-                            <span class="input_title">Input Type:</span> {{ form.input_type }}
+                            <span class="input_title">Inputs (.json format):</span>&nbsp&nbsp{{ form.inputs }}
                         </div>
                         {% endif %}
-                        <div class="form-group col-sm-12 col-md-12 col-lg-12 col-xl-12 item" id="custom_input_div"></div>
-                        <div class="form-group col-sm-12 col-md-12 col-lg-12 col-xl-12 item"><span class="input_title">Problem Description:</span><span class="problem_desc">{{ form.description }}</span></div>
+                        <div class="form-group col-sm-12 col-md-12 col-lg-12 col-xl-12 item"><span class="input_title">Problem Description:</span><span class="problem_desc">&nbsp&nbsp{{ form.description }}</span></div>
                         {{ form.category }}
                     </div>
                     <div class="text-center">

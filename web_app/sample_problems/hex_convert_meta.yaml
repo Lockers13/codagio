@@ -11,3 +11,4 @@ input_type:
 input_length: 5000
 num_tests: 3
 category: ["mathematics", "string_manipulation", "computer_architecture"]
+main_function: "hex_vert"
