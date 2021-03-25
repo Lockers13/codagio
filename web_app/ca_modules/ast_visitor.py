@@ -63,9 +63,6 @@ class AstTreeVisitor(ast.NodeVisitor):
         self.__num_args = int(self.__metadata.get("constraints").get("num_args", 0))
         self.__program_dict["constraint_violation"] = []
  
-
-
-
     def get_program_dict(self):
         return self.__program_dict
 
@@ -287,8 +284,8 @@ class AstTreeVisitor(ast.NodeVisitor):
                 self.__fdef_dict["args"].append(arg.arg)
             num_args = len(self.__fdef_dict["args"])
 
-            # if num_args != self.__num_args:
-            #     self.__program_dict["constraint_violation"].append({"num_args": "specification={0} - user-code={1}".format(self.__num_args, num_args)})
+            if self.__fname == self.__metadata.get("main_function") and num_args != self.__num_args:
+                self.__program_dict["constraint_violation"].append({"num_args": "specification={0} - user-code={1}".format(self.__num_args, num_args)})
 
             signature = "def {0}({1}):".format(node.name, ', '.join(self.__fdef_dict["args"]))
             self.__fdef_dict["skeleton"] = []
@@ -330,7 +327,6 @@ class AstTreeVisitor(ast.NodeVisitor):
     def visit_Call(self, node):
         def check_safe_open(func_name, node):
             if func_name == "open":
-                print(self.__fdef_dict["args"])
                 if len(node.args) == 2 and isinstance(node.args[0], ast.Name) and isinstance(node.args[1], ast.Str):
                     if node.args[0].id in self.__fdef_dict["args"] and node.args[1].s == 'r':
                         return True

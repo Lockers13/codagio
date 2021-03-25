@@ -65,7 +65,6 @@ class Verifier:
                         raise Exception("hhh{0}".format(str(e)))           
                 ### clean up the returned output of subprocess - '\r' for windows, and 'None' because sometimes python sp.Popen adds this at the end (probably return value)
                 cleaned_split_output = output.decode("utf-8").replace('\r', '').replace('None', '').splitlines()
-                print(cleaned_split_output)
                 sub_outputs.append(cleaned_split_output)
                 ### remove throwaway files after uploaded script has been run on them => if they exist!
                 os.remove(target_file)
