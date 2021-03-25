@@ -76,20 +76,24 @@ def make_file(path, code, input_type="auto", init_data=False, main_function=None
     
     TEMPLATE_CODE_FILE_WITH_DATA = ["def prep_output():",
                     "    try:",
-                    "        output = template_function(argv[1], argv[2])",
-                    "        return output",
+                    "        return template_function(argv[1], argv[2])",
                     "    except IndexError:",
                     "        print(\"Error: please make sure correct input has been provided\")",
                     "def main():",
                     "    try:",
                     "        output = prep_output()",
-                    "        with open(argv[1], 'r') as f:",
-                    "            len_lines = len(f.readlines())",
-                    "        for i in range(1, len_lines+1):",
-                    "            if output.get(i, None) is not None:",
-                    "                print(i, output[i])",
-                    "            else:",
-                    "                print(i, False)",
+                    "        if isinstance(output, dict):",
+                    "            output = prep_output()",
+                    "            with open(argv[1], 'r') as f:",
+                    "                len_lines = len(f.readlines())",
+                    "            for i in range(1, len_lines+1):",
+                    "                if output.get(i, None) is not None:",
+                    "                    print(i, output[i])",
+                    "                else:",
+                    "                    print(i, False)",
+                    "        elif isinstance(output, list):",
+                    "            for line in output:",
+                    "                print(line)",
                     "    except Exception as e:",
                     "        print('EXCEPTION: semantic error in submitted program: {0}'.format(str(e)))\n",
                     "main()"]
@@ -135,8 +139,6 @@ def gen_sample_outputs(filename, inputs, init_data=None, input_type="auto"):
             else:
                 output = spc.run_subprocess_ctrld(base_cmd, filename, script)
             cleaned_split_output = output.decode("utf-8").replace('\r', '').replace('None', '').splitlines()
-            for line in cleaned_split_output:
-                print(line)
             outputs.append(cleaned_split_output)
             try:
                 os.remove(script)

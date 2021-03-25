@@ -2,6 +2,8 @@ ABC_LOWER = "abcdefghijklmnopqrstuvwxyz"
 ABC_UPPER = ABC_LOWER.upper()
 
 def rot13(phrase):
+    if not isinstance(phrase, str):
+        return "Error: input is not a string!"
     out_phrase = ''
     for char in phrase:
         if char.isupper():

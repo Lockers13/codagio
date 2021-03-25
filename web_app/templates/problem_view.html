@@ -11,7 +11,7 @@
         {% for problem in problems %}
         <button type="button" class="collapsible">{{ problem.name }} ({{ problem.metadata.difficulty }}) </button>
         <div class="content">
-            <p class="problem_desc">{{ problem.metadata.description }}</p>
+            <p class="problem_desc" style="white-space: pre-wrap;">{{ problem.metadata.description }}</p>
             <a href="{% url 'code:solution' prob_id=problem.id %}">
                 <div class="text-center">
                     <button type="button" class="text-center go_btn">

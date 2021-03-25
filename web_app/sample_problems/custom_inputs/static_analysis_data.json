@@ -1,1 +1,1 @@
-{"disallowed_functions": ["exec", "eval", "literal_eval"], "allowed_abs_imports": ["random"], "allowed_rel_imports": {"os": ["path"]}}
+{"functions": ["exec", "eval", "literal_eval"], "abs_imports": ["random", "os", "sys", "gzip"], "rel_imports": {"os": ["path"], "shutil": ["copy"], "datetime": ["datetime"]}}

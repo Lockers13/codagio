@@ -1,4 +1,4 @@
-def hex_to_decimal(hex_string):
+def hex_vert(hex_string):
     hex_alpha = {
         'a': 10,
         'b': 11,

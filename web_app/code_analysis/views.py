@@ -210,7 +210,6 @@ class SaveProblemView(APIView):
 
         ### get data, process it, and handle errors
         data = request.data
-        print(data)
         processed_data = self.__process_request_data(data)
         ### if an error response was returned from processing function, then return it from this view
         if isinstance(processed_data, Response):
@@ -264,9 +263,6 @@ class SaveProblemView(APIView):
             else:
                 ### make new script capable of being verified and profiled
                 make_utils.make_file(filename, processed_data["code"], input_type="file", main_function=processed_data["metadata"]["main_function"])
-                with open(filename, 'r') as f:
-                    for line in f.readlines():
-                        print(line)
                 ### generate file inputs, given processed data
                 problem_inputs, files = make_utils.handle_uploaded_file_inputs(processed_data)
                 ### generate sample outputs, given file inputs
