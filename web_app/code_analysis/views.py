@@ -195,7 +195,7 @@ class SaveProblemView(APIView):
             processed_data["program_file"] = data.get("program")
             processed_data["code"] = [line.decode("utf-8") for line in processed_data["program_file"].read().splitlines()]
             meta_file = data.get("meta_file")
-            processed_data["metadata"] = yaml.full_load(meta_file.read())
+            processed_data["metadata"] = yaml.safe_load(meta_file.read())
             processed_data["metadata"]["description"] = description
             processed_data["date_submitted"] = datetime.now()
             processed_data["inputs"] = data.get("inputs", None)

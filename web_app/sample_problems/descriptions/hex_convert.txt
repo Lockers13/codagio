@@ -1,0 +1,10 @@
+Challenge - write a function which takes a hexadecimal string as its sole parameter and returns its corresponding integer value.
+
+Exception handling must be implemented for the following cases:
+
+1. The string passed to the function does not begin with the characters '0x'
+(On exception return the string  "Error: the provided string does not begin with a leading '0x'")
+2. The string does begin with the characters '0x', but is not in valid hexadecimal format
+(On exception return the string  "Error: the provided string contains invalid characters!")
+
+Good Luck!

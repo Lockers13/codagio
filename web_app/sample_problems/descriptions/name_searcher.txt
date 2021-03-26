@@ -1,0 +1,17 @@
+Challenge - Write a function which takes two arguments (targetfile, data)...'data' is presuppied list of unique names, and targetfile is a json file also containing an array of unqiue names. The task is to iterate through the data list, and for each name in it, determine if it occurs or not in the supplied target file.
+
+For each name, we record whether or not it occurs in the file by adding both the name followed by either true/false to a new list. 
+
+Thus for example:
+
+If a name, say 'John', occurs in the file, then our list will contain an  entry of the form ["John True"]. Otherwise the entry will look like ["John False"]
+
+The fully populated list (i.e. containing an entry for each name in 'data') should be returned by the function.
+
+We will leave it to you to determine what exceptions need handling...good luck!
+
+In the editor, you are allowed to make use of the following imports to complete this task:
+
+- from json import loads
+
+It should be noted that efficiency is key here, as both the supplied list of names and the targetfile are veruy large in size!

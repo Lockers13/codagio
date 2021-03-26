@@ -76,7 +76,9 @@ def make_file(path, code, input_type="auto", init_data=False, main_function=None
     
     TEMPLATE_CODE_FILE_WITH_DATA = ["def prep_output():",
                     "    try:",
-                    "        return template_function(argv[1], argv[2])",
+                    "        data = load_json(argv[2])",
+                    "        targetfile = argv[1]",
+                    "        return template_function(targetfile, data)",
                     "    except IndexError:",
                     "        print(\"Error: please make sure correct input has been provided\")",
                     "def main():",
@@ -139,6 +141,8 @@ def gen_sample_outputs(filename, inputs, init_data=None, input_type="auto"):
             else:
                 output = spc.run_subprocess_ctrld(base_cmd, filename, script)
             cleaned_split_output = output.decode("utf-8").replace('\r', '').replace('None', '').splitlines()
+            for line in cleaned_split_output:
+                print(line)
             outputs.append(cleaned_split_output)
             try:
                 os.remove(script)

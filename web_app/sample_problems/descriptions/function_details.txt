@@ -1,0 +1,21 @@
+Challenge - Write a function which takes a .py script as its sole argument and returns a dictionary having as keys the line number of each function occurring in the script, and as values a string containing the corresponding details about that function.
+
+String contraining function details should be of the following form:
+
+"function_name-function_visibility-function_parameters"
+
+Note: all function parameters should be recorded in the form of a comma separated string, i.e.: "param1,param2,paramN"...so an example of a complete entry into our function detail dictionary might look as follows:
+
+{17: 'get_info - public - info_dict,node'}
+
+or again:
+
+{24: '__shorten_url - private - url,param_list'}
+
+We will leave it to you to determine what exceptions need handling in order to arrive at the correct output.
+
+In the editor, you are allowed to import the following modules to complete this task:
+
+- ast
+
+Good Luck!
