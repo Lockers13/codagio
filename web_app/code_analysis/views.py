@@ -337,6 +337,7 @@ def solution_upload(request, prob_id):
     metadata = problem.metadata
     difficulty = metadata['difficulty']
     description = metadata['description']
+    main_signature = problem.analysis.get("main_signature", None)
 
     initial_state = {
         'user_id': request.user.id,
@@ -353,6 +354,7 @@ def solution_upload(request, prob_id):
                 'difficulty':difficulty,
                 'problem_name':problem.name,
                 'problem_desc':description,
+                'main_signature': main_signature,
                 }
 
     return render(request, 'code.html', context)

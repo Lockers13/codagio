@@ -288,6 +288,8 @@ class AstTreeVisitor(ast.NodeVisitor):
                 self.__program_dict["constraint_violation"].append({"num_args": "specification={0} - user-code={1}".format(self.__num_args, num_args)})
 
             signature = "def {0}({1}):".format(node.name, ', '.join(self.__fdef_dict["args"]))
+            if self.__fname == self.__metadata.get("main_function"):
+                self.__program_dict["main_signature"] = signature
             self.__fdef_dict["skeleton"] = []
             self.__fdef_dict["skeleton"].append(signature)
             for cat in ["whiles", "fors", "ifs", "ops", "calls", "elses", "assigns", "augassigns", "trys", "returns", "else-ifs", "withs"]:

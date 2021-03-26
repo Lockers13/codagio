@@ -216,7 +216,9 @@ function write_lprof(collapsible, fdefs, lprof_str) {
 //Editor set up related 
 function init_editor() {
     let editor = ace.edit("editor");
-    editor.setValue("def test(a,b):\n    print(a)");            ///Setting initial value here to quickly test
+    var main_signature = document.getElementById("main_signature").innerHTML
+
+    editor.setValue(main_signature + "\n    ### write your code below...");            ///Setting initial value here to quickly test
 
     editor.setOptions({
         // editor options
