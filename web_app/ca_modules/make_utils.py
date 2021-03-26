@@ -76,7 +76,7 @@ def make_file(path, code, input_type="auto", init_data=False, main_function=None
     
     TEMPLATE_CODE_FILE_WITH_DATA = ["def prep_output():",
                     "    try:",
-                    "        data = load_json(argv[2])",
+                    "        data = json_load(argv[2])",
                     "        targetfile = argv[1]",
                     "        return template_function(targetfile, data)",
                     "    except IndexError:",
