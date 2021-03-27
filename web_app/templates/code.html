@@ -34,27 +34,28 @@
                                 <div id="collapse_section">
                                     
                                     <button type="button" class="collapsible"> Quick Results Breakdown </button>
-                                    <div class="content">
+                                    <!-- <div class="content">
                                         <p id="breakdown"> </p>
-                                    </div>
+                                    </div> -->
                                     <button type="button" class="collapsible"> Code Comparison </button>
-                                    <div class="content">
+                                    <!-- <div class="content">
                                         <p id="comparison"> </p>
-                                    </div>
+                                    </div> -->
                                     <button type="button" class="collapsible"> Our Sample Solution </button>
-                                    <div class="content">
+                                    <!-- <div class="content">
                                         <p id="sample_solution"> </p>
-                                    </div>
+                                    </div> -->
                                     <button id="lp_btn" type="button" class="collapsible"> Line Profiling </button>
-                                    <div class="content">
+                                    <!-- <div class="content">
                                         <p id="line_profiling"> </p>
-                                    </div>
+                                    </div> -->
                                     <button id="fail_btn" type="button" class="collapsible"> Failure Stats </button>
-                                    <div class="content">
+                                    <!-- <div class="content">
                                         <p id="fail_stats"> </p>
-                                    </div>
+                                    </div> -->
                                 </div>    
                             </div>
+                            
                             <p style="visibility:hidden;" id="main_signature">{{ main_signature }}</p>
                             <p class="problem_desc" id="description" style="white-space:pre-wrap;margin-left:2em;">{{ problem_desc }}</p>
                             {% if sample_input %}
@@ -70,6 +71,7 @@
                         </div>
 
                     </form>
+
 
                     <div id="loader">
                         <div class="text-center">
@@ -88,6 +90,10 @@
                 </div>
             
             </div>
+
+            <div height="400px" width="400px" style="width:100%;height:100vh;position:relative;">
+                <canvas id="myChart" width="400" height="400" style="position:absolute;top:0;bottom:0;right:0;left:0;margin:auto;"></canvas>
+            </div>
             
         
 
@@ -100,4 +106,6 @@
 <script type="text/javascript" src="{% static 'js/editor.js' %}"></script>
 <script type="text/javascript" src="{% static 'js/collapse.js' %}"></script>
 <script type="text/javascript" src="{% static 'js/reset_results.js' %}"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.js"></script> 
+
 {% endblock content %}

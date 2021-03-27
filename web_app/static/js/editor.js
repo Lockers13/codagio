@@ -2,13 +2,17 @@ const editor = init_editor()
 
 let loader = document.getElementById('loader');
 let submitbtn = document.getElementById('sub_btn');
-let desc = document.getElementById('description'); 
+let desc = document.getElementById('description');
 let result_section = document.getElementById('result');
 let overall = document.getElementById('overall_score');
 let back = document.getElementById('go_back');
 let collapse_section = document.getElementById('collapse_section');
 
-submitbtn.addEventListener('click', function(){
+var ctx = document.getElementById('myChart').getContext('2d');
+ctx.canvas.width = 700;
+ctx.canvas.height = 500;
+
+submitbtn.addEventListener('click', function () {
     submitbtn.style.visibility = 'hidden';
     desc.style.display = 'none';
     loader.style.display = 'block';
@@ -16,7 +20,7 @@ submitbtn.addEventListener('click', function(){
 
 back.addEventListener('click', reset);
 
-function reset(){
+function reset() {
     submitbtn.style.visibility = 'visible';
     desc.style.display = 'block';
     back.style.display = 'none';
@@ -25,7 +29,7 @@ function reset(){
 }
 
 //Form submission logic
-$("#sub_form").submit(function(e) {
+$("#sub_form").submit(function (e) {
     e.preventDefault();
     let sub_text = editor.getValue();
     let solution_text_box = document.getElementById("solution_text")
@@ -34,93 +38,153 @@ $("#sub_form").submit(function(e) {
 
     solution_text_box.value = sub_text
 
-    $.ajax( {
+    $.ajax({
         url: 'http://localhost:8000/code/analysis/',
         type: 'POST',
         data: new FormData(this),
         processData: false,
         contentType: false,
     })
-    .done(function(resp_data) {
-        let analysis = JSON.parse(resp_data)
-        console.log(analysis)
-        //Get results
-        let scores = analysis["scores"]
-        let comp_stats = analysis["comp_stats"][0]
-        let fdefs = analysis["fdefs"]
-        let comp_str = skel_str = lprof_str = ""
-        let result = scores["overall_score"]
-        let samp_skels = analysis["samp_skels"]
-        //Get sections
-        let breakdown_section = document.getElementById('breakdown');
-        let comparison_section = document.getElementById('comparison');
-        let sample_section = document.getElementById('sample_solution');
-        let profiling_section = document.getElementById('line_profiling');
-        let failure_section = document.getElementById('fail_stats');
-        let fail_btn = document.getElementById('fail_btn');
-        let lp_btn = document.getElementById('lp_btn');
-        // make global collapsible visible
-        loader.style.display = 'none';
-        back.style.display = 'block';
-        overall.style.display = 'block';
-        overall.innerHTML = '<h1>Total Score: ' +  result + '</h1>';
-        collapse_section.style.display = 'block';
+        .done(function (resp_data) {
+            let analysis = JSON.parse(resp_data)
+            console.log(analysis)
+            //Get results
+            let scores = analysis["scores"]
+            let comp_stats = analysis["comp_stats"][0]
+            let fdefs = analysis["fdefs"]
+            let comp_str = skel_str = lprof_str = ""
+            let result = scores["overall_score"]
+            let samp_skels = analysis["samp_skels"]
+            //Get sections
+            // let breakdown_section = document.getElementById('breakdown');
+            // let comparison_section = document.getElementById('comparison');
+            // let sample_section = document.getElementById('sample_solution');
+            // let profiling_section = document.getElementById('line_profiling');
+            // let failure_section = document.getElementById('fail_stats');
+            // let fail_btn = document.getElementById('fail_btn');
+            // let lp_btn = document.getElementById('lp_btn');
+            // make global collapsible visible
+            loader.style.display = 'none';
+            back.style.display = 'block';
+            overall.style.display = 'block';
+            overall.innerHTML = '<h1>Total Score: ' + result + '</h1>';
+            collapse_section.style.display = 'block';
+            var lp_btn = document.getElementById("lp_btn")
 
-        if(result == "100.0%") {
-            overall.style.color = "#06D6A0"
-            overall.innerHTML = "<br>Congratulations, your code passed all our tests!...<br>Now check out some of your feedback below:"
-            write_breakdown(breakdown_section, scores)
-            write_comp(comparison_section, comp_stats, comp_str)
-            write_skeleton(sample_section, samp_skels, skel_str)
-            write_lprof(profiling_section, fdefs, lprof_str)   
-            fail_btn.style.visibility = "hidden"
-        }
-        else {
-            fail_btn.style.visibility = "visible"
-            overall.style.color = "#FF3E6C"
-            overall.innerHTML = "<br>Oops, looks like your code doesn't produce the correct outputs...<br><br>Please Try again! But first, why not check out some feedback below?"
-            // do quick marks breakdown and comparison on failure
-            write_breakdown(breakdown_section, scores)
-            write_comp(comparison_section, comp_stats, comp_str)
-            write_skeleton(sample_section, samp_skels, skel_str)
-            profiling_section.innerHTML ="<p class='text-center' style='margin:20px 0px;'>Sorry, you have to pass all tests to qualify for line profiling!<p>"
-            write_failure(failure_section, scores)
+            if (result == "100.0%") {
+                overall.style.color = "#06D6A0"
+                overall.innerHTML = "<br>Congratulations, your code passed all our tests!...<br>Now check out some of your feedback below:"
+
+                lp_btn.addEventListener('click', display_lp_graph.bind(e, fdefs["fdef_1"]))
+                // write_breakdown(breakdown_section, scores)
+                // write_comp(comparison_section, comp_stats, comp_str)
+                // write_skeleton(sample_section, samp_skels, skel_str)
+                // write_lprof(profiling_section, fdefs, lprof_str)   
+                fail_btn.style.visibility = "hidden"
+            }
+            else {
+                fail_btn.style.visibility = "visible"
+                overall.style.color = "#FF3E6C"
+                overall.innerHTML = "<br>Oops, looks like your code doesn't produce the correct outputs...<br><br>Please Try again! But first, why not check out some feedback below?"
+                // do quick marks breakdown and comparison on failure
+                // write_breakdown(breakdown_section, scores)
+                // write_comp(comparison_section, comp_stats, comp_str)
+                // write_skeleton(sample_section, samp_skels, skel_str)
+                // profiling_section.innerHTML ="<p class='text-center' style='margin:20px 0px;'>Sorry, you have to pass all tests to qualify for line profiling!<p>"
+                // write_failure(failure_section, scores)
             }
         })
-    .fail(function(resp_data) {
-        loader.style.display = 'none';
-        back.style.display = 'block';  
-        console.log("Broken code", resp_data)
-        if(resp_data["responseJSON"] == "POST NOT OK: potentially unsafe code!")
+        .fail(function (resp_data) {
             loader.style.display = 'none';
+            back.style.display = 'block';
+            console.log("Broken code", resp_data)
+            if (resp_data["responseJSON"] == "POST NOT OK: potentially unsafe code!")
+                loader.style.display = 'none';
             back.style.display = 'block';
             result_section.style.display = 'block';
             result_section.innerHTML = "<br><b><i>Sorry, we cannot trust the submitted code as it does not abide by our rules. Please try again!</i></b>"
-    })
+        })
 
 });
+function display_lp_graph(fdef) {
+    console.log(fdef)
+    var lprof_dict = fdef["line_profile"]
+    var percentage_times = []
+    var line_nos = []
+    var bar_colors = []
+    for(line in lprof_dict) {
+        try{
+            var p_time = parseFloat(lprof_dict[line]["%time"])
+            percentage_times.push(p_time)
+        }
+        catch(err) {
+            percentage_times.push(0.0)
+        }
+        line_nos.push(line)
+    }
+    var max_pc = Math.max.apply(null, percentage_times)
+    for(var i = 0; i < percentage_times.length; i++) {
+        var p_ratio = percentage_times[i]/max_pc
+        if(p_ratio > .66)
+            bar_colors.push("red")
+        else if(p_ratio > .33)
+            bar_colors.push("orange")
+        else
+            bar_colors.push("green")
+    }   
 
-function swap(node1, node2) {
-    const afterNode2 = node2.nextElementSibling;
-    const parent = node2.parentNode;
-    node1.replaceWith(node2);
-    parent.insertBefore(node1, afterNode2);
+    var labels = line_nos
+    var dataset = [
+        {
+            data: percentage_times,
+            backgroundColor: bar_colors
+        },
+    ];
+
+    var options = {
+        maintainAspectRatio : false,
+        responsive: false,
+        scales: {
+            xAxes: [{
+                stacked: true
+            }],
+            yAxes: [{
+                ticks: {
+                    max : max_pc,
+                    min : 0.0,
+                    fixedStepSize: 0.1
+                },
+                stacked: true
+            }]
+        }
+    };
+
+    var content = {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: dataset
+        },
+        options
+    };
+
+    new Chart(ctx, content);
 }
 
 function write_failure(collapsible, scores) {
     collapsible.innerHTML = ""
-    let breakdown = "<p style='text-align:left;margin:20px 0px 20px 0px;' class='lead'>Let's take a closer look at where you went wrong</p>" + 
-                "<table style='align:left;max-width:80%;margin-left:auto;margin-right:auto;' class='table table-dark'>" + 
-                "<thead><tr><th class='topline scope='col'>Test #</th><th class='topline' scope='col'># Inputs</th><th class='topline' scope='col'># Failures</th><th class='topline' scope='col'>Failure Rate</th><th class='topline' scope='col'>Sample Failure</th></tr></thead><tbody>"
+    let breakdown = "<p style='text-align:left;margin:20px 0px 20px 0px;' class='lead'>Let's take a closer look at where you went wrong</p>" +
+        "<table style='align:left;max-width:80%;margin-left:auto;margin-right:auto;' class='table table-dark'>" +
+        "<thead><tr><th class='topline scope='col'>Test #</th><th class='topline' scope='col'># Inputs</th><th class='topline' scope='col'># Failures</th><th class='topline' scope='col'>Failure Rate</th><th class='topline' scope='col'>Sample Failure</th></tr></thead><tbody>"
     var count = 1;
     for (test_key in scores) {
-        if(test_key == "overall_score") 
+        if (test_key == "overall_score")
             continue
         breakdown += "<tr><td>" + count++ + "</td>"
         let fail_hash = scores[test_key]["failure_stats"]
         breakdown += "<td>" + fail_hash["num_tests"] + "</td>" +
-            "<td>" + fail_hash["num_failures"] + "</td>" + 
-            "<td>" + fail_hash["failure_rate"] + "</td>" + 
+            "<td>" + fail_hash["num_failures"] + "</td>" +
+            "<td>" + fail_hash["failure_rate"] + "</td>" +
             "<td>" + fail_hash["first_mismatch"] + "</td></tr>"
     }
     breakdown += "</tbody></table></p>"
@@ -129,23 +193,23 @@ function write_failure(collapsible, scores) {
 
 function write_breakdown(collapsible, scores) {
     collapsible.innerHTML = ""
-    let breakdown = "<p style='text-align:left;margin:20px 0px 20px 0px;' class='lead'>Let's see where you went right and where you went wrong </p>" + 
-                "<table style='align:left;max-width:80%;margin-left:auto;margin-right:auto;' class='table table-dark'>" + 
-                "<thead><tr><th class='topline scope='col'>Test #</th><th class='topline' scope='col'>Status</th><th class='topline' scope='col'>Input Length</th><th class='topline' scope='col'>Input Type</th><th class='topline' scope='col'>Failure Stats</th></tr></thead><tbody>"
+    let breakdown = "<p style='text-align:left;margin:20px 0px 20px 0px;' class='lead'>Let's see where you went right and where you went wrong </p>" +
+        "<table style='align:left;max-width:80%;margin-left:auto;margin-right:auto;' class='table table-dark'>" +
+        "<thead><tr><th class='topline scope='col'>Test #</th><th class='topline' scope='col'>Status</th><th class='topline' scope='col'>Input Length</th><th class='topline' scope='col'>Input Type</th><th class='topline' scope='col'>Failure Stats</th></tr></thead><tbody>"
     let count = 1;
     for (test_key in scores) {
-        if(test_key == "overall_score")
+        if (test_key == "overall_score")
             continue
-        breakdown += "<tr><th scope='row'>" + count++ + "</th>"  +
-            "<td>" + scores[test_key]["status"] + "</td>" + 
+        breakdown += "<tr><th scope='row'>" + count++ + "</th>" +
+            "<td>" + scores[test_key]["status"] + "</td>" +
             "<td>" + scores[test_key]["input_length"] + "</td>" +
             "<td>" + scores[test_key]["input_type"] + "</td>"
-        if(scores[test_key]["failure_stats"] != undefined) {
+        if (scores[test_key]["failure_stats"] != undefined) {
             for (fail_key in scores[test_key]["failure_stats"]) {
                 breakdown += "<td>" + scores[test_key]["failure_stats"][fail_key] + "</td>"
             }
         }
-            breakdown += "</tr>"
+        breakdown += "</tr>"
     }
     breakdown += "</tbody></table></p>"
     collapsible.innerHTML += breakdown
@@ -154,13 +218,13 @@ function write_breakdown(collapsible, scores) {
 function write_comp(collapsible, comp_stats, comp_str) {
     collapsible.innerHTML = ""
     comp_str +=
-            "<p style='text-align:left; margin:20px 0px;' class='lead'>Let's see how you match up structurally with the desired solution </p>" + 
-            "<table style='align:left;max-width:80%;margin-left:auto;margin-right:auto;' class='table table-dark'>" + 
-            "<thead><tr><th class='topline' scope='col'>Your Code</th><th class='topline' scope='col'>Our Code</th></tr></thead><tbody>"
-    for(let i = 0; i < comp_stats.length; i++) {
-        if(comp_stats[i][0].startsWith("skeleton") || comp_stats[i][0].startsWith("lineno"))
+        "<p style='text-align:left; margin:20px 0px;' class='lead'>Let's see how you match up structurally with the desired solution </p>" +
+        "<table style='align:left;max-width:80%;margin-left:auto;margin-right:auto;' class='table table-dark'>" +
+        "<thead><tr><th class='topline' scope='col'>Your Code</th><th class='topline' scope='col'>Our Code</th></tr></thead><tbody>"
+    for (let i = 0; i < comp_stats.length; i++) {
+        if (comp_stats[i][0].startsWith("skeleton") || comp_stats[i][0].startsWith("lineno"))
             continue
-        comp_str += "<tr><th scope='row'>" + comp_stats[i][0] + "</th>"  +
+        comp_str += "<tr><th scope='row'>" + comp_stats[i][0] + "</th>" +
             "<td>" + comp_stats[i][1] + "</td></tr>"
     }
     comp_str += "</tbody></table></p>"
@@ -170,9 +234,9 @@ function write_comp(collapsible, comp_stats, comp_str) {
 function write_skeleton(collapsible, skels, skel_str) {
     collapsible.innerHTML = ""
     skel_str += "<p style='margin:20px 0px; padding: 10px 10px;' class='table table-dark'>"
-    for(let i = 0; i < skels.length; i++) {
+    for (let i = 0; i < skels.length; i++) {
         let skeleton = skels[i]
-        for(let j = 0; j < skeleton.length; j++) {
+        for (let j = 0; j < skeleton.length; j++) {
             real_str = skeleton[j].replace(/\s/g, '&nbsp')
             skel_str += "" + real_str + "<br>"
         }
@@ -184,32 +248,32 @@ function write_skeleton(collapsible, skels, skel_str) {
 
 function write_lprof(collapsible, fdefs, lprof_str) {
     collapsible.innerHTML = ""
-    lprof_str += 
-        "<p style='text-align:left; margin:20px 0px;' class='lead'>Check out the performance of your code in more detail </p>" + 
-        "<table style='align:left;max-width:80%;margin-left:auto;margin-right:auto;' class='table table-dark'>" + 
+    lprof_str +=
+        "<p style='text-align:left; margin:20px 0px;' class='lead'>Check out the performance of your code in more detail </p>" +
+        "<table style='align:left;max-width:80%;margin-left:auto;margin-right:auto;' class='table table-dark'>" +
         "<thead><tr><th class='topline' scope='col'>Line #</th><th class='topline' scope='col'># Hits</th><th class='topline' scope='col'>% Time</th><th class='topline' scope='col'>Real Time</th><th class='topline' scope='col'>Contents</th></tr></thead>"
 
-    for(fdef in fdefs) {
+    for (fdef in fdefs) {
         lprof_str += "<tbody>"
         count = 1
         lprof_dict = fdefs[fdef]["line_profile"]
-        for(lprof in lprof_dict) {
+        for (lprof in lprof_dict) {
             hits = lprof_dict[lprof]["hits"]
             p_time = parseFloat(lprof_dict[lprof]["%time"])
             contents = lprof_dict[lprof]["contents"]
-            real_time = lprof_dict[lprof]["real_time"] === undefined? 0: lprof_dict[lprof]["real_time"];
-            let bar_colour = p_time < 15? (p_time < 10? "green": "orange"): "red";
-            lprof_str += "<tr><th scope='row'>" + count++ + "</th>"  +
-            "<td style='height:5px;colour:" + bar_colour + ";'>" + hits + "</td>" + 
-            "<td style='height:5px;colour:" + bar_colour + ";'>" + p_time + "</td>" +
-            "<td style='height:5px;colour:" + bar_colour + ";'>" + real_time + "</td>" +
-            "<td style='height:5px;colour:" + bar_colour + ";'>" + contents + "</td></tr>"
-            }
-        lprof_str += "</tbody>"
+            real_time = lprof_dict[lprof]["real_time"] === undefined ? 0 : lprof_dict[lprof]["real_time"];
+            let bar_colour = p_time < 15 ? (p_time < 10 ? "green" : "orange") : "red";
+            lprof_str += "<tr><th scope='row'>" + count++ + "</th>" +
+                "<td style='height:5px;colour:" + bar_colour + ";'>" + hits + "</td>" +
+                "<td style='height:5px;colour:" + bar_colour + ";'>" + p_time + "</td>" +
+                "<td style='height:5px;colour:" + bar_colour + ";'>" + real_time + "</td>" +
+                "<td style='height:5px;colour:" + bar_colour + ";'>" + contents + "</td></tr>"
         }
+        lprof_str += "</tbody>"
+    }
     lprof_str += "</table></p>"
     collapsible.innerHTML += lprof_str
-    }
+}
 
 
 
