@@ -59,7 +59,7 @@ $("#sub_form").submit(function (e) {
             // let breakdown_section = document.getElementById('breakdown');
             // let comparison_section = document.getElementById('comparison');
             // let sample_section = document.getElementById('sample_solution');
-            // let profiling_section = document.getElementById('line_profiling');
+            let profiling_section = document.getElementById('line_profiling');
             // let failure_section = document.getElementById('fail_stats');
             // let fail_btn = document.getElementById('fail_btn');
             // let lp_btn = document.getElementById('lp_btn');
@@ -75,11 +75,12 @@ $("#sub_form").submit(function (e) {
                 overall.style.color = "#06D6A0"
                 overall.innerHTML = "<br>Congratulations, your code passed all our tests!...<br>Now check out some of your feedback below:"
 
-                lp_btn.addEventListener('click', display_lp_graph.bind(e, fdefs["fdef_1"]))
+                //lp_btn.addEventListener('click', display_lp_graph.bind(e, fdefs["fdef_1"]))
                 // write_breakdown(breakdown_section, scores)
                 // write_comp(comparison_section, comp_stats, comp_str)
                 // write_skeleton(sample_section, samp_skels, skel_str)
-                // write_lprof(profiling_section, fdefs, lprof_str)   
+                write_lprof(profiling_section, fdefs, lprof_str)
+                bind_lprof_btns(fdefs)   
                 fail_btn.style.visibility = "hidden"
             }
             else {
@@ -107,10 +108,18 @@ $("#sub_form").submit(function (e) {
 
 });
 function display_lp_graph(fdef) {
-    console.log(fdef)
+    document.getElementById("graph_heading").innerHTML = "<h2 style='margin:50px 0px 0px 0px;text-align:center'><u>Line Profile of Function: " + fdef["name"] + "</u></h2>"
+    try {
+        window.chart.destroy();
+    }
+    catch(err) {
+        ;
+    }
     var lprof_dict = fdef["line_profile"]
+    console.log(lprof_dict)
     var percentage_times = []
     var line_nos = []
+    var line_no = 1
     var bar_colors = []
     for(line in lprof_dict) {
         try{
@@ -120,7 +129,7 @@ function display_lp_graph(fdef) {
         catch(err) {
             percentage_times.push(0.0)
         }
-        line_nos.push(line)
+        line_nos.push(line_no++)
     }
     var max_pc = Math.max.apply(null, percentage_times)
     for(var i = 0; i < percentage_times.length; i++) {
@@ -135,22 +144,41 @@ function display_lp_graph(fdef) {
 
     var labels = line_nos
     var dataset = [
-        {
+        {   
+            label: "% time spent executing line",
             data: percentage_times,
             backgroundColor: bar_colors
         },
     ];
 
     var options = {
+        onClick: function (e) {
+            try {
+                var activePointLabel = this.getElementsAtEvent(e)[0]._model.label;
+                alert(activePointLabel);
+            }
+            catch(err) {
+                ;
+            }
+
+        },
         maintainAspectRatio : false,
         responsive: false,
         scales: {
             xAxes: [{
+                scaleLabel: {
+                    display: true,
+                    labelString: '% Time'
+                },
                 stacked: true
             }],
             yAxes: [{
+                scaleLabel: {
+                    display: true,
+                    labelString: 'Line No.'
+                },
                 ticks: {
-                    max : max_pc,
+                    max : line_no,
                     min : 0.0,
                     fixedStepSize: 0.1
                 },
@@ -160,7 +188,7 @@ function display_lp_graph(fdef) {
     };
 
     var content = {
-        type: 'bar',
+        type: 'horizontalBar',
         data: {
             labels: labels,
             datasets: dataset
@@ -168,7 +196,16 @@ function display_lp_graph(fdef) {
         options
     };
 
-    new Chart(ctx, content);
+    window.chart = new Chart(ctx, content);
+}
+
+function bind_lprof_btns(fdefs) {
+    var evt = undefined
+    for(fdef in fdefs) {
+        var fdef_btn = document.getElementById(fdef + "_btn")
+        fdef_btn.addEventListener('click', display_lp_graph.bind(evt, fdefs[fdef]))
+    }
+
 }
 
 function write_failure(collapsible, scores) {
@@ -248,31 +285,37 @@ function write_skeleton(collapsible, skels, skel_str) {
 
 function write_lprof(collapsible, fdefs, lprof_str) {
     collapsible.innerHTML = ""
-    lprof_str +=
-        "<p style='text-align:left; margin:20px 0px;' class='lead'>Check out the performance of your code in more detail </p>" +
-        "<table style='align:left;max-width:80%;margin-left:auto;margin-right:auto;' class='table table-dark'>" +
-        "<thead><tr><th class='topline' scope='col'>Line #</th><th class='topline' scope='col'># Hits</th><th class='topline' scope='col'>% Time</th><th class='topline' scope='col'>Real Time</th><th class='topline' scope='col'>Contents</th></tr></thead>"
-
-    for (fdef in fdefs) {
-        lprof_str += "<tbody>"
-        count = 1
-        lprof_dict = fdefs[fdef]["line_profile"]
-        for (lprof in lprof_dict) {
-            hits = lprof_dict[lprof]["hits"]
-            p_time = parseFloat(lprof_dict[lprof]["%time"])
-            contents = lprof_dict[lprof]["contents"]
-            real_time = lprof_dict[lprof]["real_time"] === undefined ? 0 : lprof_dict[lprof]["real_time"];
-            let bar_colour = p_time < 15 ? (p_time < 10 ? "green" : "orange") : "red";
-            lprof_str += "<tr><th scope='row'>" + count++ + "</th>" +
-                "<td style='height:5px;colour:" + bar_colour + ";'>" + hits + "</td>" +
-                "<td style='height:5px;colour:" + bar_colour + ";'>" + p_time + "</td>" +
-                "<td style='height:5px;colour:" + bar_colour + ";'>" + real_time + "</td>" +
-                "<td style='height:5px;colour:" + bar_colour + ";'>" + contents + "</td></tr>"
-        }
-        lprof_str += "</tbody>"
+    lprof_str += "<div id='lprof_btn_div' style='padding:20px 10px 20px 10px'><ul>"
+    for(fdef in fdefs) {
+        lprof_str += "<li style='padding:5px'><button style='padding:10px 10px 10px 10px' id='" + fdef + "_btn' class='btn btn-sm btn-primary'>Function: " + fdefs[fdef]["name"] + "</button></li>"
     }
-    lprof_str += "</table></p>"
+    lprof_str += "</ul></div>"
     collapsible.innerHTML += lprof_str
+    // lprof_str +=
+    //     "<p style='text-align:left; margin:20px 0px;' class='lead'>Check out the performance of your code in more detail </p>" +
+    //     "<table style='align:left;max-width:80%;margin-left:auto;margin-right:auto;' class='table table-dark'>" +
+    //     "<thead><tr><th class='topline' scope='col'>Line #</th><th class='topline' scope='col'># Hits</th><th class='topline' scope='col'>% Time</th><th class='topline' scope='col'>Real Time</th><th class='topline' scope='col'>Contents</th></tr></thead>"
+
+    // for (fdef in fdefs) {
+    //     lprof_str += "<tbody>"
+    //     count = 1
+    //     lprof_dict = fdefs[fdef]["line_profile"]
+    //     for (lprof in lprof_dict) {
+    //         hits = lprof_dict[lprof]["hits"]
+    //         p_time = parseFloat(lprof_dict[lprof]["%time"])
+    //         contents = lprof_dict[lprof]["contents"]
+    //         real_time = lprof_dict[lprof]["real_time"] === undefined ? 0 : lprof_dict[lprof]["real_time"];
+    //         let bar_colour = p_time < 15 ? (p_time < 10 ? "green" : "orange") : "red";
+    //         lprof_str += "<tr><th scope='row'>" + count++ + "</th>" +
+    //             "<td style='height:5px;colour:" + bar_colour + ";'>" + hits + "</td>" +
+    //             "<td style='height:5px;colour:" + bar_colour + ";'>" + p_time + "</td>" +
+    //             "<td style='height:5px;colour:" + bar_colour + ";'>" + real_time + "</td>" +
+    //             "<td style='height:5px;colour:" + bar_colour + ";'>" + contents + "</td></tr>"
+    //     }
+    //     lprof_str += "</tbody>"
+    // }
+    // lprof_str += "</table></p>"
+    // collapsible.innerHTML += lprof_str
 }
 
 
