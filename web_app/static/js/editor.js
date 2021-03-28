@@ -109,7 +109,7 @@ $("#sub_form").submit(function (e) {
 
 });
 function display_lp_graph(fdef) {
-    document.getElementById("graph_heading").innerHTML = "<h2 style='margin:50px 0px 0px 0px;text-align:center'><u>Line Profile of Function: " + fdef["name"] + "</u></h2>"
+    document.getElementById("graph_heading").innerHTML = "<br><h2 style='margin:50px 0px 0px 0px;text-align:center'><u>Line Profile of Function: " + fdef["name"] + "</u></h2><br><p style='margin:50px 0px 0px 0px;text-align:center'>Time spent in function => " + fdef["cum_time"] + " seconds</p>"
     try {
         window.chart.destroy();
     }
