@@ -53,10 +53,11 @@ $("#sub_form").submit(function (e) {
             let scores = analysis["scores"]
             let comp_stats = analysis["comp_stats"][0]
             let fdefs = analysis["fdefs"]
-            let comp_str = skel_str = lprof_str = ""
+            let comp_str = skel_str = lprof_str = overview_str = ""
             let result = scores["overall_score"]
             let samp_skels = analysis["samp_skels"]
             //Get sections
+            let overview_section = document.getElementById("overview_stats")
             // let breakdown_section = document.getElementById('breakdown');
             // let comparison_section = document.getElementById('comparison');
             // let sample_section = document.getElementById('sample_solution');
@@ -80,6 +81,7 @@ $("#sub_form").submit(function (e) {
                 // write_breakdown(breakdown_section, scores)
                 // write_comp(comparison_section, comp_stats, comp_str)
                 // write_skeleton(sample_section, samp_skels, skel_str)
+                write_overview_stats(overview_section, analysis, overview_str)
                 write_lprof(profiling_section, fdefs, lprof_str)
                 bind_lprof_btns(fdefs)   
                 fail_btn.style.visibility = "hidden"
@@ -109,7 +111,7 @@ $("#sub_form").submit(function (e) {
 
 });
 function display_lp_graph(fdef) {
-    document.getElementById("graph_heading").innerHTML = "<br><h2 style='margin:50px 0px 0px 0px;text-align:center'><u>Line Profile of Function: " + fdef["name"] + "</u></h2><br><p style='margin:50px 0px 0px 0px;text-align:center'>Time spent in function => " + fdef["cum_time"] + " seconds</p>"
+    document.getElementById("graph_heading").innerHTML = "<p style='margin:50px 0px 0px 0px;text-align:center'>Time spent in function => " + fdef["cum_time"] + " seconds</p>"
     try {
         window.chart.destroy();
     }
@@ -191,11 +193,21 @@ function display_lp_graph(fdef) {
     window.chart = new Chart(ctx, content);
 }
 
+function write_overview_stats(section, analysis, content_str) {
+    section.innerHTML = "<ul>"
+    var fdefs = analysis["fdefs"]
+    for(fdef in fdefs) {
+        content_str += "<li>Function Name: " + fdefs[fdef]["name"] + "<br>" +
+                        "Cumulative Time spent in function: " + fdefs[fdef]["cum_time"] + "</li><br>"
+    }   
+    section.innerHTML += content_str
+}
+
 function bind_lprof_btns(fdefs) {
     var evt = undefined
     for(fdef in fdefs) {
-        var fdef_btn = document.getElementById(fdef + "_btn")
-        fdef_btn.addEventListener('click', display_lp_graph.bind(evt, fdefs[fdef]))
+        var fdef_opt = document.getElementById(fdef + "_opt")
+        fdef_opt.addEventListener('click', display_lp_graph.bind(evt, fdefs[fdef]))
     }
 
 }
@@ -275,13 +287,16 @@ function write_skeleton(collapsible, skels, skel_str) {
     collapsible.innerHTML += skel_str
 }
 
+
 function write_lprof(collapsible, fdefs, lprof_str) {
     collapsible.innerHTML = ""
-    lprof_str += "<div id='lprof_btn_div' style='padding:20px 10px 20px 10px'><ul>"
+    lprof_str += "<div style='text-align:center;margin-top:10px' id='lprof_dropdown' class='dropdown'><button class='btn btn-secondary dropdown-toggle' type='button' id='dropdownMenuButton' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false'>Choose a function to profile!</button>" +
+                "<div class='dropdown-menu' aria-labelledby='dropdownMenuButton'>"
     for(fdef in fdefs) {
-        lprof_str += "<li style='padding:5px'><button style='padding:10px 10px 10px 10px' id='" + fdef + "_btn' class='btn btn-sm btn-primary'>Function: " + fdefs[fdef]["name"] + "</button></li>"
+        lprof_str += "<a class='dropdown-item' href='#' id='" + fdef + "_opt' >" + fdefs[fdef]["name"] + "</a>"
     }
-    lprof_str += "</ul></div>"
+    lprof_str += "</div></div>"
+
     collapsible.innerHTML += lprof_str
     // lprof_str +=
     //     "<p style='text-align:left; margin:20px 0px;' class='lead'>Check out the performance of your code in more detail </p>" +

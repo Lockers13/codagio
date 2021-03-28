@@ -123,11 +123,10 @@ body::-webkit-scrollbar-thumb {
 .content {
     padding: 0 18px;
     max-height: 0;
-    overflow: hidden;
+    overflow: scroll;
     transition: max-height 0.2s ease-out;
-    background-color: var(--blue);
-    width: 80%;
-    margin-left: 10%;
+    background-color: var(--black);
+    width: 100%;
     color:var(--white);
     margin-top: -10px;
 }

@@ -59,19 +59,23 @@
                                 <p id="overall_score" class="text-center"></p> 
                                 <div id="collapse_section">
                                     
-                                    <button type="button" class="collapsible"> Quick Results Breakdown </button>
-
+                                    <button type="button" class="collapsible"> Overview Stats </button>
+                                    <div class="content">
+                                        <p id="overview_stats"></p>
+                                    </div>
                                     <button type="button" class="collapsible"> Code Comparison </button>
                                     <button type="button" class="collapsible"> Our Sample Solution </button>
                                     <button id="lp_btn" type="button" class="collapsible"> Line Profiling </button>
                                     <div class="content">
-                                        <p id="line_profiling"> </p>
+                                        <p id="line_profiling">
+                                        <p id="graph_space"><div id='graph_heading'></div>
+                                            <div height='400px' width='400px' style='width:100%;height:100vh;position:relative;'>
+                                                <canvas id='myChart' width='400' height='400' style='position:absolute;top:0;bottom:0;right:0;left:0;margin:auto;'></canvas>
+                                            </div> 
+                                        </p>
+                                        </p>
                                     </div>
                                     <button id="fail_btn" type="button" class="collapsible"> Failure Stats </button>
-                                </div>
-                                <div id="graph_heading"></div>
-                                <div height="400px" width="400px" style="width:100%;height:100vh;position:relative;">
-                                    <canvas id="myChart" width="400" height="400" style="position:absolute;top:0;bottom:0;right:0;left:0;margin:auto;"></canvas>
                                 </div>
                             </div>
                             
@@ -87,14 +91,12 @@
 
                 </div>
                 
-
-            
+                  
             </div>
 
-            
-        
 
     </div>
+
     <div id="result"></div>
 
 
