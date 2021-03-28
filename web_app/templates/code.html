@@ -3,9 +3,21 @@
 {% block content %}
 
     <div class="code-home">
+        <div class="top_section">
+            <img src="{% static 'images/back.png' %}" id="go_back"/>
+            <h1 class="problem_name text-center"><br><u>{{ problem_name }}</u><br></h1>
+        </div>
+        <br>
+        <p class="problem_desc" id="description" style="white-space:pre-wrap;margin-left:2em;">{{ problem_desc }}</p>
+        <br>
+        {% if sample_input %}
+            <p>Sample input: {{ sample_input }}</p>
+            <p>Sample output: {{ sample_output }} </p>
+        {% endif %}
 
             <div class="row no-gutters">
-                
+                <div id="editor" class="col-sm-12 col-md-6 col-lg-6 col-xl-6 nopadding">
+                </div>
                 <div class="solution-info col-sm-12 col-md-6 col-lg-6 col-xl-6 nopadding">
                     <form id="sub_form" action="" method="post" enc="multipart/form-data">
                         
@@ -23,12 +35,9 @@
                             <input type="hidden" name="sub_type" value="solution">
                         </div>
 
+
                         <div id="problem_info">
-                            <div class="top_section">
-                                <img src="{% static 'images/back.png' %}" id="go_back"/>
-                                <h1 class="problem_name text-center">{{ problem_name }}</h1>
-                            </div>
-                            
+
                             <div id="result">
                                 <p id="overall_score" class="text-center"></p> 
                                 <div id="collapse_section">
@@ -57,11 +66,7 @@
                             </div>
                             
                             <p style="visibility:hidden;" id="main_signature">{{ main_signature }}</p>
-                            <p class="problem_desc" id="description" style="white-space:pre-wrap;margin-left:2em;">{{ problem_desc }}</p>
-                            {% if sample_input %}
-                                <p>Sample input: {{ sample_input }}</p>
-                                <p>Sample output: {{ sample_output }} </p>
-                            {% endif %}
+
                             <div class="text-center">
                                 <button id="sub_btn" type="submit" class="text-center submit_btn">
                                     <img src="{% static 'images/submit.png' %}" id="submit_img" alt="Unknown img"/>
@@ -86,8 +91,7 @@
 
                 </div>
                 
-                <div id="editor" class="col-sm-12 col-md-6 col-lg-6 col-xl-6 nopadding">
-                </div>
+
             
             </div>
             <div id="graph_heading"></div>
