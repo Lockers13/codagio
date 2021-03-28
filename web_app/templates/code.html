@@ -39,11 +39,22 @@
                         <div id="problem_info">
 
                             <div id="result">
+
                                 <div class="text-center">
                                     <button id="sub_btn" type="submit" class="text-center submit_btn">
                                         <img src="{% static 'images/submit.png' %}" id="submit_img" alt="Unknown img"/>
                                         <p class="btn_text">Submit Your Code</p>
                                     </button>
+                                </div>
+                                <div id="loader">
+                                    <div class="text-center">
+                                        <svg width="200" height="200" viewBox="0 0 100 100">
+                                            <polyline class="line-cornered stroke-still" points="0,0 100,0 100,100" stroke-width="10" fill="none"></polyline>
+                                            <polyline class="line-cornered stroke-still" points="0,0 0,100 100,100" stroke-width="10" fill="none"></polyline>
+                                            <polyline class="line-cornered stroke-animation" points="0,0 100,0 100,100" stroke-width="10" fill="none"></polyline>
+                                            <polyline class="line-cornered stroke-animation" points="0,0 0,100 100,100" stroke-width="10" fill="none"></polyline>
+                                        </svg>
+                                    </div>
                                 </div>
                                 <p id="overall_score" class="text-center"></p> 
                                 <div id="collapse_section">
@@ -72,16 +83,7 @@
                     </form>
 
 
-                    <div id="loader">
-                        <div class="text-center">
-                            <svg width="200" height="200" viewBox="0 0 100 100">
-                                <polyline class="line-cornered stroke-still" points="0,0 100,0 100,100" stroke-width="10" fill="none"></polyline>
-                                <polyline class="line-cornered stroke-still" points="0,0 0,100 100,100" stroke-width="10" fill="none"></polyline>
-                                <polyline class="line-cornered stroke-animation" points="0,0 100,0 100,100" stroke-width="10" fill="none"></polyline>
-                                <polyline class="line-cornered stroke-animation" points="0,0 0,100 100,100" stroke-width="10" fill="none"></polyline>
-                            </svg>
-                        </div>
-                    </div>
+
 
                 </div>
                 

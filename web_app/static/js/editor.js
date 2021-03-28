@@ -1,4 +1,5 @@
 const editor = init_editor()
+const func_line_offset = 3
 
 let loader = document.getElementById('loader');
 let submitbtn = document.getElementById('sub_btn');
@@ -119,7 +120,6 @@ function display_lp_graph(fdef) {
     console.log(lprof_dict)
     var percentage_times = []
     var line_nos = []
-    var line_no = 1
     var bar_colors = []
     for(line in lprof_dict) {
         try{
@@ -129,25 +129,17 @@ function display_lp_graph(fdef) {
         catch(err) {
             percentage_times.push(0.0)
         }
-        line_nos.push(line_no++)
+        var line_num = parseInt(line.split("_")[1])
+        line_nos.push(line_num - func_line_offset)
     }
     var max_pc = Math.max.apply(null, percentage_times)
-    for(var i = 0; i < percentage_times.length; i++) {
-        var p_ratio = percentage_times[i]/max_pc
-        if(p_ratio > .66)
-            bar_colors.push("red")
-        else if(p_ratio > .33)
-            bar_colors.push("orange")
-        else
-            bar_colors.push("green")
-    }   
 
     var labels = line_nos
     var dataset = [
         {   
-            label: "% time spent executing line",
+            label: "% of function time spent executing line",
             data: percentage_times,
-            backgroundColor: bar_colors
+            backgroundColor: "blue"
         },
     ];
 
@@ -178,8 +170,8 @@ function display_lp_graph(fdef) {
                     labelString: 'Line No.'
                 },
                 ticks: {
-                    max : line_no,
-                    min : 0.0,
+                    max : line_nos[line_nos.length - 1],
+                    min : line_nos[0],
                     fixedStepSize: 0.1
                 },
                 stacked: true
