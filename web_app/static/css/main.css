@@ -97,8 +97,8 @@ body::-webkit-scrollbar-thumb {
     text-align: left;
     outline: none;
     font-size: 20px;
-    width: 80%;
-    margin-left: 10%;
+    width: 100%;
+    /* margin-left: 10%; */
     margin-top: 10px;
     margin-bottom: 10px;
 }

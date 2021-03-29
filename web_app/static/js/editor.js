@@ -81,15 +81,18 @@ $("#sub_form").submit(function (e) {
                 // write_breakdown(breakdown_section, scores)
                 // write_comp(comparison_section, comp_stats, comp_str)
                 // write_skeleton(sample_section, samp_skels, skel_str)
-                write_overview_stats(overview_section, analysis, overview_str)
+                write_overview_stats(overview_section, analysis, overview_str, success=true)
                 write_lprof(profiling_section, fdefs, lprof_str)
                 bind_lprof_btns(fdefs)   
-                fail_btn.style.visibility = "hidden"
             }
             else {
-                fail_btn.style.visibility = "visible"
                 overall.style.color = "#FF3E6C"
                 overall.innerHTML = "<br>Oops, looks like your code doesn't produce the correct outputs...<br><br>Please Try again! But first, why not check out some feedback below?"
+                if(window.chart != undefined)
+                    window.chart.destroy()
+                profiling_section.innerHTML = "<br>Sorry, you must pass all tests to qualify for line profiling!"
+                write_overview_stats(overview_section, analysis, overview_str, success=false)
+                bind_fail_btns(scores)
                 // do quick marks breakdown and comparison on failure
                 // write_breakdown(breakdown_section, scores)
                 // write_comp(comparison_section, comp_stats, comp_str)
@@ -193,14 +196,48 @@ function display_lp_graph(fdef) {
     window.chart = new Chart(ctx, content);
 }
 
-function write_overview_stats(section, analysis, content_str) {
-    section.innerHTML = "<ul>"
-    var fdefs = analysis["fdefs"]
-    for(fdef in fdefs) {
-        content_str += "<li>Function Name: " + fdefs[fdef]["name"] + "<br>" +
-                        "Cumulative Time spent in function: " + fdefs[fdef]["cum_time"] + "</li><br>"
-    }   
-    section.innerHTML += content_str
+function write_overview_stats(section, analysis, content_str, success=false) {
+    section.innerHTML = ""
+    if(success) {
+        
+        content_str += "<br><p>Total Time spent executing your functions: " + analysis["udef_func_time_tot"] + "</p>"
+        content_str += "<p>Total Time spent executing functions of reference program: " + analysis["ref_time"] + "</p><br>"
+        content_str += "<ul>"
+        var fdefs = analysis["fdefs"]
+        for(fdef in fdefs) {
+            content_str += "<li>Function Name: " + fdefs[fdef]["name"] + "<br>" +
+                            "Cumulative Time spent in function: " + fdefs[fdef]["cum_time"] + "</li><br>"
+        }
+        content_str += "</ul>"
+        section.innerHTML += content_str
+    }
+    else {
+        content_str += "<p style='text-align:left;margin:20px 0px 20px 0px;' class='lead'>Let's see where you went right and where you went wrong </p>" +
+        "<table style='align:left;max-width:80%;margin-left:auto;margin-right:auto;' class='table'>" +
+        "<thead><tr><th style='color:white' class='topline scope='col'>Test #</th><th style='color:white' class='topline' scope='col'>Status</th><th style='color:white' class='topline' scope='col'>Input Length</th><th style='color:white' class='topline' scope='col'>Input Type</th><th style='color:white' class='topline' scope='col'>Failure Stats</th></tr></thead><tbody>"
+        let count = 1
+        let scores = analysis["scores"]
+        for (test_key in scores) {
+            if (test_key == "overall_score")
+                continue
+            content_str += "<tr><th scope='row' style='color:white'>" + count++ + "</th>" +
+                "<td style='color:white'>" + scores[test_key]["status"] + "</td>" +
+                "<td style='color:white'>" + scores[test_key]["input_length"] + "</td>" +
+                "<td style='color:white'>" + scores[test_key]["input_type"] + "</td>"
+            if (scores[test_key]["failure_stats"] != undefined) {
+                content_str += "<td style='color:red'><button name='fail_btn' id='" + test_key + "' class='btn btn-outline-danger btn_sm' data-toggle='modal' data-target='#exampleModalCenter'>See More</button></td>"
+                // for (fail_key in scores[test_key]["failure_stats"]) {
+                //     content_str += "<td>" + scores[test_key]["failure_stats"][fail_key] + "</td>"
+                // }
+            }
+            else {
+                content_str += "<td style='color:white'> None </td>"
+            }
+            content_str += "</tr>"
+        }
+        content_str += "</tbody></table></p>"
+        section.innerHTML += content_str
+    }
 }
 
 function bind_lprof_btns(fdefs) {
@@ -209,7 +246,25 @@ function bind_lprof_btns(fdefs) {
         var fdef_opt = document.getElementById(fdef + "_opt")
         fdef_opt.addEventListener('click', display_lp_graph.bind(evt, fdefs[fdef]))
     }
+}
 
+function bind_fail_btns(scores) {
+    var fail_btns = document.getElementsByName("fail_btn")
+    for(var i = 0; i < fail_btns.length; i++) {
+        var test_key = fail_btns[i].id
+        var evt = undefined
+        //write_fail_stats(scores, test_key)
+        fail_btns[i].addEventListener('click', write_fail_stats.bind(evt, scores, test_key))
+    }
+}
+
+function write_fail_stats(scores, test_key) {
+    var modal_body = document.getElementById("modal_body")
+    modal_body.innerHTML = "<ul>"
+    for(fail_stat in scores[test_key]["failure_stats"]) {
+        modal_body.innerHTML += "<li>" + fail_stat.charAt(0).toUpperCase() + fail_stat.slice(1) + ": " +  scores[test_key]["failure_stats"][fail_stat] + "</li>"
+    }
+    modal_body.innerHTML += "</ul>"
 }
 
 function write_failure(collapsible, scores) {

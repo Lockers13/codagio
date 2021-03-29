@@ -62,6 +62,8 @@ class AstTreeVisitor(ast.NodeVisitor):
             self.__disallowed_fcalls.add(func)
         self.__num_args = int(self.__metadata.get("constraints").get("num_args", 0))
         self.__program_dict["constraint_violation"] = []
+        self.__program_dict["udef_func_time_tot"] = 0
+
  
     def get_program_dict(self):
         return self.__program_dict

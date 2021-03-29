@@ -221,6 +221,7 @@ class Profiler:
                         fdefs[fdef_k]["ncalls"] = split_line[0]
                         fdefs[fdef_k]["tot_time"] = split_line[1]
                         fdefs[fdef_k]["cum_time"] = split_line[3]
+                        self.__program_dict["udef_func_time_tot"] += float(split_line[3])
                 except Exception as e:
                     pass
 

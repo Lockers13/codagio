@@ -142,6 +142,7 @@ class AnalysisView(APIView):
         ### get analysis dict
 
         analysis = analyzer.get_prog_dict()
+        analysis["ref_time"] = problem.analysis["udef_func_time_tot"]
         ### write comparison stats (with reference problem) to analysis dict
         comparison.write_comp(analysis, problem_data["analysis"])         
         ### only save submitted solution to db if all tests were passed, and hence submission was profiled, etc.
