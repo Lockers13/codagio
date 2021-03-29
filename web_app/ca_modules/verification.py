@@ -3,6 +3,7 @@ import subprocess
 import sys
 import os
 import json
+import random
 from .subprocess_ctrl import run_subprocess_ctrld
 from django.utils.translation import gettext_lazy as _
 
@@ -110,21 +111,20 @@ class Verifier:
         Returns score as percentage (string) of exact matches (this point may need reviewing)."""
 
         def get_failure_stats():
-            num_failures = 0
             failure_dict = {}
-            first_mismatch = ""
+            mismatches = []
             for line_count, (line_sub, line_samp) in enumerate(zip(sub_output, samp_output)):
                 if line_sub != line_samp:
-                    if first_mismatch == "":
-                        first_mismatch = "Your output : {0} vs Expected output: {1}".format(line_sub, line_samp)
-                    num_failures += 1
+                    mismatches.append((line_sub, line_samp))
+            num_failures = len(mismatches)
             failure_dict["num_failures"] = num_failures
             failure_dict["num_tests"] = test_stats[1][count]
             try:
                 failure_dict["failure_rate"] = "{0}%".format(round((int(num_failures)/int(test_stats[1][count])) * 100, 2))
             except Exception as e:
                 failure_dict["failure_rate"] = "File IO"
-            failure_dict["first_mismatch"] = first_mismatch
+            num_samples = 5 if len(mismatches) > 5 else len(mismatches)
+            failure_dict["mismatches"] = random.sample(mismatches, num_samples)
             return failure_dict
 
         sample_outputs = self.__sample_outputs

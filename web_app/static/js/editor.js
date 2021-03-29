@@ -225,7 +225,7 @@ function write_overview_stats(section, analysis, content_str, success=false) {
                 "<td style='color:white'>" + scores[test_key]["input_length"] + "</td>" +
                 "<td style='color:white'>" + scores[test_key]["input_type"] + "</td>"
             if (scores[test_key]["failure_stats"] != undefined) {
-                content_str += "<td style='color:red'><button name='fail_btn' id='" + test_key + "' class='btn btn-outline-danger btn_sm' data-toggle='modal' data-target='#exampleModalCenter'>See More</button></td>"
+                content_str += "<td style='color:red'><a class='link-danger' style='color:red;cursor:pointer;' name='fail_link' id='" + test_key + "' data-toggle='modal' data-target='#exampleModalCenter'>See More</a></td>"
                 // for (fail_key in scores[test_key]["failure_stats"]) {
                 //     content_str += "<td>" + scores[test_key]["failure_stats"][fail_key] + "</td>"
                 // }
@@ -249,12 +249,12 @@ function bind_lprof_btns(fdefs) {
 }
 
 function bind_fail_btns(scores) {
-    var fail_btns = document.getElementsByName("fail_btn")
-    for(var i = 0; i < fail_btns.length; i++) {
-        var test_key = fail_btns[i].id
+    var fail_links = document.getElementsByName("fail_link")
+    for(var i = 0; i < fail_links.length; i++) {
+        var test_key = fail_links[i].id
         var evt = undefined
         //write_fail_stats(scores, test_key)
-        fail_btns[i].addEventListener('click', write_fail_stats.bind(evt, scores, test_key))
+        fail_links[i].addEventListener('click', write_fail_stats.bind(evt, scores, test_key))
     }
 }
 
@@ -262,7 +262,16 @@ function write_fail_stats(scores, test_key) {
     var modal_body = document.getElementById("modal_body")
     modal_body.innerHTML = "<ul>"
     for(fail_stat in scores[test_key]["failure_stats"]) {
-        modal_body.innerHTML += "<li>" + fail_stat.charAt(0).toUpperCase() + fail_stat.slice(1) + ": " +  scores[test_key]["failure_stats"][fail_stat] + "</li>"
+        if(fail_stat == "mismatches") {
+            modal_body.innerHTML += "<br><u>Some Sample Outputs:<u><ul>"
+            for(var mm_index = 0; mm_index < scores[test_key]["failure_stats"][fail_stat].length; mm_index++) {
+                modal_body.innerHTML += "<li  style='padding-left:3em'>Your Output: " + scores[test_key]["failure_stats"][fail_stat][mm_index][0] + " - VS - Expected: " + scores[test_key]["failure_stats"][fail_stat][mm_index][1] + "</li>"
+            }
+            modal_body.innerHTML += "</ul>"
+        }
+        else {
+            modal_body.innerHTML += "<li>" + fail_stat.charAt(0).toUpperCase() + fail_stat.slice(1) + ": " +  scores[test_key]["failure_stats"][fail_stat] + "</li>"
+        }
     }
     modal_body.innerHTML += "</ul>"
 }
