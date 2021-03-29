@@ -123,7 +123,7 @@ class Verifier:
                 failure_dict["failure_rate"] = "{0}%".format(round((int(num_failures)/int(test_stats[1][count])) * 100, 2))
             except Exception as e:
                 failure_dict["failure_rate"] = "File IO"
-            num_samples = 5 if len(mismatches) > 5 else len(mismatches)
+            num_samples = 5 if num_failures > 5 else num_failures
             failure_dict["mismatches"] = random.sample(mismatches, num_samples)
             return failure_dict
 

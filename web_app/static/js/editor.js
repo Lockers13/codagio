@@ -21,12 +21,32 @@ submitbtn.addEventListener('click', function () {
 
 back.addEventListener('click', reset);
 
+function toggleContent(content) {
+    if (content.style.maxHeight) {
+      content.style.maxHeight = null;
+    } else {
+      content.style.maxHeight = content.scrollHeight + 'px';
+    }
+  }
+  
+
+function collapseAllOpenContent() {
+    const colls = document.getElementsByClassName('collapsible');
+    for (const coll of colls) {
+      if (coll.classList.contains('active')) {
+        coll.classList.remove('active');
+        toggleContent(coll.nextElementSibling);
+      }
+    }
+  }
+
 function reset() {
     submitbtn.style.visibility = 'visible';
     desc.style.display = 'block';
     back.style.display = 'none';
     overall.style.display = 'none';
     collapse_section.style.display = 'none';
+    collapseAllOpenContent()
 }
 
 //Form submission logic
@@ -34,8 +54,7 @@ $("#sub_form").submit(function (e) {
     e.preventDefault();
     let sub_text = editor.getValue();
     let solution_text_box = document.getElementById("solution_text")
-    //let result_p = document.getElementById("result")
-    //result_p.innerHTML = ""
+
 
     solution_text_box.value = sub_text
 
@@ -71,6 +90,7 @@ $("#sub_form").submit(function (e) {
             overall.style.display = 'block';
             overall.innerHTML = '<h1>Total Score: ' + result + '</h1>';
             collapse_section.style.display = 'block';
+
             var lp_btn = document.getElementById("lp_btn")
 
             if (result == "100.0%") {
@@ -144,7 +164,7 @@ function display_lp_graph(fdef) {
         {   
             label: "% of function time spent executing line",
             data: percentage_times,
-            backgroundColor: "blue"
+            backgroundColor: "green"
         },
     ];
 
