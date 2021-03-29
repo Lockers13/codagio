@@ -39,41 +39,20 @@
                 <div id="problem_info">
 
                     <div id="result">
-
-                        <div class="text-center">
-                            <button id="sub_btn" type="submit" class="text-center submit_btn">
-                                <img src="{% static 'images/submit.png' %}" id="submit_img" alt="Unknown img" />
-                                <p class="btn_text">Submit Your Code</p>
-                            </button>
-                        </div>
-                        <div id="loader">
-                            <div class="text-center">
-                                <svg width="200" height="200" viewBox="0 0 100 100">
-                                    <polyline class="line-cornered stroke-still" points="0,0 100,0 100,100"
-                                        stroke-width="10" fill="none"></polyline>
-                                    <polyline class="line-cornered stroke-still" points="0,0 0,100 100,100"
-                                        stroke-width="10" fill="none"></polyline>
-                                    <polyline class="line-cornered stroke-animation" points="0,0 100,0 100,100"
-                                        stroke-width="10" fill="none"></polyline>
-                                    <polyline class="line-cornered stroke-animation" points="0,0 0,100 100,100"
-                                        stroke-width="10" fill="none"></polyline>
-                                </svg>
-                            </div>
-                        </div>
                         <p id="overall_score" class="text-center"></p>
                         <div id="collapse_section">
                             <button type="button" class="collapsible"> Overview Stats </button>
-                            <div class="content">
+                            <div class="content" name="collapse_results">
                                 <p id="overview_stats">
                                 </p>
 
                             </div>
                             <button type="button" class="collapsible"> Sample Pseudocode </button>
-                            <div class="content">
+                            <div class="content" name="collapse_results">
                                 <p id="pseudocode"></p>
                             </div>
                             <button id="lp_btn" type="button" class="collapsible"> Line Profiling </button>
-                            <div class="content">
+                            <div class="content" name="collapse_results">
                                 <p id="line_profiling">
                                 <p id="graph_space">
                                 <div id='graph_heading'></div>
@@ -86,6 +65,27 @@
                             </div>
                         </div>
                     </div>
+                    <div class="text-center">
+                        <button id="sub_btn" type="submit" class="text-center submit_btn">
+                            <img src="{% static 'images/submit.png' %}" id="submit_img" alt="Unknown img" />
+                            <p class="btn_text">Submit Your Code</p>
+                        </button>
+                    </div>
+                    <div id="loader">
+                        <div class="text-center">
+                            <svg width="200" height="200" viewBox="0 0 100 100">
+                                <polyline class="line-cornered stroke-still" points="0,0 100,0 100,100"
+                                    stroke-width="10" fill="none"></polyline>
+                                <polyline class="line-cornered stroke-still" points="0,0 0,100 100,100"
+                                    stroke-width="10" fill="none"></polyline>
+                                <polyline class="line-cornered stroke-animation" points="0,0 100,0 100,100"
+                                    stroke-width="10" fill="none"></polyline>
+                                <polyline class="line-cornered stroke-animation" points="0,0 0,100 100,100"
+                                    stroke-width="10" fill="none"></polyline>
+                            </svg>
+                        </div>
+                    </div>
+
 
                     <p style="visibility:hidden;" id="main_signature">{{ main_signature }}</p>
 
@@ -109,7 +109,7 @@
 
 <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle"
     aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg"  style="width:90%" role="document">
+    <div class="modal-dialog modal-dialog-centered modal-lg" style="width:90%" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 style="color:black;text-align:center;" class="modal-title" id="modal_title">Failure Breakdown</h5>

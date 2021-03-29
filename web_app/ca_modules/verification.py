@@ -121,7 +121,7 @@ class Verifier:
             failure_dict["num_failures"] = num_failures
             failure_dict["num_tests"] = test_stats[1][count]
             try:
-                failure_dict["failure_rate"] = round((int(num_failures)/int(test_stats[1][count])) * 100, 2)
+                failure_dict["failure_rate"] = "{0}%".format(round((int(num_failures)/int(test_stats[1][count])) * 100, 2))
             except Exception as e:
                 failure_dict["failure_rate"] = "File IO"
             failure_dict["first_mismatch"] = first_mismatch

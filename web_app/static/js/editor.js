@@ -60,7 +60,7 @@ $("#sub_form").submit(function (e) {
             let overview_section = document.getElementById("overview_stats")
             // let breakdown_section = document.getElementById('breakdown');
             // let comparison_section = document.getElementById('comparison');
-            // let sample_section = document.getElementById('sample_solution');
+            let pseudo_section = document.getElementById('pseudocode');
             let profiling_section = document.getElementById('line_profiling');
             // let failure_section = document.getElementById('fail_stats');
             // let fail_btn = document.getElementById('fail_btn');
@@ -80,7 +80,7 @@ $("#sub_form").submit(function (e) {
                 //lp_btn.addEventListener('click', display_lp_graph.bind(e, fdefs["fdef_1"]))
                 // write_breakdown(breakdown_section, scores)
                 // write_comp(comparison_section, comp_stats, comp_str)
-                // write_skeleton(sample_section, samp_skels, skel_str)
+                write_skeleton(pseudo_section, samp_skels, skel_str)
                 write_overview_stats(overview_section, analysis, overview_str, success=true)
                 write_lprof(profiling_section, fdefs, lprof_str)
                 bind_lprof_btns(fdefs)   
@@ -96,7 +96,7 @@ $("#sub_form").submit(function (e) {
                 // do quick marks breakdown and comparison on failure
                 // write_breakdown(breakdown_section, scores)
                 // write_comp(comparison_section, comp_stats, comp_str)
-                // write_skeleton(sample_section, samp_skels, skel_str)
+                write_skeleton(pseudo_section, samp_skels, skel_str)
                 // profiling_section.innerHTML ="<p class='text-center' style='margin:20px 0px;'>Sorry, you have to pass all tests to qualify for line profiling!<p>"
                 // write_failure(failure_section, scores)
             }
@@ -329,7 +329,7 @@ function write_comp(collapsible, comp_stats, comp_str) {
 
 function write_skeleton(collapsible, skels, skel_str) {
     collapsible.innerHTML = ""
-    skel_str += "<p style='margin:20px 0px; padding: 10px 10px;' class='table table-dark'>"
+    skel_str += "<p style='color:white;font-style:italic;margin:20px 0px; padding: 10px 10px;' class='table'>"
     for (let i = 0; i < skels.length; i++) {
         let skeleton = skels[i]
         for (let j = 0; j < skeleton.length; j++) {
