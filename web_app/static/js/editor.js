@@ -1,6 +1,13 @@
 const editor = init_editor()
 const func_line_offset = 3
+const ERROR_CODES = {
+    10: "Uh-oh...Looks like your code threw a run-time error!",
+    11: "Uh-oh...Looks like there's a syntax error in your code!",
+    12: "Sorry, your code violates one of the problem constraints!",
+    13: "Sorry, it seems like there's something wrong with our server...check back later!"
+}
 
+let error_paragraph = document.getElementById("error_message")
 let loader = document.getElementById('loader');
 let submitbtn = document.getElementById('sub_btn');
 let desc = document.getElementById('description');
@@ -28,7 +35,6 @@ function toggleContent(content) {
       content.style.maxHeight = content.scrollHeight + 'px';
     }
   }
-  
 
 function collapseAllOpenContent() {
     const colls = document.getElementsByClassName('collapsible');
@@ -47,6 +53,7 @@ function reset() {
     overall.style.display = 'none';
     collapse_section.style.display = 'none';
     collapseAllOpenContent()
+    error_paragraph.innerHTML = ""
 }
 
 //Form submission logic
@@ -54,8 +61,6 @@ $("#sub_form").submit(function (e) {
     e.preventDefault();
     let sub_text = editor.getValue();
     let solution_text_box = document.getElementById("solution_text")
-
-
     solution_text_box.value = sub_text
 
     $.ajax({
@@ -68,38 +73,34 @@ $("#sub_form").submit(function (e) {
         .done(function (resp_data) {
             let analysis = JSON.parse(resp_data)
             console.log(analysis)
+            try {
+                var graph_heading = document.getElementById("graph_heading")
+                if(graph_heading != null)
+                    graph_heading.innerHTML = ""
+            }
+            catch(err) {
+                ;
+            }
             //Get results
             let scores = analysis["scores"]
-            let comp_stats = analysis["comp_stats"][0]
             let fdefs = analysis["fdefs"]
-            let comp_str = skel_str = lprof_str = overview_str = ""
+            let skel_str = lprof_str = overview_str = ""
             let result = scores["overall_score"]
             let samp_skels = analysis["samp_skels"]
             //Get sections
             let overview_section = document.getElementById("overview_stats")
-            // let breakdown_section = document.getElementById('breakdown');
-            // let comparison_section = document.getElementById('comparison');
             let pseudo_section = document.getElementById('pseudocode');
             let profiling_section = document.getElementById('line_profiling');
-            // let failure_section = document.getElementById('fail_stats');
-            // let fail_btn = document.getElementById('fail_btn');
-            // let lp_btn = document.getElementById('lp_btn');
-            // make global collapsible visible
+
             loader.style.display = 'none';
             back.style.display = 'block';
             overall.style.display = 'block';
             overall.innerHTML = '<h1>Total Score: ' + result + '</h1>';
             collapse_section.style.display = 'block';
 
-            var lp_btn = document.getElementById("lp_btn")
-
             if (result == "100.0%") {
                 overall.style.color = "#06D6A0"
                 overall.innerHTML = "<br>Congratulations, your code passed all our tests!...<br>Now check out some of your feedback below:"
-
-                //lp_btn.addEventListener('click', display_lp_graph.bind(e, fdefs["fdef_1"]))
-                // write_breakdown(breakdown_section, scores)
-                // write_comp(comparison_section, comp_stats, comp_str)
                 write_skeleton(pseudo_section, samp_skels, skel_str)
                 write_overview_stats(overview_section, analysis, overview_str, success=true)
                 write_lprof(profiling_section, fdefs, lprof_str)
@@ -112,27 +113,32 @@ $("#sub_form").submit(function (e) {
                     window.chart.destroy()
                 profiling_section.innerHTML = "<br>Sorry, you must pass all tests to qualify for line profiling!"
                 write_overview_stats(overview_section, analysis, overview_str, success=false)
-                bind_fail_btns(scores)
-                // do quick marks breakdown and comparison on failure
-                // write_breakdown(breakdown_section, scores)
-                // write_comp(comparison_section, comp_stats, comp_str)
+                bind_fail_links(scores)
                 write_skeleton(pseudo_section, samp_skels, skel_str)
-                // profiling_section.innerHTML ="<p class='text-center' style='margin:20px 0px;'>Sorry, you have to pass all tests to qualify for line profiling!<p>"
-                // write_failure(failure_section, scores)
             }
         })
         .fail(function (resp_data) {
-            loader.style.display = 'none';
-            back.style.display = 'block';
-            console.log("Broken code", resp_data)
-            if (resp_data["responseJSON"] == "POST NOT OK: potentially unsafe code!")
+            if(resp_data["status"] == 400) {
                 loader.style.display = 'none';
-            back.style.display = 'block';
-            result_section.style.display = 'block';
-            result_section.innerHTML = "<br><b><i>Sorry, we cannot trust the submitted code as it does not abide by our rules. Please try again!</i></b>"
-        })
+                back.style.display = 'block';
+                var error_code = parseInt(resp_data["responseJSON"])
+                var message = ERROR_CODES[error_code]
 
+                loader.style.display = 'none';
+                back.style.display = 'block';
+                result_section.style.display = 'block';
+                error_paragraph.innerHTML = message
+            }
+            else if(resp_data["status"] == 500) {
+                loader.style.display = 'none';
+                back.style.display = 'block';
+                result_section.style.display = 'block';
+                error_paragraph.innerHTML = ERROR_CODES[13]
+            }
+
+        })
 });
+
 function display_lp_graph(fdef) {
     document.getElementById("graph_heading").innerHTML = "<p style='margin:50px 0px 0px 0px;text-align:center'>Time spent in function => " + fdef["cum_time"] + " seconds</p>"
     try {
@@ -142,10 +148,9 @@ function display_lp_graph(fdef) {
         ;
     }
     var lprof_dict = fdef["line_profile"]
-    console.log(lprof_dict)
     var percentage_times = []
     var line_nos = []
-    var bar_colors = []
+
     for(line in lprof_dict) {
         try{
             var p_time = parseFloat(lprof_dict[line]["%time"])
@@ -157,28 +162,26 @@ function display_lp_graph(fdef) {
         var line_num = parseInt(line.split("_")[1])
         line_nos.push(line_num - func_line_offset)
     }
-    var max_pc = Math.max.apply(null, percentage_times)
 
     var labels = line_nos
     var dataset = [
         {   
             label: "% of function time spent executing line",
             data: percentage_times,
-            backgroundColor: "green"
+            backgroundColor: "purple"
         },
     ];
 
     var options = {
-        onClick: function (e) {
-            try {
-                var activePointLabel = this.getElementsAtEvent(e)[0]._model.label;
-                alert(activePointLabel);
-            }
-            catch(err) {
-                ;
-            }
-
-        },
+        // onClick: function (e) {
+        //     try {
+        //         var activePointLabel = this.getElementsAtEvent(e)[0]._model.label;
+        //         alert(activePointLabel);
+        //     }
+        //     catch(err) {
+        //         ;
+        //     }
+        // },
         maintainAspectRatio : false,
         responsive: false,
         scales: {
@@ -246,9 +249,6 @@ function write_overview_stats(section, analysis, content_str, success=false) {
                 "<td style='color:white'>" + scores[test_key]["input_type"] + "</td>"
             if (scores[test_key]["failure_stats"] != undefined) {
                 content_str += "<td style='color:red'><a class='link-danger' style='color:red;cursor:pointer;' name='fail_link' id='" + test_key + "' data-toggle='modal' data-target='#exampleModalCenter'>See More</a></td>"
-                // for (fail_key in scores[test_key]["failure_stats"]) {
-                //     content_str += "<td>" + scores[test_key]["failure_stats"][fail_key] + "</td>"
-                // }
             }
             else {
                 content_str += "<td style='color:white'> None </td>"
@@ -268,12 +268,11 @@ function bind_lprof_btns(fdefs) {
     }
 }
 
-function bind_fail_btns(scores) {
+function bind_fail_links(scores) {
     var fail_links = document.getElementsByName("fail_link")
     for(var i = 0; i < fail_links.length; i++) {
         var test_key = fail_links[i].id
         var evt = undefined
-        //write_fail_stats(scores, test_key)
         fail_links[i].addEventListener('click', write_fail_stats.bind(evt, scores, test_key))
     }
 }
@@ -296,66 +295,6 @@ function write_fail_stats(scores, test_key) {
     modal_body.innerHTML += "</ul>"
 }
 
-function write_failure(collapsible, scores) {
-    collapsible.innerHTML = ""
-    let breakdown = "<p style='text-align:left;margin:20px 0px 20px 0px;' class='lead'>Let's take a closer look at where you went wrong</p>" +
-        "<table style='align:left;max-width:80%;margin-left:auto;margin-right:auto;' class='table table-dark'>" +
-        "<thead><tr><th class='topline scope='col'>Test #</th><th class='topline' scope='col'># Inputs</th><th class='topline' scope='col'># Failures</th><th class='topline' scope='col'>Failure Rate</th><th class='topline' scope='col'>Sample Failure</th></tr></thead><tbody>"
-    var count = 1;
-    for (test_key in scores) {
-        if (test_key == "overall_score")
-            continue
-        breakdown += "<tr><td>" + count++ + "</td>"
-        let fail_hash = scores[test_key]["failure_stats"]
-        breakdown += "<td>" + fail_hash["num_tests"] + "</td>" +
-            "<td>" + fail_hash["num_failures"] + "</td>" +
-            "<td>" + fail_hash["failure_rate"] + "</td>" +
-            "<td>" + fail_hash["first_mismatch"] + "</td></tr>"
-    }
-    breakdown += "</tbody></table></p>"
-    collapsible.innerHTML += breakdown
-}
-
-function write_breakdown(collapsible, scores) {
-    collapsible.innerHTML = ""
-    let breakdown = "<p style='text-align:left;margin:20px 0px 20px 0px;' class='lead'>Let's see where you went right and where you went wrong </p>" +
-        "<table style='align:left;max-width:80%;margin-left:auto;margin-right:auto;' class='table table-dark'>" +
-        "<thead><tr><th class='topline scope='col'>Test #</th><th class='topline' scope='col'>Status</th><th class='topline' scope='col'>Input Length</th><th class='topline' scope='col'>Input Type</th><th class='topline' scope='col'>Failure Stats</th></tr></thead><tbody>"
-    let count = 1;
-    for (test_key in scores) {
-        if (test_key == "overall_score")
-            continue
-        breakdown += "<tr><th scope='row'>" + count++ + "</th>" +
-            "<td>" + scores[test_key]["status"] + "</td>" +
-            "<td>" + scores[test_key]["input_length"] + "</td>" +
-            "<td>" + scores[test_key]["input_type"] + "</td>"
-        if (scores[test_key]["failure_stats"] != undefined) {
-            for (fail_key in scores[test_key]["failure_stats"]) {
-                breakdown += "<td>" + scores[test_key]["failure_stats"][fail_key] + "</td>"
-            }
-        }
-        breakdown += "</tr>"
-    }
-    breakdown += "</tbody></table></p>"
-    collapsible.innerHTML += breakdown
-}
-
-function write_comp(collapsible, comp_stats, comp_str) {
-    collapsible.innerHTML = ""
-    comp_str +=
-        "<p style='text-align:left; margin:20px 0px;' class='lead'>Let's see how you match up structurally with the desired solution </p>" +
-        "<table style='align:left;max-width:80%;margin-left:auto;margin-right:auto;' class='table table-dark'>" +
-        "<thead><tr><th class='topline' scope='col'>Your Code</th><th class='topline' scope='col'>Our Code</th></tr></thead><tbody>"
-    for (let i = 0; i < comp_stats.length; i++) {
-        if (comp_stats[i][0].startsWith("skeleton") || comp_stats[i][0].startsWith("lineno"))
-            continue
-        comp_str += "<tr><th scope='row'>" + comp_stats[i][0] + "</th>" +
-            "<td>" + comp_stats[i][1] + "</td></tr>"
-    }
-    comp_str += "</tbody></table></p>"
-    collapsible.innerHTML += comp_str
-}
-
 function write_skeleton(collapsible, skels, skel_str) {
     collapsible.innerHTML = ""
     skel_str += "<p style='color:white;font-style:italic;margin:20px 0px; padding: 10px 10px;' class='table'>"
@@ -371,7 +310,6 @@ function write_skeleton(collapsible, skels, skel_str) {
     collapsible.innerHTML += skel_str
 }
 
-
 function write_lprof(collapsible, fdefs, lprof_str) {
     collapsible.innerHTML = ""
     lprof_str += "<div style='text-align:center;margin-top:10px' id='lprof_dropdown' class='dropdown'><button class='btn btn-secondary dropdown-toggle' type='button' id='dropdownMenuButton' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false'>Choose a function to profile!</button>" +
@@ -382,36 +320,9 @@ function write_lprof(collapsible, fdefs, lprof_str) {
     lprof_str += "</div></div>"
 
     collapsible.innerHTML += lprof_str
-    // lprof_str +=
-    //     "<p style='text-align:left; margin:20px 0px;' class='lead'>Check out the performance of your code in more detail </p>" +
-    //     "<table style='align:left;max-width:80%;margin-left:auto;margin-right:auto;' class='table table-dark'>" +
-    //     "<thead><tr><th class='topline' scope='col'>Line #</th><th class='topline' scope='col'># Hits</th><th class='topline' scope='col'>% Time</th><th class='topline' scope='col'>Real Time</th><th class='topline' scope='col'>Contents</th></tr></thead>"
-
-    // for (fdef in fdefs) {
-    //     lprof_str += "<tbody>"
-    //     count = 1
-    //     lprof_dict = fdefs[fdef]["line_profile"]
-    //     for (lprof in lprof_dict) {
-    //         hits = lprof_dict[lprof]["hits"]
-    //         p_time = parseFloat(lprof_dict[lprof]["%time"])
-    //         contents = lprof_dict[lprof]["contents"]
-    //         real_time = lprof_dict[lprof]["real_time"] === undefined ? 0 : lprof_dict[lprof]["real_time"];
-    //         let bar_colour = p_time < 15 ? (p_time < 10 ? "green" : "orange") : "red";
-    //         lprof_str += "<tr><th scope='row'>" + count++ + "</th>" +
-    //             "<td style='height:5px;colour:" + bar_colour + ";'>" + hits + "</td>" +
-    //             "<td style='height:5px;colour:" + bar_colour + ";'>" + p_time + "</td>" +
-    //             "<td style='height:5px;colour:" + bar_colour + ";'>" + real_time + "</td>" +
-    //             "<td style='height:5px;colour:" + bar_colour + ";'>" + contents + "</td></tr>"
-    //     }
-    //     lprof_str += "</tbody>"
-    // }
-    // lprof_str += "</table></p>"
-    // collapsible.innerHTML += lprof_str
 }
 
-
-
-//Editor set up related 
+// Main editor initialization function
 function init_editor() {
     let editor = ace.edit("editor");
     var main_signature = document.getElementById("main_signature").innerHTML

@@ -15,6 +15,14 @@ from . import forms as submission_forms
 from django.contrib.auth.models import User
 import yaml
 
+
+ERROR_CODES = {
+    "Semantic Error": 10,
+    "Syntax Error": 11,
+    "Constraint Violation": 12,
+    "Server-Side Error": 13
+}
+
 ### NB: When hashmaps (dicts) are saved as jsonb to postgres, their keys are ordered by length, and then alphabetically
 ### This is a change from the order in which they are created on our python backend, and if we need to make our pythonic dicts
 ### conform to the ordering of the ones retrieved from our db, then we can use 'make_utils.json_reorder(hashmap)'
@@ -34,7 +42,8 @@ class AnalysisView(APIView):
             problem_data["outputs"] = problem.outputs
             problem_data["analysis"] = problem.analysis        
         except Exception as e:
-            return Response("POST NOT OK: Error during loading of problem json - {0}".format(str(e)), status=status.HTTP_400_BAD_REQUEST)
+            print("POST NOT OK: Error during loading of problem json - {0}".format(str(e)))
+            return Response(ERROR_CODES["Server-Side Error"], status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         return problem_data
 
     def __process_request_data(self, request):
@@ -48,7 +57,8 @@ class AnalysisView(APIView):
             processed_data["uid"] = request.user.id
             processed_data["code_data"] = request.data.get("solution")
         except Exception as e:
-            return Response("POST NOT OK: Error during intial processing of uploaded data - {0}".format(str(e)), status=status.HTTP_400_BAD_REQUEST)
+            print("POST NOT OK: Error during intial processing of uploaded data - {0}".format(str(e)))
+            return Response(ERROR_CODES["Server-Side Error"], status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         return processed_data
 
     def post(self, request):
@@ -73,7 +83,8 @@ class AnalysisView(APIView):
         try:
             problem = Problem.objects.filter(id=processed_data["prob_id"]).first()
         except Exception as e:
-            return Response("POST NOT OK: reference problem db exception = {0}".format(str(e)), status=status.HTTP_400_BAD_REQUEST)
+            print("POST NOT OK: reference problem db exception = {0}".format(str(e)))
+            return Response(ERROR_CODES["Server-Side Error"], status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
         problem_data = self.__load_problem_data(problem)
 
@@ -85,12 +96,14 @@ class AnalysisView(APIView):
         try:
             user = Profile.objects.filter(id=processed_data["uid"]).first()
         except Exception as e:
-            return Response("POST NOT OK: uid db exception = {0}".format(str(e)), status=status.HTTP_400_BAD_REQUEST)
+            print("POST NOT OK: uid db exception = {0}".format(str(e)))
+            return Response(ERROR_CODES["Server-Side Error"], status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         filename = "{0}.py".format(prob_name)
         ### checking with mock validation (seems obsolete as placeholder, maybe remove)
         if not validate_submission(processed_data["code_data"]):
-            return Response("POST NOT OK: invalid code!", status=status.HTTP_400_BAD_REQUEST)
+            print("POST NOT OK: invalid code!")
+            return Response(ERROR_CODES["Server-Side Error"], status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         ### make basic initial file from code_data for the sole purposes of ast parsing
         with open(filename, 'w') as f:
             f.write(processed_data["code_data"])
@@ -100,8 +113,9 @@ class AnalysisView(APIView):
         try:
             analyzer.visit_ast()
         except Exception as e:
-            #os.remove(filename)
-            return Response("POST NOG\QT OK: {0}".format(str(e)), status=status.HTTP_400_BAD_REQUEST)
+            print("POST NOT OK: {0}".format(str(e)))
+            os.remove(filename)
+            return Response(ERROR_CODES["Syntax Error"], status=status.HTTP_400_BAD_REQUEST)
         
         ### if the ast_visitor has picked up on any constraint violations then return appropriate error status
         ast_analysis = analyzer.get_prog_dict()
@@ -122,13 +136,21 @@ class AnalysisView(APIView):
             try:
                 make_utils.make_file(filename, processed_data["code_data"].splitlines(), main_function=problem_data["metadata"]["main_function"])
             except Exception as e:
-                print(str(e))
+                print("POST NOT OK: {0}".format(str(e)))
+                return Response(ERROR_CODES["Server-Side Error"], status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
         ### verify the submitted solution against the appropriate reference problem
 
         try:
             percentage_score = analyzer.verify(problem_data)
         except Exception as e:
-            return Response("POST NObT OK: {0}".format(str(e)), status=status.HTTP_400_BAD_REQUEST)
+            print("POST NOT OK: {0}".format(str(e)))
+            if "semantic" in str(e):
+                return Response(ERROR_CODES["Semantic Error"], status=status.HTTP_400_BAD_REQUEST)
+            else:
+                return Response(ERROR_CODES["Server-Side Error"], status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
         ### check if all tests were passed, and only profile submission if so (both lprof and cprof)
         hundred_pc = float(percentage_score) == 100.0
         if hundred_pc:
@@ -138,7 +160,9 @@ class AnalysisView(APIView):
                 else:
                     analyzer.profile(problem_data["inputs"])                   
             except Exception as e:
-                return Response("POST NOAAT OK: {0}".format(str(e)), status=status.HTTP_400_BAD_REQUEST)
+                print("POST NOT OK: {0}".format(str(e)))
+                return Response(ERROR_CODES["Server-Side Error"], status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+              
         ### get analysis dict
 
         analysis = analyzer.get_prog_dict()

@@ -15,5 +15,6 @@ def validate(ast_analysis, filename):
     # if num_fdefs != 1:
     #     return Response("POST NOT OK: Too few or too many function(s) => {0}".format(num_fdefs), status=status.HTTP_400_BAD_REQUEST)
     if constraints_vlen > 0:
-        return Response("POST NOT OK: constraint violation(s) : {0}" .format(ast_analysis["constraint_violation"]), status=status.HTTP_400_BAD_REQUEST)
+        print("POST NOT OK: constraint violation(s) : {0}" .format(ast_analysis["constraint_violation"]))
+        return Response(12, status=status.HTTP_400_BAD_REQUEST) # 12 is error code for constraint violation
     return True

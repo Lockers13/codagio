@@ -5,7 +5,7 @@
 <div class="code-home">
     <div class="top_section">
         <img src="{% static 'images/back.png' %}" id="go_back" />
-        <h1 class="problem_name text-center"><br><u>{{ problem_name }}</u><br></h1>
+        <h1 class="problem_name text-left" style="text-transform:capitalize;margin-left:20px;"><br><u>{{ problem_name }}</u><br></h1>
     </div>
     <br>
     <p class="problem_desc" id="description" style="white-space:pre-wrap;margin-left:2em;">{{ problem_desc }}</p>
@@ -39,6 +39,7 @@
                 <div id="problem_info">
 
                     <div id="result">
+                        <p id="error_message" style="padding-top:10em;text-align:center;color:red;text-transform:italic;"></p>
                         <p id="overall_score" class="text-center"></p>
                         <div id="collapse_section">
                             <button type="button" class="collapsible"> Overview Stats </button>
