@@ -20,7 +20,8 @@ ERROR_CODES = {
     "Semantic Error": 10,
     "Syntax Error": 11,
     "Constraint Violation": 12,
-    "Server-Side Error": 13
+    "Server-Side Error": 13,
+    "Timeout Error": 14
 }
 
 ### NB: When hashmaps (dicts) are saved as jsonb to postgres, their keys are ordered by length, and then alphabetically
@@ -148,6 +149,8 @@ class AnalysisView(APIView):
             print("POST NOT OK: {0}".format(str(e)))
             if "semantic" in str(e):
                 return Response(ERROR_CODES["Semantic Error"], status=status.HTTP_400_BAD_REQUEST)
+            elif "retcode = 124" in str(e):
+                return Response(ERROR_CODES["Timeout Error"], status=status.HTTP_400_BAD_REQUEST)
             else:
                 return Response(ERROR_CODES["Server-Side Error"], status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 

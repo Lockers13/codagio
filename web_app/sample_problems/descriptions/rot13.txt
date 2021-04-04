@@ -5,7 +5,7 @@ Exception handling must be implemented for the following cases:
 1. The input passed to the function is not a string
 (On exception return the string  "Error: input is not a string!")
 
-In the editor, you are allowed to import the following modules to complete this task:
+In the editor, you are allowed to make the following imports to complete this task:
 
 - from string import ascii_letters
 

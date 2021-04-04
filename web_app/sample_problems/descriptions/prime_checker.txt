@@ -7,6 +7,6 @@ Exception handling must be implemented for the following cases:
 
 In the editor, you are allowed to import the following modules to complete this task:
 
-- import math
+- math
 
 Good Luck!

@@ -2,6 +2,8 @@ const MAX_FILE_UPLOAD_SIZE = 1000000
 
 $("#prob_form").submit(function(e) {
     e.preventDefault();
+    var upload_res = document.getElementById("form_upload_res")
+    upload_res.innerHTML = ""
     
     // checking uploaded file sizes are all under 100KB
 
@@ -36,13 +38,12 @@ $("#prob_form").submit(function(e) {
             console.log(err)
         }
     }
-    let error_p = document.getElementById("form_upload_error")
-    error_p.innerHTML = ""
     for (let i = 0; i < upload_files.length; i++) {
         if(upload_files[i] != undefined) {
             for (let j = 0; j < upload_files[i].length; j++) {
                 if(upload_files[i][j] != undefined && upload_files[i][j].size >= MAX_FILE_UPLOAD_SIZE) {
-                    error_p.innerHTML += "Error - file: " + upload_files[i][j].name + " is too large!"
+                    upload_res.style.color = "red"
+                    upload_res.innerHTML += "Error - file: " + upload_files[i][j].name + " is too large!"
                     return
                 }
             }
@@ -60,8 +61,12 @@ $("#prob_form").submit(function(e) {
     })
     .done(function(resp_data) {
         console.log(resp_data)
+        upload_res.style.color = "green"
+        upload_res.innerHTML = "Congrats, your problem was uploaded successfully!"
     })
     .fail(function(resp_data) {
         console.log(resp_data)
+        upload_res.style.color = "red"
+        upload_res.innerHTML = "Oops, there was an error uploading your file, please ensure everything is in order and try again!"
     })
 });

@@ -4,7 +4,8 @@ const ERROR_CODES = {
     10: "Uh-oh...Looks like your code threw a run-time error!",
     11: "Uh-oh...Looks like there's a syntax error in your code!",
     12: "Sorry, your code violates one of the problem constraints!",
-    13: "Sorry, it seems like there's something wrong with our server...check back later!"
+    13: "Sorry, it seems like there's something wrong with our server...check back later!",
+    14: "Uh-oh...Your code timed out, please try again!"
 }
 
 let error_paragraph = document.getElementById("error_message")
@@ -190,7 +191,7 @@ function display_lp_graph(fdef) {
                     display: true,
                     labelString: '% Time'
                 },
-                stacked: true
+                stacked: true,
             }],
             yAxes: [{
                 scaleLabel: {
