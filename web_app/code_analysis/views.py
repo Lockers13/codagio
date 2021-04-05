@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
-from ca_modules import make_utils, comparison, ast_checker
+from ca_modules import make_utils, comparison
 from ca_modules.analyzer import Analyzer
 from datetime import datetime
 from .models import Problem, Solution
@@ -16,7 +16,6 @@ from django.contrib.auth.models import User
 import yaml
 from app import postmaster as pm
 from app import settings
-
 
 ERROR_CODES = settings.SUBMISSION_ERROR_CODES
 
@@ -70,40 +69,35 @@ class AnalysisView(APIView):
 
         ### after discarding first file used during ast analysis, now create full-fledged script capable of processing inputs passed from command line (cf. verification stage)
         ### but first check what kind of problem input we are dealing with (viz. 'auto generated', 'file io', etc.)
-        input_type = next(iter(problem_data["metadata"].get("input_type")))
-        
-        if input_type == "file":
-            if problem_data["init_data"] is not None:
-                make_utils.make_file(filename, processed_data["code_data"].splitlines(), input_type="file", init_data=True, main_function=problem_data["metadata"]["main_function"])
-            else:
-                make_utils.make_file(filename, processed_data["code_data"].splitlines(), input_type="file", main_function=problem_data["metadata"]["main_function"])
-        elif input_type == "auto" or input_type == "custom":
-            try:
-                make_utils.make_file(filename, processed_data["code_data"].splitlines(), main_function=problem_data["metadata"]["main_function"])
-            except Exception as e:
-                print("POST NOT OK: {0}".format(str(e)))
-                return Response(ERROR_CODES["Server-Side Error"], status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+        code_data = processed_data["code_data"].splitlines()
+
+        try:
+            make_utils.make_file(filename, code_data, problem_data)
+        except Exception as e:
+            print("POST NOT OK: {0}".format(str(e)))
+            return Response(ERROR_CODES["Server-Side Error"], status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                
         ### verify the submitted solution against the appropriate reference problem
         try:
             percentage_score = analyzer.verify(problem_data)
         except Exception as e:
-            print("POST NOT OK: {0}".format(str(e)))
-            if "semantic" in str(e):
+            msg = str(e)
+            print("POST NOT OK: {0}".format(msg))
+            if "semantic" in msg:
                 return Response(ERROR_CODES["Semantic Error"], status=status.HTTP_400_BAD_REQUEST)
-            elif "retcode = 124" in str(e):
+            elif "retcode = 124" in msg:
                 return Response(ERROR_CODES["Timeout Error"], status=status.HTTP_400_BAD_REQUEST)
             else:
                 return Response(ERROR_CODES["Server-Side Error"], status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         ### check if all tests were passed, and only profile submission if so (both lprof and cprof)
         hundred_pc = float(percentage_score) == 100.0
+
         if hundred_pc:
             try:
-                if problem_data["init_data"] is not None:
-                    analyzer.profile(problem_data["inputs"], init_data=problem_data["init_data"])
-                else:
-                    analyzer.profile(problem_data["inputs"])                   
+                # default kwarg is init_data=None
+                analyzer.profile(problem_data["inputs"], init_data=problem_data["init_data"])            
             except Exception as e:
                 print("POST NOT OK: {0}".format(str(e)))
                 return Response(ERROR_CODES["Server-Side Error"], status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -215,10 +209,10 @@ class SaveProblemView(APIView):
             return Response("POST NOfdbT OK: {0}".format(str(e)), status=status.HTTP_400_BAD_REQUEST)
         ### if the ast_visitor has picked up on any constraint violations then return appropriate error response
         ast_analysis = analyzer.get_prog_dict()
-        validation_result = ast_checker.validate(ast_analysis, filename)
+        # validation_result = ast_checker.validate(ast_analysis, filename)
         
-        if isinstance(validation_result, Response):
-            return validation_result
+        # if isinstance(validation_result, Response):
+        #     return validation_result
 
         ### Depending on the type of uploaded problem, the processes for making an executable script, generating inputs, and generating outputs, will be different
         ### These different eventualities are handled below

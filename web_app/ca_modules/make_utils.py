@@ -8,99 +8,37 @@ import sys
 import random
 import string
 from . import subprocess_ctrl as spc
+from . import code_templates
 
-def make_file(path, code, input_type="auto", init_data=False, main_function=None):
+def make_file(path, code, problem_data):
     """Function to create script that is used for verification and profiling purposes
 
     Returns nothing, writes to disk"""
 
     def write_prequel(file_obj):
-        for line in IMPORTS:
+        for line in ctemps["IMPORTS"]:
             file_obj.write("{0}\n".format(line))
         file_obj.write("\n")
 
     def write_sequel(file_obj, fname):
-        
         if input_type == "file":
-            if init_data:
-                text_to_write = TEMPLATE_CODE_FILE_WITH_DATA
+            if init_data is not None:
+                text_to_write = ctemps["TEMPLATE_CODE_FILE_WITH_DATA"]
             else:
-                text_to_write = TEMPLATE_CODE_FILE 
-        elif input_type == "auto":
-            text_to_write = TEMPLATE_CODE_AUTO
+                text_to_write = ctemps["TEMPLATE_CODE_FILE"]
+        elif input_type == "auto" or input_type == "custom": ### CHANGE 'auto' TO 'default' AFTER PROBLEM UPLOAD VIEW IS CLEANED !!!
+            text_to_write = ctemps["TEMPLATE_CODE_DEFAULT"]
 
         for line in text_to_write:
             if "template_function" in line:
                 line = line.replace("template_function", str(fname))
             file_obj.write("{0}\n".format(line))
 
-
-    IMPORTS = ["from json import loads as json_load", 
-                "from sys import argv"]
-
-    TEMPLATE_CODE_AUTO = ["def prep_input():",
-                    "    try:",
-                    "        return json_load(argv[1])",
-                    "    except IndexError:",
-                    "        print(\"Error: please make sure correct input has been provided\")",
-                    "        sys.exit(1)\n",
-                    "def main():",
-                    "    input_list = prep_input()",
-                    "    try:",
-                    "        for inp in input_list:",
-                    "            print(\"{0} {1}\".format(inp, template_function(inp)))",
-                    "    except Exception as e:",
-                    "        print('EXCEPTION: semantic error in submitted program: {0}'.format(str(e)))\n",
-                    "main()"]
-    
-    TEMPLATE_CODE_FILE = ["def prep_output():",
-                    "    try:",
-                    "        output = template_function(argv[1])",
-                    "        return output",
-                    "    except IndexError:",
-                    "        print(\"Error: please make sure correct input has been provided\")",
-                    "        sys.exit(1)\n",
-                    "def main():",
-                    "    try:",
-                    "        output = prep_output()",
-                    "        with open(argv[1], 'r') as f:",
-                    "            len_lines = len(f.readlines())",
-                    "        for i in range(1, len_lines+1):",
-                    "            if output.get(i, None) is not None:",
-                    "                print(i, output[i])",
-                    "            else:",
-                    "                print(i, False)",
-                    "    except Exception as e:",
-                    "        print('EXCEPTION: semantic error in submitted program: {0}'.format(str(e)))\n",
-                    "main()"]
-    
-    TEMPLATE_CODE_FILE_WITH_DATA = ["def prep_output():",
-                    "    try:",
-                    "        data = json_load(argv[2])",
-                    "        targetfile = argv[1]",
-                    "        return template_function(targetfile, data)",
-                    "    except IndexError:",
-                    "        print(\"Error: please make sure correct input has been provided\")",
-                    "def main():",
-                    "    try:",
-                    "        output = prep_output()",
-                    "        if isinstance(output, dict):",
-                    "            output = prep_output()",
-                    "            with open(argv[1], 'r') as f:",
-                    "                len_lines = len(f.readlines())",
-                    "            for i in range(1, len_lines+1):",
-                    "                if output.get(i, None) is not None:",
-                    "                    print(i, output[i])",
-                    "                else:",
-                    "                    print(i, False)",
-                    "        elif isinstance(output, list):",
-                    "            for line in output:",
-                    "                print(line)",
-                    "    except Exception as e:",
-                    "        print('EXCEPTION: semantic error in submitted program: {0}'.format(str(e)))\n",
-                    "main()"]
-
+    ctemps = code_templates.get_ctemp_dict()
     program_text = code
+    input_type = list(problem_data["metadata"]["input_type"].keys())[0]
+    main_function = problem_data["metadata"]["main_function"]
+    init_data = problem_data["init_data"]
 
     with open(path, 'w') as f:
         write_prequel(f)
@@ -116,7 +54,7 @@ def make_file(path, code, input_type="auto", init_data=False, main_function=None
 
         write_sequel(f, fname)
 
-def gen_sample_outputs(filename, inputs, init_data=None, input_type="auto"):
+def gen_sample_outputs(filename, inputs, init_data=None, input_type="default"):
     """Utility function invoked whenever a reference problem is submitted
 
     Returns a list of outputs that are subsequently stored in DB as field associated with given problem"""
@@ -127,7 +65,7 @@ def gen_sample_outputs(filename, inputs, init_data=None, input_type="auto"):
     timeout_cmd = "gtimeout {0}".format(SAMPUP_TIMEOUT) if platform == "darwin" else "timeout {0} -m {1}".format(SAMPUP_TIMEOUT, SAMPUP_MEMOUT) if platform == "linux" or platform == "linux2" else ""
     base_cmd = "{0} python".format(timeout_cmd)
     outputs = []
-    if input_type == "auto":
+    if input_type == "default":
         programmatic_inputs = inputs
         for i in range(len(programmatic_inputs)):  
             output = spc.run_subprocess_ctrld(base_cmd, filename, json.dumps(programmatic_inputs[i]))

@@ -24,8 +24,7 @@ class Profiler:
         if input_type == "files":
             inputs = input_dict
         elif input_type == "default":
-            custom_or_auto = next(iter(input_dict[input_type]))
-            inputs = input_dict[input_type][custom_or_auto]
+            inputs = input_dict[input_type]["custom"]
         return inputs, input_type
 
     def __get_udef_info(self):

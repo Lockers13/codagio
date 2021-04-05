@@ -6,7 +6,7 @@ constraints:
     os: ["listdir"]
   disallowed_functions: ["eval", "abs"]
 input_type:
-  custom:
+  default:
     "string"
 input_length: 5000
 num_tests: 3
