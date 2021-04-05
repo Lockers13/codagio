@@ -353,3 +353,15 @@ class AstTreeVisitor(ast.NodeVisitor):
                     "type": "Disallowed fcall",
                     "name": func_name
                 })
+        
+    def auto_validate(self):
+        """Function to check if any violations have been recorded during ast_analysis
+        
+        Returns appropriate http reponse if any violations are found, true otherwise"""
+
+        # check to see if ast visitor encountered any constraint violations
+        constraints_vlen = len(self.__program_dict["constraint_violation"])
+        if constraints_vlen > 0:
+            print("POST NOT OK: constraint violation(s) : {0}" .format(self.__program_dict["constraint_violation"]))
+            return False
+        return True

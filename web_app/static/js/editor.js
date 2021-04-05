@@ -5,7 +5,8 @@ const ERROR_CODES = {
     11: "Uh-oh...Looks like there's a syntax error in your code!",
     12: "Sorry, your code violates one of the problem constraints!",
     13: "Sorry, it seems like there's something wrong with our server...check back later!",
-    14: "Uh-oh...Your code timed out, please try again!"
+    14: "Uh-oh...Your code timed out, please try again!",
+    15: "Sorry, there was a problem with your submission, please make sure everything is in order, and try again!"
 }
 
 let error_paragraph = document.getElementById("error_message")

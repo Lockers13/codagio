@@ -47,6 +47,7 @@ class Analyzer:
         atv = AstTreeVisitor(self)
         # visit ast-parsed script
         atv.visit(parsed_tree)
+        return atv.auto_validate()
     
     def verify(self, paragon):
         verifier = Verifier(self, paragon)
