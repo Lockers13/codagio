@@ -13,6 +13,9 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 import os
 from pathlib import Path
 
+MAX_UPLOAD_SIZE_PROG = MAX_UPLOAD_SIZE_META = MAX_UPLOAD_SIZE_CODE_STRING = 1024 * 100 # 100 KB
+MAX_UPLOAD_SIZE_TARGET_FILE = MAX_UPLOAD_SIZE_INPUTS = MAX_UPLOAD_SIZE_DATA_FILE = 1024 * 1024 # 1MB
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -24,6 +27,7 @@ SUBMISSION_ERROR_CODES = {
     "Server-Side Error": 13,
     "Timeout Error": 14,
     "Form Submission Error": 15,
+    "Permission Denied Error": 16,
 }
 
 # Quick-start development settings - unsuitable for production

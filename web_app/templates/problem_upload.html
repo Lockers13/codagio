@@ -20,8 +20,8 @@
                         <div class="form-group col-sm-12 col-md-12 col-lg-12 col-xl-12 item"><span class="upload-form-field">Metadata File (.yaml format):</span>{{ form.meta_file }}</div>
                         <div class="form-group col-sm-12 col-md-12 col-lg-12 col-xl-12 item"><span class="upload-form-field">Problem Script:</span>{{ form.program }}</div>
                         {% if cat == 'file_io' %}
-                           <div class="form-group col-sm-12 col-md-12 col-lg-12 col-xl-12 item"><span class="upload-form-field">Target File(s) - maximum 3:</span>{{ form.target_file }}</div>
-                           <div class="form-group col-sm-12 col-md-12 col-lg-12 col-xl-12 item"><span class="upload-form-field">Optional Data File:</span>{{ form.data_file }}</div>
+                           <div class="form-group col-sm-12 col-md-12 col-lg-12 col-xl-12 item"><span class="upload-form-field">Target File(s):</span>{{ form.target_file }}</div>
+                           <div class="form-group col-sm-12 col-md-12 col-lg-12 col-xl-12 item"><span class="upload-form-field">Optional Data File (.json format):</span>{{ form.data_file }}</div>
                         {% elif cat == 'default' %}
                         <div class="form-group col-sm-12 col-md-12 col-lg-12 col-xl-12 item">
                             <span class="upload-form-field">Inputs (.json format):</span>{{ form.inputs }}

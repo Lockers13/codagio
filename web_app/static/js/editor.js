@@ -62,6 +62,14 @@ function reset() {
 $("#sub_form").submit(function (e) {
     e.preventDefault();
     let sub_text = editor.getValue();
+    let submission_length = sub_text.split(/\r\n|\r|\n/).length
+    if(submission_length > 1500) {
+        error_paragraph.innerHTML = "Sorry, your submission must be less than 1500 lines!"
+        loader.style.display = 'none';
+        back.style.display = 'block';
+        result_section.style.display = 'block';
+        return
+    }
     let solution_text_box = document.getElementById("solution_text")
     solution_text_box.value = sub_text
 

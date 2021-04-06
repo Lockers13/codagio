@@ -26,7 +26,7 @@ def make_file(path, code, problem_data):
                 text_to_write = ctemps["TEMPLATE_CODE_FILE_WITH_DATA"]
             else:
                 text_to_write = ctemps["TEMPLATE_CODE_FILE"]
-        elif input_type == "auto" or input_type == "custom": ### CHANGE 'auto' TO 'default' AFTER PROBLEM UPLOAD VIEW IS CLEANED !!!
+        elif input_type == "default": ### CHANGE 'auto' TO 'default' AFTER PROBLEM UPLOAD VIEW IS CLEANED !!!
             text_to_write = ctemps["TEMPLATE_CODE_DEFAULT"]
 
         for line in text_to_write:
@@ -115,14 +115,17 @@ def generate_input(input_type, input_length, num_tests):
 def handle_uploaded_file_inputs(processed_data):
     input_dict = {"files": {}}
     files = []
-    for count, file_obj in enumerate(processed_data.get("target_file")):
-        input_dict["files"]["file_{0}".format(count+1)] = ""
-        with open("file_{0}.py".format(count+1), 'w') as g:
-            for chunk in file_obj.chunks():
-                decoded_chunk = chunk.decode("utf-8")
-                input_dict["files"]["file_{0}".format(count+1)] += decoded_chunk
-            g.write(decoded_chunk)
-            files.append("file_{0}.py".format(count+1))
+    count = 0
+    ### add below for loop for multiple files
+    # for count, file_obj in enumerate(processed_data.get("target_file")):
+    input_dict["files"]["file_{0}".format(count+1)] = ""
+    file_obj = processed_data.get("target_file")
+    with open("file_{0}.py".format(count+1), 'w') as g:
+        for chunk in file_obj.chunks():
+            decoded_chunk = chunk.decode("utf-8")
+            input_dict["files"]["file_{0}".format(count+1)] += decoded_chunk
+        g.write(decoded_chunk)
+        files.append("file_{0}.py".format(count+1))
     return input_dict, files
 
 def json_reorder(hashmap):

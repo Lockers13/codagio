@@ -16,6 +16,7 @@ from django.contrib.auth.models import User
 import yaml
 from app import postmaster as pm
 from app import settings
+from . import forms as ca_forms
 
 ERROR_CODES = settings.SUBMISSION_ERROR_CODES
 
@@ -35,6 +36,12 @@ class AnalysisView(APIView):
         Returns an HTTP response of some kind"""
 
         processed_data = pm.retrieve_form_data(request, submission_type="solution")
+        uploaded_form = ca_forms.SolutionSubmissionForm(request.POST, request.FILES)
+        try:
+            uploaded_form.is_valid()
+        except Exception as e:
+            print("POST NOT OK: {0}".format(str(e)))
+            return Response(ERROR_CODES["Form Submission Error"], status=status.HTTP_400_BAD_REQUEST)
         ### if an error response was returned from processing function, then return it from this view
         if isinstance(processed_data, Response):
             return processed_data
@@ -51,7 +58,7 @@ class AnalysisView(APIView):
             return problem_data
 
         ### make basic initial file from code_data for the sole purposes of ast parsing
-        filename = pm.write_initial_file(problem.name, processed_data["code_data"])
+        filename = pm.write_initial_file(problem.name, processed_data["code_data"], submission_type="solution")
 
         ### analyze submitted solution (at ast level) against reference problem metadata - passing metadata allows us to access constraint variables
         analyzer = Analyzer(filename, problem_data["metadata"])
@@ -124,153 +131,92 @@ class AnalysisView(APIView):
         ### return analysis within successful http response
         return Response(json.dumps(analysis), status=status.HTTP_200_OK)
 
+
 class SaveProblemView(APIView):
     """Class based API view for handling the uploading of a reference problem"""
 
     ### only allow 'post' requests to this api endpoint
     http_method_names = ['post']
 
-    def __validate_custom_inputs(self, custom_input):
-        # try:
-        #     custom_input
-        #     if len(custom_input) > 3:
-        #         return Response("POST NOT OK: Too many tests!", status=status.HTTP_400_BAD_REQUEST)
-        #     else:
-        #         for inp in custom_input:
-        #             if not isinstance(inp, list):
-        #                 return Response("POST NOT OK: Incorrectly formatted custom inputs!", status=status.HTTP_400_BAD_REQUEST)
-        # except Exception as e:
-        #     return Response("POST 1NOT OK: {0}".format(str(e)), status=status.HTTP_400_BAD_REQUEST)
-        return True
-
-    def __process_request_data(self, data):
-        """Utility function to process received request data. Takes data object (dict) as argument
-
-        Returns processed data dict on success, otherwise error response"""
-
-        processed_data = {}
-        try:
-            processed_data["author_id"] = int(data.get("author_id"))
-            processed_data["category"] = data.get("category")
-            processed_data["target_file"] = data.getlist("target_file", None)
-            processed_data["data_file"] = data.get("data_file", None)
-            processed_data["name"] = data.get("name")
-            description = data.get("description")
-            processed_data["program_file"] = data.get("program")
-            processed_data["code"] = [line.decode("utf-8") for line in processed_data["program_file"].read().splitlines()]
-            meta_file = data.get("meta_file")
-            processed_data["metadata"] = yaml.safe_load(meta_file.read())
-            processed_data["metadata"]["description"] = description
-            processed_data["date_submitted"] = datetime.now()
-            processed_data["inputs"] = data.get("inputs", None)
-        except Exception as e:
-            return Response("POST NOT OK: Error during intial processing of uploaded data - {0}".format(str(e)), status=status.HTTP_400_BAD_REQUEST)
-        return processed_data
-
     def post(self, request):
         """Built-in django function to handle post requests to API endpoint
         
         Returns an HTTP response of some kind"""
-
         ### get data, process it, and handle errors
-        data = request.data
-        processed_data = self.__process_request_data(data)
+        processed_data = pm.retrieve_form_data(request, submission_type="problem_upload")
         ### if an error response was returned from processing function, then return it from this view
         if isinstance(processed_data, Response):
             return processed_data
-        if processed_data["metadata"]["main_function"] in ["main", "prep_input"]:
-            return Response("POST NOT OK: main_function cannot be called 'main' or 'prep_input'", status=status.HTTP_400_BAD_REQUEST)
-
-        ### get author instance from DB
+        
+        if processed_data["category"] == "file_io":
+            uploaded_form = ca_forms.IOProblemUploadForm(request.POST, request.FILES)
+        elif processed_data["category"] == "default":
+            uploaded_form = ca_forms.DefaultProblemUploadForm(request.POST, request.FILES)
+        
         try:
-            author = User.objects.filter(id=processed_data.get("author_id")).first()
-            ### only allow registered superusers to upload problems - this feature may need reviewing!
-            if not author.is_superuser:
-                return Response("POST NOT OK: problem author is not superuser!", status=status.HTTP_400_BAD_REQUEST)
+            uploaded_form.is_valid()
         except Exception as e:
-            return Response("POST NOT OK: author db exception = {0}".format(str(e)), status=status.HTTP_400_BAD_REQUEST)
+            print("POST NOT OK: {0}".format(str(e)))
+            return Response(ERROR_CODES["Form Submission Error"], status=status.HTTP_400_BAD_REQUEST)
 
-        filename = "{0}.py".format(processed_data["name"])
+        if processed_data["metadata"]["main_function"] in ["main", "prep_input"]:
+            return Response(ERROR_CODES["Constraint Violation"], status=status.HTTP_400_BAD_REQUEST)
+        ### get author instance from DB
+        author = pm.get_relevant_db_entries(processed_data, submission_type="problem_upload")
+        if isinstance(author, Response):
+            return author
+            
+        filename = pm.write_initial_file(processed_data["name"], processed_data["program_file"], submission_type="problem_upload")
 
-        ### make basic initial file from uploaded in-memory file obj for the purposes of ast parsing
-        ### chunkwise writing is unnecessay since we impose file size restrictions of the client side, but we leave it in anyway (as probably more efficient to deal with bytes rather than decoded strings)
-        with open(filename, 'wb+') as f:
-            for chunk in processed_data["program_file"].chunks():
-                f.write(chunk)
-    
         ### create analyzer instance, passing script to be visited by ast_visitor, as well as uploaded metadata...subsequent checks may be overkill - needs review (are you really going to violate your own constraints? maybe by accident...)
         analyzer = Analyzer(filename, processed_data["metadata"])
 
         ### visit ast, do static analysis, and check for constraint violations
         try:
-            analyzer.visit_ast()
+            validation_result = analyzer.visit_ast()
         except Exception as e:
+            print("POST NOT OK: {0}".format(str(e)))
             os.remove(filename)
-            return Response("POST NOfdbT OK: {0}".format(str(e)), status=status.HTTP_400_BAD_REQUEST)
-        ### if the ast_visitor has picked up on any constraint violations then return appropriate error response
-        ast_analysis = analyzer.get_prog_dict()
-        # validation_result = ast_checker.validate(ast_analysis, filename)
+            return Response(ERROR_CODES["Syntax Error"], status=status.HTTP_400_BAD_REQUEST)
         
-        # if isinstance(validation_result, Response):
-        #     return validation_result
+        if validation_result == False:
+            os.remove(filename)
+            return Response(ERROR_CODES["Constraint Violation"], status=status.HTTP_400_BAD_REQUEST)
+
+        code_data = processed_data["code"]
+
+        if processed_data["data_file"] is not None:
+            processed_data["data_file"].seek(0)
+            processed_data["init_data"] = processed_data["data_file"].read().decode("utf-8")
+        else:
+            processed_data["init_data"] = None
+
+        make_utils.make_file(filename, code_data, processed_data)
 
         ### Depending on the type of uploaded problem, the processes for making an executable script, generating inputs, and generating outputs, will be different
         ### These different eventualities are handled below
         if processed_data["category"] == "file_io":
-            if processed_data["data_file"] is not None and processed_data["data_file"] != "":
-                make_utils.make_file(filename, processed_data["code"], input_type="file", init_data=True, main_function=processed_data["metadata"]["main_function"])
-                problem_inputs, files = make_utils.handle_uploaded_file_inputs(processed_data)
-                ### generate sample outputs, given file inputs
-                init_data = processed_data["data_file"].read().decode("utf-8")
-                outputs = make_utils.gen_sample_outputs(filename, files, init_data=init_data, input_type="file")
-                input_hash = problem_inputs
-            else:
-                ### make new script capable of being verified and profiled
-                make_utils.make_file(filename, processed_data["code"], input_type="file", main_function=processed_data["metadata"]["main_function"])
-                ### generate file inputs, given processed data
-                problem_inputs, files = make_utils.handle_uploaded_file_inputs(processed_data)
-                ### generate sample outputs, given file inputs
-                outputs = make_utils.gen_sample_outputs(filename, files, input_type="file")
-                input_hash = problem_inputs
-                init_data = None
+            problem_inputs, files = make_utils.handle_uploaded_file_inputs(processed_data)
+            input_hash = problem_inputs
+            outputs = make_utils.gen_sample_outputs(filename, files, init_data=processed_data["init_data"], input_type="file")
 
         elif processed_data["category"] == "default":
-            input_hash = {}
-            input_hash["default"] = {}
-            ### make new script capable of being verified and profiled
-            make_utils.make_file(filename, processed_data["code"], main_function=processed_data["metadata"]["main_function"])
-            ### check whether custom inputs are provided (in json format), 
-            ### or whether they are to be auto generated as per specifications of metadata file
-
-            problem_inputs = json.loads(processed_data["inputs"].read().decode("utf-8"))
-            validated_input = self.__validate_custom_inputs(problem_inputs)
-            if isinstance(validated_input, Response):
-                return validated_input
+            input_hash = {"default": {}}
+            try:
+                processed_data["inputs"].seek(0)
+                problem_inputs = json.loads(processed_data["inputs"].read().decode("utf-8"))
+                
+            except Exception as e:
+                print("Invalid upload: {0}".format(str(e)))
+                return Response(ERROR_CODES["Form Submission Error"], status=status.HTTP_400_BAD_REQUEST)
             input_hash["default"]["custom"] = problem_inputs
-
-            # else:
-            #     ### just shortening overly verbose data references
-            #     input_type = processed_data["metadata"].get("input_type")["auto"]
-            #     input_length = processed_data["metadata"].get("input_length", None)
-            #     num_tests = processed_data["metadata"].get("num_tests", None)
-            #     ### auto-generate inputs, given relevant metadata
-            #     problem_inputs = make_utils.generate_input(input_type, input_length, num_tests)
-            #     input_hash["default"]["auto"] = problem_inputs
-
             ### generate sample outputs, given auto-generated or custom inputs
-            init_data = None  
             outputs = make_utils.gen_sample_outputs(filename, problem_inputs)
  
-
         ### profile uploaded reference problem (will only do cProfile and not line_profile as 'solution' is set to false)
-        analyzer.profile(input_hash, solution=False, init_data=init_data)
+        analyzer.profile(input_hash, solution=False, init_data=processed_data["init_data"])
         ### get final analysis dict
         analysis = analyzer.get_prog_dict()
-
-        try:
-            init_data
-        except Exception as e:
-            init_data = None
         
         ### save uploaded problem, with associated inputs, outputs, and metadata to DB
         problem, created = Problem.objects.update_or_create(
@@ -280,7 +226,7 @@ class SaveProblemView(APIView):
                 'metadata': processed_data["metadata"],
                 'inputs': input_hash,
                 'analysis': analysis,
-                'init_data': init_data,
+                'init_data': processed_data["init_data"],
                 'date_submitted': processed_data["date_submitted"],
                 }
             )
