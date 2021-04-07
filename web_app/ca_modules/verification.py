@@ -73,7 +73,7 @@ class Verifier:
             for i in range(len(self.__sample_inputs)):
                 if self.__init_data is not None:
                     try:
-                        output = run_subprocess_ctrld(base_cmd, self.__filename, json.dumps(self.__sample_inputs[i]), self.__init_data)
+                        output = run_subprocess_ctrld(base_cmd, self.__filename, json.dumps(self.__sample_inputs[i]), init_data=self.__init_data)
                     except Exception as e:
                         raise Exception("hhh{0}".format(str(e)))
                 else:

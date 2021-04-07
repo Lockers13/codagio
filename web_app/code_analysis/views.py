@@ -144,6 +144,7 @@ class SaveProblemView(APIView):
         Returns an HTTP response of some kind"""
         ### get data, process it, and handle errors
         processed_data = pm.retrieve_form_data(request, submission_type="problem_upload")
+        print(processed_data)
         ### if an error response was returned from processing function, then return it from this view
         if isinstance(processed_data, Response):
             return processed_data
@@ -204,14 +205,13 @@ class SaveProblemView(APIView):
             input_hash = {"default": {}}
             try:
                 processed_data["inputs"].seek(0)
-                problem_inputs = json.loads(processed_data["inputs"].read().decode("utf-8"))
-                
+                problem_inputs = json.loads(processed_data["inputs"].read().decode("utf-8"))  
             except Exception as e:
                 print("Invalid upload: {0}".format(str(e)))
                 return Response(ERROR_CODES["Form Submission Error"], status=status.HTTP_400_BAD_REQUEST)
             input_hash["default"]["custom"] = problem_inputs
             ### generate sample outputs, given auto-generated or custom inputs
-            outputs = make_utils.gen_sample_outputs(filename, problem_inputs)
+            outputs = make_utils.gen_sample_outputs(filename, problem_inputs, init_data=processed_data["init_data"])
  
         ### profile uploaded reference problem (will only do cProfile and not line_profile as 'solution' is set to false)
         analyzer.profile(input_hash, solution=False, init_data=processed_data["init_data"])

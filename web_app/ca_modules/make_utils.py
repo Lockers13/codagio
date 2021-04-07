@@ -27,7 +27,10 @@ def make_file(path, code, problem_data):
             else:
                 text_to_write = ctemps["TEMPLATE_CODE_FILE"]
         elif input_type == "default": ### CHANGE 'auto' TO 'default' AFTER PROBLEM UPLOAD VIEW IS CLEANED !!!
-            text_to_write = ctemps["TEMPLATE_CODE_DEFAULT"]
+            if init_data is not None:
+                text_to_write = ctemps["TEMPLATE_CODE_DEFAULT_WITH_DATA"]
+            else:
+                text_to_write = ctemps["TEMPLATE_CODE_DEFAULT"]
 
         for line in text_to_write:
             if "template_function" in line:
@@ -67,8 +70,11 @@ def gen_sample_outputs(filename, inputs, init_data=None, input_type="default"):
     outputs = []
     if input_type == "default":
         programmatic_inputs = inputs
-        for i in range(len(programmatic_inputs)):  
-            output = spc.run_subprocess_ctrld(base_cmd, filename, json.dumps(programmatic_inputs[i]))
+        for i in range(len(programmatic_inputs)): 
+            if init_data is not None: 
+                output = spc.run_subprocess_ctrld(base_cmd, filename, json.dumps(programmatic_inputs[i]), init_data=init_data)
+            else:
+                output = spc.run_subprocess_ctrld(base_cmd, filename, json.dumps(programmatic_inputs[i]))
             cleaned_split_output = output.decode("utf-8").replace('\r', '').replace('None', '').splitlines()
             outputs.append(cleaned_split_output)
         return outputs

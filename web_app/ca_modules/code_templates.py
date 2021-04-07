@@ -16,6 +16,21 @@ TEMPLATE_CODE_DEFAULT = ["def prep_input():",
                 "        print('EXCEPTION: semantic error in submitted program: {0}'.format(str(e)))\n",
                 "main()"]
 
+TEMPLATE_CODE_DEFAULT_WITH_DATA = ["def prep_input():",
+                "    try:",
+                "        return json_load(argv[1]), json_load(argv[2])",
+                "    except IndexError:",
+                "        print(\"Error: please make sure correct input has been provided\")",
+                "        sys.exit(1)\n",
+                "def main():",
+                "    input_list, init_data = prep_input()",
+                "    try:",
+                "        for inp in input_list:",
+                "            print(\"{0} {1}\".format(inp, template_function(inp, init_data)))",
+                "    except Exception as e:",
+                "        print('EXCEPTION: semantic error in submitted program: {0}'.format(str(e)))\n",
+                "main()"]
+
 TEMPLATE_CODE_FILE = ["def prep_output():",
                 "    try:",
                 "        output = template_function(argv[1])",
@@ -68,6 +83,7 @@ def get_ctemp_dict():
     ctemps = {
         "IMPORTS": IMPORTS,
         "TEMPLATE_CODE_DEFAULT": TEMPLATE_CODE_DEFAULT,
+        "TEMPLATE_CODE_DEFAULT_WITH_DATA": TEMPLATE_CODE_DEFAULT_WITH_DATA,
         "TEMPLATE_CODE_FILE": TEMPLATE_CODE_FILE,
         "TEMPLATE_CODE_FILE_WITH_DATA": TEMPLATE_CODE_FILE_WITH_DATA,
     }

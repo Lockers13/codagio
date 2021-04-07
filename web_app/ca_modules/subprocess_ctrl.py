@@ -34,7 +34,9 @@ def run_subprocess_ctrld(base_cmd, filename, json_arg, stage="verification", ini
     if ret == 124:
         try:
             os.remove(filename)
-        except:
+            if os.path.isfile(json_arg):
+                os.remove(json_arg)
+        except Exception as e:
             pass
         raise Exception("Error during {0} stage - subprocess timed out: retcode = {1}".format(stage, ret))
     return output

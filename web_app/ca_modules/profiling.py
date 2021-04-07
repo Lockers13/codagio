@@ -165,7 +165,10 @@ class Profiler:
             elif self.__input_type == "default":
                 json_str = json.dumps(self.__sample_inputs[0])
                 # crucially, readlines() is blocking for pipes
-                output = run_subprocess_ctrld(base_cmd, pro_file, json_str, stage="line_profile")
+                if self.__init_data is not None:
+                    output = run_subprocess_ctrld(base_cmd, pro_file, json_str, init_data=self.__init_data, stage="line_profile")
+                else:
+                    output = run_subprocess_ctrld(base_cmd, pro_file, json_str, stage="line_profile")
 
             process_lprof_out(output)
 
@@ -240,7 +243,10 @@ class Profiler:
             os.remove("cprof_script.py")
         elif self.__input_type == "default":
             json_str = json.dumps(self.__sample_inputs[0])
-            output = run_subprocess_ctrld(base_cmd, self.__filename, json_str, stage="c_profile")
+            if self.__init_data is not None:
+                output = run_subprocess_ctrld(base_cmd, self.__filename, json_str, init_data=self.__init_data, stage="c_profile")
+            else:
+                output = run_subprocess_ctrld(base_cmd, self.__filename, json_str, stage="c_profile")
 
         process_cprof_out(output)
 

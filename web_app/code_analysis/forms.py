@@ -55,6 +55,16 @@ class IOProblemUploadForm(forms.Form):
 
 class DefaultProblemUploadForm(forms.Form):
     ### cleaning function for data_file goes here!!!
+    def clean_data_file(self):
+        content = self.cleaned_data['data_file']
+        if content is None:
+            return content
+        else:
+            content_type = content.content_type.split('/')[0]
+            if content.size > settings.MAX_UPLOAD_SIZE_DATA_FILE:
+                raise forms.ValidationError(_('Please keep filesize under %s. Current filesize %s') % (filesizeformat(settings.MAX_UPLOAD_SIZE), filesizeformat(content.size)))
+        return content
+        
     def clean_program(self):
         content = self.cleaned_data['program']
         content_type = content.content_type.split('/')[0]
@@ -89,3 +99,5 @@ class DefaultProblemUploadForm(forms.Form):
     meta_file = forms.FileField(required=True, widget=forms.ClearableFileInput(attrs={'style':'display:block;margin-top:20px;', 'class':'form-control-sm'}))
     category = forms.CharField(widget=forms.HiddenInput(), required=True)
     inputs = forms.FileField(required=True, widget=forms.ClearableFileInput(attrs={'style':'display:block;margin-top:20px;', 'class':'form-control-sm'}))
+    data_file = forms.FileField(required=False, widget=forms.ClearableFileInput(attrs={'style':'display:block;margin-top:20px;', 'class':'form-control-sm'}))
+
