@@ -4,6 +4,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.conf import settings
 import json
 import sys
+import yaml
 
 CHOICES=[('Auto','Auto'),
          ('Custom','Custom')]
@@ -12,7 +13,7 @@ class SolutionSubmissionForm(forms.Form):
     def clean_solution(self):
         content = self.cleaned_data['solution']
         if sys.getsizeof(content) > settings.MAX_UPLOAD_SIZE_CODE_STRING:
-            raise Exception
+            raise Exception("Submitted code exceeds size limit!")
         return content
 
     problem_id = forms.IntegerField(widget=forms.HiddenInput(), required=True)
@@ -20,6 +21,13 @@ class SolutionSubmissionForm(forms.Form):
     solution = forms.CharField(widget=forms.HiddenInput())
 
 class IOProblemUploadForm(forms.Form):
+    def clean_program(self):
+        content = self.cleaned_data['program']
+        content_type = content.content_type.split('/')[0]
+        if content.size > settings.MAX_UPLOAD_SIZE_PROG:
+            raise forms.ValidationError(_('Please keep filesize under %s. Current filesize %s') % (filesizeformat(settings.MAX_UPLOAD_SIZE), filesizeformat(content.size)))
+        return content
+        
     def clean_target_file(self):
         content = self.cleaned_data['target_file']
         content_type = content.content_type.split('/')[0]
@@ -42,6 +50,10 @@ class IOProblemUploadForm(forms.Form):
         content_type = content.content_type.split('/')[0]
         if content.size > settings.MAX_UPLOAD_SIZE_META:
             raise forms.ValidationError(_('Please keep filesize under %s. Current filesize %s') % (filesizeformat(settings.MAX_UPLOAD_SIZE), filesizeformat(content.size)))
+        try:
+            content = yaml.safe_load(content.read())
+        except Exception as e:
+            raise Exception("Invalid YAML in meta file!")
         return content
 
     author_id = forms.IntegerField(widget=forms.HiddenInput(), required=True)
@@ -64,7 +76,7 @@ class DefaultProblemUploadForm(forms.Form):
             if content.size > settings.MAX_UPLOAD_SIZE_DATA_FILE:
                 raise forms.ValidationError(_('Please keep filesize under %s. Current filesize %s') % (filesizeformat(settings.MAX_UPLOAD_SIZE), filesizeformat(content.size)))
         return content
-        
+
     def clean_program(self):
         content = self.cleaned_data['program']
         content_type = content.content_type.split('/')[0]
@@ -78,11 +90,11 @@ class DefaultProblemUploadForm(forms.Form):
         if content.size > settings.MAX_UPLOAD_SIZE_INPUTS:
             raise forms.ValidationError(_('Please keep filesize under %s. Current filesize %s') % (filesizeformat(settings.MAX_UPLOAD_SIZE), filesizeformat(content.size)))
         try:
-            programmatic_inputs = json.loads(content.read())
-            if not isinstance(programmatic_inputs[0], list):
+            content = json.loads(content.read())
+            if not isinstance(content[0], list):
                 raise Exception("POST NOT OK: Incorrectly formatted custom inputs!")
         except Exception as e:
-            raise Exception(str(e))
+            raise Exception("Invalid JSON in input file!")
         return content
 
     def clean_meta_file(self):
@@ -90,6 +102,10 @@ class DefaultProblemUploadForm(forms.Form):
         content_type = content.content_type.split('/')[0]
         if content.size > settings.MAX_UPLOAD_SIZE_META:
             raise forms.ValidationError(_('Please keep filesize under %s. Current filesize %s') % (filesizeformat(settings.MAX_UPLOAD_SIZE), filesizeformat(content.size)))
+        try:
+            content = yaml.safe_load(content.read())
+        except Exception as e:
+            raise Exception("Invalid YAML in meta file!")
         return content
 
     author_id = forms.IntegerField(widget=forms.HiddenInput(), required=True)
@@ -100,4 +116,3 @@ class DefaultProblemUploadForm(forms.Form):
     category = forms.CharField(widget=forms.HiddenInput(), required=True)
     inputs = forms.FileField(required=True, widget=forms.ClearableFileInput(attrs={'style':'display:block;margin-top:20px;', 'class':'form-control-sm'}))
     data_file = forms.FileField(required=False, widget=forms.ClearableFileInput(attrs={'style':'display:block;margin-top:20px;', 'class':'form-control-sm'}))
-

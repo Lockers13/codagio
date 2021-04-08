@@ -35,13 +35,17 @@ class AnalysisView(APIView):
         
         Returns an HTTP response of some kind"""
 
-        processed_data = pm.retrieve_form_data(request, submission_type="solution")
-        uploaded_form = ca_forms.SolutionSubmissionForm(request.POST, request.FILES)
+        
+        uploaded_form = ca_forms.SolutionSubmissionForm(request.POST)
+
         try:
-            uploaded_form.is_valid()
+            if not uploaded_form.is_valid():
+                return Response(ERROR_CODES["Form Submission Error"], status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             print("POST NOT OK: {0}".format(str(e)))
             return Response(ERROR_CODES["Form Submission Error"], status=status.HTTP_400_BAD_REQUEST)
+        
+        processed_data = pm.retrieve_form_data(uploaded_form, submission_type="solution")
         ### if an error response was returned from processing function, then return it from this view
         if isinstance(processed_data, Response):
             return processed_data
@@ -143,22 +147,25 @@ class SaveProblemView(APIView):
         
         Returns an HTTP response of some kind"""
         ### get data, process it, and handle errors
-        processed_data = pm.retrieve_form_data(request, submission_type="problem_upload")
-        print(processed_data)
-        ### if an error response was returned from processing function, then return it from this view
-        if isinstance(processed_data, Response):
-            return processed_data
-        
-        if processed_data["category"] == "file_io":
+        # processed_data = pm.retrieve_form_data(request, submission_type="problem_upload")
+
+        if request.data["category"] == "file_io":
             uploaded_form = ca_forms.IOProblemUploadForm(request.POST, request.FILES)
-        elif processed_data["category"] == "default":
+        elif request.data["category"] == "default":
             uploaded_form = ca_forms.DefaultProblemUploadForm(request.POST, request.FILES)
-        
+
         try:
-            uploaded_form.is_valid()
+            if not uploaded_form.is_valid():
+                return Response(ERROR_CODES["Form Submission Error"], status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             print("POST NOT OK: {0}".format(str(e)))
             return Response(ERROR_CODES["Form Submission Error"], status=status.HTTP_400_BAD_REQUEST)
+
+        processed_data = pm.retrieve_form_data(uploaded_form, submission_type="problem_upload")
+        
+        ### if an error response was returned from processing function, then return it from this view
+        if isinstance(processed_data, Response):
+            return processed_data
 
         if processed_data["metadata"]["main_function"] in ["main", "prep_input"]:
             return Response(ERROR_CODES["Constraint Violation"], status=status.HTTP_400_BAD_REQUEST)
@@ -186,12 +193,6 @@ class SaveProblemView(APIView):
 
         code_data = processed_data["code"]
 
-        if processed_data["data_file"] is not None:
-            processed_data["data_file"].seek(0)
-            processed_data["init_data"] = processed_data["data_file"].read().decode("utf-8")
-        else:
-            processed_data["init_data"] = None
-
         make_utils.make_file(filename, code_data, processed_data)
 
         ### Depending on the type of uploaded problem, the processes for making an executable script, generating inputs, and generating outputs, will be different
@@ -204,8 +205,7 @@ class SaveProblemView(APIView):
         elif processed_data["category"] == "default":
             input_hash = {"default": {}}
             try:
-                processed_data["inputs"].seek(0)
-                problem_inputs = json.loads(processed_data["inputs"].read().decode("utf-8"))  
+                problem_inputs = processed_data["inputs"] 
             except Exception as e:
                 print("Invalid upload: {0}".format(str(e)))
                 return Response(ERROR_CODES["Form Submission Error"], status=status.HTTP_400_BAD_REQUEST)

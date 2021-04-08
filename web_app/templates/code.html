@@ -30,7 +30,8 @@
                 <br>
                 <div class="form-row">
                     <div class="form-group col-md-6 mb-0 col-lg-12">
-                        <input name="solution" id="solution_text" type="hidden"> {{ form.problem_id }}
+                        <input name="solution" id="solution_text" type="hidden">
+                        <input type="hidden"> {{ form.user_id }} {{ form.problem_id }}
                     </div>
                     <input type="hidden" name="sub_type" value="solution">
                 </div>
