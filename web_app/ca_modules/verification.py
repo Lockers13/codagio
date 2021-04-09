@@ -64,7 +64,10 @@ class Verifier:
                     except Exception as e:
                         raise Exception("hhh{0}".format(str(e)))           
                 ### clean up the returned output of subprocess - '\r' for windows, and 'None' because sometimes python sp.Popen adds this at the end (probably return value)
-                cleaned_split_output = output.decode("utf-8").replace('\r', '').replace('None', '').splitlines()
+                cleaned_split_output = output.decode("utf-8").replace('\r', '').splitlines()
+                if cleaned_split_output[-1] == "None":
+                    cleaned_split_output = cleaned_split_output[:-1]
+                print("CSO =>", cleaned_split_output)
                 sub_outputs.append(cleaned_split_output)
                 ### remove throwaway files after uploaded script has been run on them => if they exist!
                 os.remove(target_file)
@@ -75,14 +78,17 @@ class Verifier:
                     try:
                         output = run_subprocess_ctrld(base_cmd, self.__filename, json.dumps(self.__sample_inputs[i]), init_data=self.__init_data)
                     except Exception as e:
-                        raise Exception("hhh{0}".format(str(e)))
+                        raise Exception("{0}".format(str(e)))
                 else:
                     try:
                         output = run_subprocess_ctrld(base_cmd, self.__filename, json.dumps(self.__sample_inputs[i]))
                     except Exception as e:
-                        raise Exception("hhh{0}".format(str(e)))                   
+                        raise Exception("{0}".format(str(e)))                   
                 ### clean up the returned output of subprocess - '\r' for windows, and 'None' because sometimes python sp.Popen adds this at the end (probably return value)
-                cleaned_split_output = output.decode("utf-8").replace('\r', '').replace('None', '').splitlines()
+                cleaned_split_output = output.decode("utf-8").replace('\r', '').splitlines()
+                if cleaned_split_output[-1] == "None":
+                    cleaned_split_output = cleaned_split_output[:-1]
+                print("CSO =>", cleaned_split_output)
                 sub_outputs.append(cleaned_split_output)
                 ### remove throwaway files after uploaded script has been run on them => if they exist!
             return sub_outputs

@@ -205,14 +205,14 @@ function display_lp_graph(fdef) {
             yAxes: [{
                 scaleLabel: {
                     display: true,
-                    labelString: 'Line No.'
+                    labelString: 'Line No.',
                 },
                 ticks: {
                     max : line_nos[line_nos.length - 1],
                     min : line_nos[0],
-                    fixedStepSize: 0.1
                 },
-                stacked: true
+                stacked: true,
+                barPercentage: 0.4,
             }]
         }
     };
@@ -231,10 +231,11 @@ function display_lp_graph(fdef) {
 
 function write_overview_stats(section, analysis, content_str, success=false) {
     section.innerHTML = ""
+    var ufunc_tot = Math.round(parseFloat(analysis["udef_func_time_tot"]) * 10000) / 10000
+    var ref_func_tot = Math.round(parseFloat(analysis["ref_time"]) * 10000) / 10000
     if(success) {
-        
-        content_str += "<br><p>Total Time spent executing your functions: " + analysis["udef_func_time_tot"] + "</p>"
-        content_str += "<p>Total Time spent executing functions of reference program: " + analysis["ref_time"] + "</p><br>"
+        content_str += "<br><p>Total Time spent executing your functions: " + ufunc_tot + "</p>"
+        content_str += "<p>Total Time spent executing functions of reference program: " + ref_func_tot + "</p><br>"
         content_str += "<ul>"
         var fdefs = analysis["fdefs"]
         for(fdef in fdefs) {
