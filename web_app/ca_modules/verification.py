@@ -67,7 +67,8 @@ class Verifier:
                 cleaned_split_output = output.decode("utf-8").replace('\r', '').splitlines()
                 if cleaned_split_output[-1] == "None":
                     cleaned_split_output = cleaned_split_output[:-1]
-                print("CSO =>", cleaned_split_output)
+                ### uncomment below line for debugging
+                # print("CSO =>", cleaned_split_output)
                 sub_outputs.append(cleaned_split_output)
                 ### remove throwaway files after uploaded script has been run on them => if they exist!
                 os.remove(target_file)
@@ -88,7 +89,8 @@ class Verifier:
                 cleaned_split_output = output.decode("utf-8").replace('\r', '').splitlines()
                 if cleaned_split_output[-1] == "None":
                     cleaned_split_output = cleaned_split_output[:-1]
-                print("CSO =>", cleaned_split_output)
+                ### uncomment below line for debugging
+                # print("CSO =>", cleaned_split_output)
                 sub_outputs.append(cleaned_split_output)
                 ### remove throwaway files after uploaded script has been run on them => if they exist!
             return sub_outputs
@@ -113,24 +115,30 @@ class Verifier:
     def verify_output(self):
         """Public method for verifying matches between submitted program's output, and sample outputs.
 
-        Returns score as percentage (string) of exact matches (this point may need reviewing)."""
-
-        def get_failure_stats():
-            failure_dict = {}
+        Returns score as percentage (string) of exact matches (this point may need reviewing)."""\
+        
+        def get_result_stats():
+            num_outputs = len(sub_output)
+            result_dict = {}
             mismatches = []
+            correct = 0
             for line_count, (line_sub, line_samp) in enumerate(zip(sub_output, samp_output)):
                 if line_sub != line_samp:
                     mismatches.append((line_sub, line_samp))
+                else:
+                    correct += 1
+            result_dict["num_correct"] = correct
+            result_dict["success_rate"] = round(correct/num_outputs, 4) * 100
             num_failures = len(mismatches)
-            failure_dict["num_failures"] = num_failures
-            failure_dict["num_tests"] = test_stats[1][count]
+            result_dict["num_failures"] = num_failures
+            result_dict["num_tests"] = test_stats[1][count]
             try:
-                failure_dict["failure_rate"] = "{0}%".format(round((int(num_failures)/int(test_stats[1][count])) * 100, 2))
+                result_dict["failure_rate"] = "{0}%".format(round((int(num_failures)/int(test_stats[1][count])) * 100, 2))
             except Exception as e:
-                failure_dict["failure_rate"] = "File IO"
+                result_dict["failure_rate"] = "File IO"
             num_samples = 5 if num_failures > 5 else num_failures
-            failure_dict["mismatches"] = random.sample(mismatches, num_samples)
-            return failure_dict
+            result_dict["mismatches"] = random.sample(mismatches, num_samples)
+            return result_dict
 
         sample_outputs = self.__sample_outputs
         sub_outputs = self.__gen_sub_outputs()
@@ -142,19 +150,16 @@ class Verifier:
         overall_score = 0
         ### loop to compare sub output with sample output in one go, as if they were two columns, one beside the other
         for count, (sub_output, samp_output) in enumerate(zip(sub_outputs, sample_outputs)):
-            if sub_output == samp_output:
-                status = "success"
-                overall_score += 1
-            else:
-                failure_dict = get_failure_stats()
-                status = "failure"
+            result_dict = get_result_stats()
+            status = "success" if result_dict["success_rate"] == 100 else "failure"
+            abs_score = 1 if sub_output == samp_output else 0
+            overall_score += abs_score
             scores["test_{0}".format(count+1)] = {}
             test = scores["test_{0}".format(count+1)]
             test["status"] = status
             test["input_length"] = test_stats[1][count]
             test["input_type"] = test_stats[2][count]
-            if status == "failure":
-                test["failure_stats"] = failure_dict
+            test["detailed_stats"] = result_dict
 
         ### store score as string
         percentage_score = round(overall_score/len(sample_outputs), 4) * 100

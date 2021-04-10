@@ -95,7 +95,7 @@ $("#sub_form").submit(function (e) {
             let scores = analysis["scores"]
             let fdefs = analysis["fdefs"]
             let skel_str = lprof_str = overview_str = ""
-            let result = scores["overall_score"]
+            let result = parseFloat(scores["overall_score"].split("%")[0])
             let samp_skels = analysis["samp_skels"]
             //Get sections
             let overview_section = document.getElementById("overview_stats")
@@ -108,22 +108,23 @@ $("#sub_form").submit(function (e) {
             overall.innerHTML = '<h1>Total Score: ' + result + '</h1>';
             collapse_section.style.display = 'block';
 
-            if (result == "100.0%") {
+            if (result == 100.0) {
                 overall.style.color = "#06D6A0"
                 overall.innerHTML = "<br>Congratulations, your code passed all our tests!...<br>Now check out some of your feedback below:"
                 write_skeleton(pseudo_section, samp_skels, skel_str)
-                write_overview_stats(overview_section, analysis, overview_str, success=true)
+                write_overview_stats(overview_section, analysis, overview_str, abs_success=true)
+                bind_detail_links(scores)
                 write_lprof(profiling_section, fdefs, lprof_str)
                 bind_lprof_btns(fdefs)   
             }
             else {
-                overall.style.color = "#FF3E6C"
-                overall.innerHTML = "<br>Oops, looks like your code doesn't produce the correct outputs...<br><br>Please Try again! But first, why not check out some feedback below?"
+                overall.style.color = "orange"
+                overall.innerHTML = "<br>Oops, looks like your code doesn't produce all the correct outputs...<br><br>Please try again! But first, why not check out some feedback below?"
                 if(window.chart != undefined)
                     window.chart.destroy()
-                profiling_section.innerHTML = "<br>Sorry, you must pass all tests to qualify for line profiling!"
-                write_overview_stats(overview_section, analysis, overview_str, success=false)
-                bind_fail_links(scores)
+                profiling_section.innerHTML = "<br>Sorry, you must pass all tests with flying colors to qualify for line profiling!"
+                write_overview_stats(overview_section, analysis, overview_str)
+                bind_detail_links(scores)
                 write_skeleton(pseudo_section, samp_skels, skel_str)
             }
         })
@@ -229,11 +230,11 @@ function display_lp_graph(fdef) {
     window.chart = new Chart(ctx, content);
 }
 
-function write_overview_stats(section, analysis, content_str, success=false) {
+function write_overview_stats(section, analysis, content_str, abs_success=false) {
     section.innerHTML = ""
     var ufunc_tot = Math.round(parseFloat(analysis["udef_func_time_tot"]) * 10000) / 10000
     var ref_func_tot = Math.round(parseFloat(analysis["ref_time"]) * 10000) / 10000
-    if(success) {
+    if(abs_success) {
         content_str += "<br><p>Total Time spent executing your functions: " + ufunc_tot + "</p>"
         content_str += "<p>Total Time spent executing functions of reference program: " + ref_func_tot + "</p><br>"
         content_str += "<ul>"
@@ -242,33 +243,30 @@ function write_overview_stats(section, analysis, content_str, success=false) {
             content_str += "<li>Function Name: " + fdefs[fdef]["name"] + "<br>" +
                             "Cumulative Time spent in function: " + fdefs[fdef]["cum_time"] + "</li><br>"
         }
-        content_str += "</ul>"
-        section.innerHTML += content_str
+        content_str += "</ul><br>"
     }
-    else {
-        content_str += "<p style='text-align:left;margin:20px 0px 20px 0px;' class='lead'>Let's see where you went right and where you went wrong </p>" +
-        "<table style='align:left;max-width:80%;margin-left:auto;margin-right:auto;' class='table'>" +
-        "<thead><tr><th style='color:white' class='topline scope='col'>Test #</th><th style='color:white' class='topline' scope='col'>Status</th><th style='color:white' class='topline' scope='col'>Input Length</th><th style='color:white' class='topline' scope='col'>Input Type</th><th style='color:white' class='topline' scope='col'>Failure Stats</th></tr></thead><tbody>"
-        let count = 1
-        let scores = analysis["scores"]
-        for (test_key in scores) {
-            if (test_key == "overall_score")
-                continue
-            content_str += "<tr><th scope='row' style='color:white'>" + count++ + "</th>" +
-                "<td style='color:white'>" + scores[test_key]["status"] + "</td>" +
-                "<td style='color:white'>" + scores[test_key]["input_length"] + "</td>" +
-                "<td style='color:white'>" + scores[test_key]["input_type"] + "</td>"
-            if (scores[test_key]["failure_stats"] != undefined) {
-                content_str += "<td style='color:red'><a class='link-danger' style='color:red;cursor:pointer;' name='fail_link' id='" + test_key + "' data-toggle='modal' data-target='#exampleModalCenter'>See More</a></td>"
-            }
-            else {
-                content_str += "<td style='color:white'> None </td>"
-            }
-            content_str += "</tr>"
+    content_str += "<p style='text-align:left;margin:20px 0px 20px 0px;' class='lead'>Let's see where you went right and where you went wrong </p>" +
+    "<table style='align:left;max-width:80%;margin-left:auto;margin-right:auto;' class='table'>" +
+    "<thead><tr><th style='color:white' class='topline scope='col'>Test #</th><th style='color:white' class='topline' scope='col'>Status</th><th style='color:white' class='topline' scope='col'>Input Length</th><th style='color:white' class='topline' scope='col'>Input Type</th><th style='color:white' class='topline' scope='col'>Detailed Stats</th></tr></thead><tbody>"
+    let count = 1
+    let scores = analysis["scores"]
+    for (test_key in scores) {
+        if (test_key == "overall_score")
+            continue
+        content_str += "<tr><th scope='row' style='color:white'>" + count++ + "</th>" +
+            "<td style='color:white'>" + scores[test_key]["status"] + "</td>" +
+            "<td style='color:white'>" + scores[test_key]["input_length"] + "</td>" +
+            "<td style='color:white'>" + scores[test_key]["input_type"] + "</td>"
+        if (parseFloat(scores[test_key]["detailed_stats"]["success_rate"]) != 100.0) {
+            content_str += "<td style='color:red'><a class='link-danger' style='color:red;cursor:pointer;' name='detail_link' id='" + test_key + "' data-toggle='modal' data-target='#exampleModalCenter'>Failed - <br>(See More)</a></td>"
         }
-        content_str += "</tbody></table></p>"
-        section.innerHTML += content_str
+        else {
+            content_str += "<td style='color:green;'>Passed - <br>(100%)</td>"
+        }
+        content_str += "</tr>"
     }
+    content_str += "</tbody></table></p>"
+    section.innerHTML += content_str
 }
 
 function bind_lprof_btns(fdefs) {
@@ -279,31 +277,28 @@ function bind_lprof_btns(fdefs) {
     }
 }
 
-function bind_fail_links(scores) {
-    var fail_links = document.getElementsByName("fail_link")
-    for(var i = 0; i < fail_links.length; i++) {
-        var test_key = fail_links[i].id
+function bind_detail_links(scores) {
+    var detail_links = document.getElementsByName("detail_link")
+    for(var i = 0; i < detail_links.length; i++) {
+        var test_key = detail_links[i].id
         var evt = undefined
-        fail_links[i].addEventListener('click', write_fail_stats.bind(evt, scores, test_key))
+        detail_links[i].addEventListener('click', write_detailed_stats.bind(evt, scores, test_key))
     }
 }
 
-function write_fail_stats(scores, test_key) {
+function write_detailed_stats(scores, test_key) {
     var modal_body = document.getElementById("modal_body")
     modal_body.innerHTML = "<ul>"
-    for(fail_stat in scores[test_key]["failure_stats"]) {
-        if(fail_stat == "mismatches") {
-            modal_body.innerHTML += "<br><u>Some Sample Outputs:<u><ul>"
-            for(var mm_index = 0; mm_index < scores[test_key]["failure_stats"][fail_stat].length; mm_index++) {
-                modal_body.innerHTML += "<li  style='padding-left:3em'>Your Output: " + scores[test_key]["failure_stats"][fail_stat][mm_index][0] + " - VS - Expected: " + scores[test_key]["failure_stats"][fail_stat][mm_index][1] + "</li>"
-            }
-            modal_body.innerHTML += "</ul>"
-        }
-        else {
-            modal_body.innerHTML += "<li>" + fail_stat.charAt(0).toUpperCase() + fail_stat.slice(1) + ": " +  scores[test_key]["failure_stats"][fail_stat] + "</li>"
-        }
+    var detailed_stats = scores[test_key]["detailed_stats"]
+    modal_body.innerHTML += "<li>Number of Tests: " + detailed_stats["num_tests"] + "</li><br>" +
+                        "<li>Number of Correct Outputs: " + detailed_stats["num_correct"] + "</li>" + 
+                        "<li>Success Rate: " + detailed_stats["success_rate"] + "</li><br>" + 
+                        "<li>Number of Incorrect Outputs: " + detailed_stats["num_failures"] + "</li>" + 
+                        "<li>Failure Rate: " + detailed_stats["failure_rate"] + "</li></ul>" + 
+                        "<br><u>Take a look at some of your incorrect outputs:<u><ul>"
+    for(var mm_index = 0; mm_index < detailed_stats["mismatches"].length; mm_index++) {
+        modal_body.innerHTML += "<li  style='padding-left:3em'>Your Output: " + detailed_stats["mismatches"][mm_index][0] + " - VS - Expected Output: " + detailed_stats["mismatches"][mm_index][1] + "</li>"
     }
-    modal_body.innerHTML += "</ul>"
 }
 
 function write_skeleton(collapsible, skels, skel_str) {

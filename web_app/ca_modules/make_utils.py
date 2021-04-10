@@ -78,7 +78,8 @@ def gen_sample_outputs(filename, inputs, init_data=None, input_type="default"):
             cleaned_split_output = output.decode("utf-8").replace('\r', '').splitlines()
             if cleaned_split_output[-1] == "None":
                 cleaned_split_output = cleaned_split_output[:-1]
-            print("CSO =>", cleaned_split_output)
+            ### uncomment below line for debugging
+            # print("CSO =>", cleaned_split_output)
             outputs.append(cleaned_split_output)
         return outputs
     elif input_type == "file":
@@ -90,7 +91,8 @@ def gen_sample_outputs(filename, inputs, init_data=None, input_type="default"):
             cleaned_split_output = output.decode("utf-8").replace('\r', '').splitlines()
             if cleaned_split_output[-1] == "None":
                 cleaned_split_output = cleaned_split_output[:-1]
-            print("CSO =>", cleaned_split_output)
+            ### uncomment below line for debugging
+            # print("CSO =>", cleaned_split_output)
             outputs.append(cleaned_split_output)
             try:
                 os.remove(script)
