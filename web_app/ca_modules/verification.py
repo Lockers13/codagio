@@ -121,23 +121,29 @@ class Verifier:
             num_outputs = len(sub_output)
             result_dict = {}
             mismatches = []
-            correct = 0
+            matches = []
             for line_count, (line_sub, line_samp) in enumerate(zip(sub_output, samp_output)):
                 if line_sub != line_samp:
                     mismatches.append((line_sub, line_samp))
                 else:
-                    correct += 1
-            result_dict["num_correct"] = correct
-            result_dict["success_rate"] = round(correct/num_outputs, 4) * 100
+                    matches.append(line_sub)
+            num_correct = len(matches)
+            result_dict["num_correct"] = num_correct
+            try:
+                result_dict["success_rate"] = round(num_correct/num_outputs, 4) * 100
+            except Exception as e:
+                result_dict["success_rate"] = "File IO"
             num_failures = len(mismatches)
             result_dict["num_failures"] = num_failures
             result_dict["num_tests"] = test_stats[1][count]
             try:
-                result_dict["failure_rate"] = "{0}%".format(round((int(num_failures)/int(test_stats[1][count])) * 100, 2))
+                result_dict["failure_rate"] = round((int(num_failures)/num_outputs), 4) * 100
             except Exception as e:
                 result_dict["failure_rate"] = "File IO"
-            num_samples = 5 if num_failures > 5 else num_failures
-            result_dict["mismatches"] = random.sample(mismatches, num_samples)
+            num_fail_samples = 5 if num_failures > 3 else num_failures
+            num_correct_samples = 5 if num_correct > 3 else num_correct
+            result_dict["mismatches"] = random.sample(mismatches, num_fail_samples)
+            result_dict["matches"] = random.sample(matches, num_correct_samples)
             return result_dict
 
         sample_outputs = self.__sample_outputs
@@ -152,14 +158,13 @@ class Verifier:
         for count, (sub_output, samp_output) in enumerate(zip(sub_outputs, sample_outputs)):
             result_dict = get_result_stats()
             status = "success" if result_dict["success_rate"] == 100 else "failure"
-            abs_score = 1 if sub_output == samp_output else 0
-            overall_score += abs_score
             scores["test_{0}".format(count+1)] = {}
             test = scores["test_{0}".format(count+1)]
             test["status"] = status
             test["input_length"] = test_stats[1][count]
             test["input_type"] = test_stats[2][count]
             test["detailed_stats"] = result_dict
+            overall_score += result_dict["success_rate"] / 100
 
         ### store score as string
         percentage_score = round(overall_score/len(sample_outputs), 4) * 100

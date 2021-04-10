@@ -12,3 +12,4 @@ input_length: 1000
 num_tests: 3
 category: mathematics
 main_function: "is_prime"
+pass_threshold: 100

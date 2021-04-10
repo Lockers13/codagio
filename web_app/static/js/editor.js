@@ -95,7 +95,7 @@ $("#sub_form").submit(function (e) {
             let scores = analysis["scores"]
             let fdefs = analysis["fdefs"]
             let skel_str = lprof_str = overview_str = ""
-            let result = parseFloat(scores["overall_score"].split("%")[0])
+            let result = Math.round(parseFloat(scores["overall_score"].split("%")[0]) * 100) / 100
             let samp_skels = analysis["samp_skels"]
             //Get sections
             let overview_section = document.getElementById("overview_stats")
@@ -108,9 +108,10 @@ $("#sub_form").submit(function (e) {
             overall.innerHTML = '<h1>Total Score: ' + result + '</h1>';
             collapse_section.style.display = 'block';
 
-            if (result == 100.0) {
+            if (result >= parseFloat(analysis["pass_threshold"])) {
                 overall.style.color = "#06D6A0"
-                overall.innerHTML = "<br>Congratulations, your code passed all our tests!...<br>Now check out some of your feedback below:"
+                overall.innerHTML = "<h3>You Scored: " + result + "%</h3>"
+                overall.innerHTML += "<br>Congratulations, your code passed the threshold score..!<br>Now check out some of your feedback below:"
                 write_skeleton(pseudo_section, samp_skels, skel_str)
                 write_overview_stats(overview_section, analysis, overview_str, abs_success=true)
                 bind_detail_links(scores)
@@ -119,10 +120,11 @@ $("#sub_form").submit(function (e) {
             }
             else {
                 overall.style.color = "orange"
-                overall.innerHTML = "<br>Oops, looks like your code doesn't produce all the correct outputs...<br><br>Please try again! But first, why not check out some feedback below?"
+                overall.innerHTML = "<h3>You Scored: " + result + "%</h3>"
+                overall.innerHTML += "<br>Oops, looks like your code doesn't pass our threshold of excellence...<br><br>Please try again! But first, why not check out some feedback below?"
                 if(window.chart != undefined)
                     window.chart.destroy()
-                profiling_section.innerHTML = "<br>Sorry, you must pass all tests with flying colors to qualify for line profiling!"
+                profiling_section.innerHTML = "<br>Sorry, you must pass the predetermined threshold of " + parseFloat(analysis["pass_threshold"]) + "% to qualify for line profiling!"
                 write_overview_stats(overview_section, analysis, overview_str)
                 bind_detail_links(scores)
                 write_skeleton(pseudo_section, samp_skels, skel_str)
@@ -245,7 +247,7 @@ function write_overview_stats(section, analysis, content_str, abs_success=false)
         }
         content_str += "</ul><br>"
     }
-    content_str += "<p style='text-align:left;margin:20px 0px 20px 0px;' class='lead'>Let's see where you went right and where you went wrong </p>" +
+    content_str += "<p style='text-align:left;margin:20px 0px 20px 0px;' class='lead'>Let's see how you fared in more detail...</p>" +
     "<table style='align:left;max-width:80%;margin-left:auto;margin-right:auto;' class='table'>" +
     "<thead><tr><th style='color:white' class='topline scope='col'>Test #</th><th style='color:white' class='topline' scope='col'>Status</th><th style='color:white' class='topline' scope='col'>Input Length</th><th style='color:white' class='topline' scope='col'>Input Type</th><th style='color:white' class='topline' scope='col'>Detailed Stats</th></tr></thead><tbody>"
     let count = 1
@@ -295,10 +297,16 @@ function write_detailed_stats(scores, test_key) {
                         "<li>Success Rate: " + detailed_stats["success_rate"] + "</li><br>" + 
                         "<li>Number of Incorrect Outputs: " + detailed_stats["num_failures"] + "</li>" + 
                         "<li>Failure Rate: " + detailed_stats["failure_rate"] + "</li></ul>" + 
-                        "<br><u>Take a look at some of your incorrect outputs:<u><ul>"
-    for(var mm_index = 0; mm_index < detailed_stats["mismatches"].length; mm_index++) {
-        modal_body.innerHTML += "<li  style='padding-left:3em'>Your Output: " + detailed_stats["mismatches"][mm_index][0] + " - VS - Expected Output: " + detailed_stats["mismatches"][mm_index][1] + "</li>"
+                        "<br><u>A sample of your correct outputs:<u><ul>"
+
+    for(var m_index = 0; m_index < detailed_stats["matches"].length; m_index++) {
+        modal_body.innerHTML += "<li  style='color:green;padding-left:3em'>Your Output: " + detailed_stats["matches"][m_index] + "</li>"
     }
+    modal_body.innerHTML += "</ul><br><u>A sample of your incorrect outputs:<u><ul>"
+    for(var mm_index = 0; mm_index < detailed_stats["mismatches"].length; mm_index++) {
+        modal_body.innerHTML += "<li  style='color:red;padding-left:3em'>Your Output: " + detailed_stats["mismatches"][mm_index][0] + " - VS - Expected Output: " + detailed_stats["mismatches"][mm_index][1] + "</li>"
+    }
+    modal_body.innerHTML += "</ul"
 }
 
 function write_skeleton(collapsible, skels, skel_str) {

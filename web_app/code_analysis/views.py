@@ -103,9 +103,9 @@ class AnalysisView(APIView):
                 return Response(ERROR_CODES["Server-Side Error"], status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         ### check if all tests were passed, and only profile submission if so (both lprof and cprof)
-        hundred_pc = float(percentage_score) == 100.0
+        passed = float(percentage_score) >= float(problem_data["metadata"]["pass_threshold"])
 
-        if hundred_pc:
+        if passed:
             try:
                 # default kwarg is init_data=None
                 analyzer.profile(problem_data["inputs"], init_data=problem_data["init_data"])            
@@ -117,10 +117,11 @@ class AnalysisView(APIView):
 
         analysis = analyzer.get_prog_dict()
         analysis["ref_time"] = problem.analysis["udef_func_time_tot"]
+        analysis["pass_threshold"] = problem_data["metadata"]["pass_threshold"]
         ### write comparison stats (with reference problem) to analysis dict
         comparison.write_comp(analysis, problem_data["analysis"])         
         ### only save submitted solution to db if all tests were passed, and hence submission was profiled, etc.
-        if hundred_pc:
+        if passed:
             solution, created = Solution.objects.update_or_create(
                 submitter_id=processed_data["uid"],
                 problem_id=processed_data["prob_id"],
