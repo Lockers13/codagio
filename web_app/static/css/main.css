@@ -394,3 +394,25 @@ footer{
 p field_desc {
     color:white;
 }
+
+.profile_container {
+    margin-top:50px;
+    width: 100%;
+  }
+  
+.profile_left {
+    float: left;
+    width: 50%;
+    /* border: 1px solid red; */
+    box-sizing: border-box;
+    text-align:center;
+  }
+
+.profile_right {
+    float: left;
+    width: 50%;
+    /* border: 1px solid red; */
+    box-sizing: border-box;
+    text-align:center;
+  }
+  
