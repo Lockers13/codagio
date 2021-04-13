@@ -1,49 +1,36 @@
-{% extends "base.html" %} 
+{% extends "base.html" %}
 {% load static %}
 {% block content %}
-    
+
 <div class="profile_container">
     <div class="profile_left">
-              <img class="rounded-circle" style="background-color:white;" src="{% static 'images/generic_user.png' %}"  alt="Generic user image" width="140" height="140">
-              <br><br>
-              <h2>USERNAME</h2><br>
-              <p style="color:white;">Duis mollis, est non commodo luctus, nisi erat porttitor ligula, eget lacinia odio sem nec elit. Cras mattis consectetur purus sit amet fermentum. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh.</p>
-              <div>
-                <button id="toggle" value=0 class="text-center">View Your Uploaded Problems</button>
-            </div>
-            </a>
+        <img class="rounded-circle" style="background-color:white;" src="{% static 'images/generic_user.png' %}"
+            alt="Generic user image" width="140" height="140">
+        <br><br>
+        <h2>USERNAME</h2><br>
+        <p style="color:white;">Duis mollis, est non commodo luctus, nisi erat porttitor ligula, eget lacinia odio sem
+            nec elit. Cras mattis consectetur purus sit amet fermentum. Fusce dapibus, tellus ac cursus commodo, tortor
+            mauris condimentum nibh.</p>
+        <div>
+            <button id="toggle" value=0 class="text-center">View Your Uploaded Problems</button>
+        </div>
+        </a>
     </div>
 
     <div class="profile_right" id="prof_right">
-        
-        <div id="solutions_saved">
-        <h1><u>Your Saved Solutions</u></h1>
-
-        {% for solution in solutions_saved %}
-        <button type="button" class="collapsible" style="width:80%"><u>{{ solution.problem__name }}</u></button>
-        <div class="content">
-            <p class="problem_desc">Your Score: {{ solution.analysis__scores__overall_score }}</p>
-            <a href="#">
-                <div class="text-center">
-                    <button type="button" class="text-center go_btn">
-                        View More Detailed Analysis
-                    </button>
-                </div>
-            </a>
-            <p class="problem_author"> Problem created by {{ solution.problem__author__user__username }} on {{ solution.problem__date_submitted }}</p>
+        <div id="stats_view">
+            
         </div>
+            
 
-        {% endfor %} 
-        </div>
-        
- 
+
 
     </div>
 
 
 </div>
 
-<div id="prof_right_hidden">
+<!-- <div id="prof_right_hidden">
     <div id="problems_uploaded" style="visibility:hidden;">
         <h1><u>Your Uploaded Problems</u></h1>
 
@@ -64,11 +51,12 @@
             <p class="problem_author"> Problem created by {{ solution.problem__author__user__username }} on {{ solution.problem__date_submitted }}</p>
         </div>
         {% endfor %} 
-    </div>
-</div>
+    </div>  -->
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
 <script type="text/javascript" src="{% static 'js/collapse.js' %}"></script>
 <script type="text/javascript" src="{% static 'js/profile.js' %}"></script>
 
 
 {% endblock %}
-
