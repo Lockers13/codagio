@@ -7,56 +7,31 @@
         <img class="rounded-circle" style="background-color:white;" src="{% static 'images/generic_user.png' %}"
             alt="Generic user image" width="140" height="140">
         <br><br>
-        <h2>USERNAME</h2><br>
-        <p style="color:white;">Duis mollis, est non commodo luctus, nisi erat porttitor ligula, eget lacinia odio sem
-            nec elit. Cras mattis consectetur purus sit amet fermentum. Fusce dapibus, tellus ac cursus commodo, tortor
-            mauris condimentum nibh.</p>
+        {% if profile.user__is_active %}
+        <h2 style="color:#06D6A0;">{{ profile.user__username }}</h2><br>
+        {% else %}
+        <h2 style="color:silver">{{ profile.user__username }}</h2><br>
+        {% endif %}
+        <p style="color:white;">Contact me: {{ profile.user__email }}</p>
+        <p style="color:white;">Level: {{ profile.level }}</p>
+        <p style="color:white;">About me: {{ profile.about }}</p>
+        <br><br><br>
         <div>
-            <button id="toggle" value=0 class="text-center">View Your Uploaded Problems</button>
+            <button id="toggle" value=0 class="btn text-center btn-dark">View Your Uploaded Problems</button>
         </div>
-        </a>
     </div>
 
     <div class="profile_right" id="prof_right">
         <div id="stats_view">
-            
+
         </div>
-            
-
-
 
     </div>
 
 
 </div>
 
-<!-- <div id="prof_right_hidden">
-    <div id="problems_uploaded" style="visibility:hidden;">
-        <h1><u>Your Uploaded Problems</u></h1>
-
-        {% for problem in problems_uploaded %}
-        <button type="button" class="collapsible"><u>{{ problem.name }}</u></button>
-        <div class="content">
-            <p class="problem_desc">Category: {{ problem.metadata__category }}</p>
-            <p class="problem_desc">Difficulty: {{ problem.metadata__difficulty }}</p>
-            <p class="problem_desc">Pass Threshold: {{ problem.metadata__pass_threshold }}</p>
-            <p style="white-space: pre-wrap;" class="problem_desc">{{ problem.metadata__description }}</p>
-            <a href="#">
-                <div class="text-center">
-                    <button type="button" class="text-center go_btn">
-                        Modify Problem
-                    </button>
-                </div>
-            </a>
-            <p class="problem_author"> Problem created by {{ solution.problem__author__user__username }} on {{ solution.problem__date_submitted }}</p>
-        </div>
-        {% endfor %} 
-    </div>  -->
-
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-
 <script type="text/javascript" src="{% static 'js/collapse.js' %}"></script>
 <script type="text/javascript" src="{% static 'js/profile.js' %}"></script>
-
 
 {% endblock %}
