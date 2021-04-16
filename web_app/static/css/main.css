@@ -395,12 +395,12 @@ p field_desc {
     color:white;
 }
 
-.profile_container {
+.view_container {
     margin-top:50px;
     width: 100%;
   }
-  
-.profile_left {
+ 
+.view_left {
     float: left;
     width: 50%;
     /* border: 1px solid red; */
@@ -408,11 +408,23 @@ p field_desc {
     text-align:center;
   }
 
-.profile_right {
+.view_right {
     float: left;
     width: 50%;
     /* border: 1px solid red; */
     box-sizing: border-box;
     text-align:center;
   }
-  
+
+.individual_overview {
+    margin-left:10%;
+}
+
+.central_header {
+    text-align:center;
+    color:var(--green);
+    margin: 30 0 50 0;
+    text-decoration: underline;
+    text-decoration-color: var(--green);
+    padding-bottom:2px;
+}

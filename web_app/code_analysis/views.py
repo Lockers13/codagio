@@ -33,7 +33,8 @@ class AnalysisView(APIView):
     def get(self, request, soln_id):
 
         solutions = list(Solution.objects.filter(id=soln_id).all().values(
-            'analysis'
+            'analysis',
+            'problem__name'
         ))
         return Response(solutions[0], status=status.HTTP_200_OK)
 
@@ -125,6 +126,7 @@ class AnalysisView(APIView):
         analysis = analyzer.get_prog_dict()
         analysis["ref_time"] = problem.analysis["udef_func_time_tot"]
         analysis["pass_threshold"] = problem_data["metadata"]["pass_threshold"]
+        analysis["solution_text"] = code_data
         ### write comparison stats (with reference problem) to analysis dict
         comparison.write_comp(analysis, problem_data["analysis"])         
         ### only save submitted solution to db if all tests were passed, and hence submission was profiled, etc.

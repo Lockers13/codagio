@@ -2,9 +2,32 @@
 {% load static %}
 {% block content %}
 
+<div class="view_container">
+   <h2 id="container_header" class="central_header"></h2><hr>
+   <div class="view_left" style="text-align:left;" id="soln_left">
+      <div id="overview_stats" class="individual_overview">
+         <h4><u>Your Solution</u></h4><br>
+
+      </div>
+
+   </div>
 
 
+   <div class="view_right" id="soln_right">
+       <div id="detailed_stats">
+         <div height='400px' width='400px' style='width:80%;height:60vh;position:relative;'>
+            <canvas id='myChart' width='400' height='200'
+                style='position:absolute;top:0;bottom:0;right:0;left:0;margin:auto;'></canvas>
+        </div>
 
+       </div>
+
+   </div>
+
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.js"></script>
 <script>const soln_id = "{{ soln_id }}"</script>
 <script type="text/javascript" src="{% static 'js/soln_view.js' %}"></script>
 {% endblock %}
