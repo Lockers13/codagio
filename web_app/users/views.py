@@ -10,27 +10,39 @@ class ProfileStatsView(APIView):
 
     http_method_names = ['get', 'post']
 
-    def get(self, request):
-
+    def get(self, request, spec):
         uid = request.user.id
 
-        problem_stats = list(Problem.objects.filter(author_id=uid).all().values(
-            'metadata__difficulty',
-            'metadata__category',
-            'metadata__pass_threshold',
-            'name',
-            'date_submitted',
-            'metadata__description',
-        ))
+        try:
+            spec = int(spec)
+            if spec == 0:
+                problem_stats = list(Problem.objects.filter(author_id=uid).all().values(
+                    'metadata__difficulty',
+                    'metadata__category',
+                    'metadata__pass_threshold',
+                    'name',
+                    'date_submitted',
+                    'metadata__description',
+                    'id',
+                ))
 
-        solution_stats = list(Solution.objects.filter(submitter_id=uid).all().values(
-            'analysis__scores__overall_score',
-            'problem__name',
-            'problem__author__user__username',
-            'problem__date_submitted',
-        ))
+                solution_stats = list(Solution.objects.filter(submitter_id=uid).all().values(
+                    'analysis__scores__overall_score',
+                    'problem__name',
+                    'problem__author__user__username',
+                    'problem__date_submitted',
+                    'problem__id',
+                    'id',
+                ))
 
-        return Response([solution_stats, problem_stats], status=status.HTTP_200_OK)
+                return Response([solution_stats, problem_stats], status=status.HTTP_200_OK)
+            else:
+                return Response("Ill-configured GET request: {0}".format(str(e)), status=status.HTTP_400_BAD_REQUEST)
+                
+        except Exception as e:
+            return Response("Ill-configured GET request: {0}".format(str(e)), status=status.HTTP_400_BAD_REQUEST)
+
+
 
 
 def profile(request):

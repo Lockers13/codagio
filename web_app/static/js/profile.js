@@ -1,6 +1,9 @@
-fetch('http://localhost:8000/users/profile_stats/')
+const profstats_url = "http://localhost:8000/users/profile_stats/"
+
+fetch(profstats_url + "0") // 0 is flag for 'all' profile stats, as opposed to stats for individual problem solution
 .then(response => response.json())
 .then(function (data) {
+    const soln_base_url = 'http://localhost:8000/code/solution/'
 
     var toggle = document.getElementById("toggle")
 
@@ -10,7 +13,7 @@ fetch('http://localhost:8000/users/profile_stats/')
         var build_string = ""
         if(toggle.value == 0) {
             stats_list = data[0]
-            
+            console.log(stats_list)
             build_string += "<h1 id='stats_header'><u>Your Saved Solutions</u></h1><br>"
             if(stats_list.length == 0) {
                 build_string += "<p>Sorry, you have no saved solutions to show!</p>"
@@ -25,10 +28,11 @@ fetch('http://localhost:8000/users/profile_stats/')
                     build_string += "<div id='collapse" + i +"' class='collapse' aria-labelledby='heading" + i + "' data-parent='#accordion'>"
                     build_string += "<div class='card-body'>"
                     build_string += "<p>Your Score: " + stats_list[i]["analysis__scores__overall_score"] + "</p>" 
-                    build_string += "<a href='#'>"
                     build_string += "<div class='text-center'>"
-                    build_string += "<button type='button' class='text-center go_btn'>View More</button>"
-                    build_string += "</div></a><p class='problem_author'>Problem Created by " + stats_list[i]["problem__author__user__username"]
+                    build_string += "<a href='" + soln_base_url + "view/" + stats_list[i]["id"] + "'><button type='button' class='text-center go_btn'>View More</button></a></div>"
+                    build_string += "<div class='text-center' style='margin-top:10px;'>"
+                    build_string += "<a href='" + soln_base_url + stats_list[i]["problem__id"] + "'><button type='button' class='text-center go_btn' style='background-color:#1d2b5b'>Try Again</button></a>"
+                    build_string += "</div><p class='problem_author'>Problem Created by " + stats_list[i]["problem__author__user__username"]
                     build_string +=  " on " + stats_list[i]["problem__date_submitted"] + "</p></div>"
                     build_string += "</div></div></div></div>"
                 }
@@ -41,6 +45,7 @@ fetch('http://localhost:8000/users/profile_stats/')
         }
         else if(toggle.value == 1) {
             stats_list = data[1]
+            console.log(stats_list)
             build_string += "<h1 id='stats_header'><u>Your Uploaded Problems</u></h1><br>"
             if(stats_list.length == 0) {
                 build_string += "<p>Sorry, you have no uploaded problems to show!</p>"

@@ -28,7 +28,14 @@ class AnalysisView(APIView):
     """Class based view for handling the analysis of submitted solutions"""
 
     ### only 'post' requests to this API endpoint are allowed
-    http_method_names = ['post']
+    http_method_names = ['post', 'get']
+
+    def get(self, request, soln_id):
+
+        solutions = list(Solution.objects.filter(id=soln_id).all().values(
+            'analysis'
+        ))
+        return Response(solutions[0], status=status.HTTP_200_OK)
 
     def post(self, request):
         """Built-in django function to handle post requests to API endpoint
@@ -296,3 +303,7 @@ def problem_view(request, category):
     ### turn inner json dict into python dict before passing to template
     context = {'title': 'CGC: Code For Code\'s Sake', 'problems': problems, 'category': category}
     return render(request, 'problem_view.html', context)
+
+def solution_view(request, soln_id):
+    context = {'soln_id': soln_id}
+    return render(request, 'soln_view.html', context)
