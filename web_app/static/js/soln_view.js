@@ -8,24 +8,21 @@ ctx.canvas.height = 500;
 var container_header =  document.getElementById("container_header")
 var overview_stats_div = document.getElementById("overview_stats")
 var detailed_stats_div = document.getElementById("detailed_stats")
+var lprof_btn_div = document.getElementById("lprof_btn_div")
 
 fetch(analysis_view_url + soln_id) 
 .then(response => response.json())
 .then(function (data) {
     container_header.innerHTML = data["problem__name"]
     console.log(data)
+
     var analysis = data["analysis"]
-    var soln_text = analysis["solution_text"]
-    overview_stats_div.innerHTML += "<div id='soln_code'><p>"
-    for(let i = 0; i < soln_text.length; i++) {
-        overview_stats_div.innerHTML += "<span name='codeline' id='codeline_" + (i+1) + "' style='font-style: italic;'>" + (i+1) + "." + "&nbsp&nbsp&nbsp&nbsp" + soln_text[i].replace(/\s/g, '&nbsp') + "</span><br>"
-    }
-    overview_stats_div.innerHTML += "</p></div>"
     var ref_time = parseFloat(analysis["ref_time"])
     var soln_time = parseFloat(analysis["udef_func_time_tot"])
-    overview_stats_div.innerHTML += "<div><br><br>"
-    overview_stats_div.innerHTML += "<p>Your computation time: " + soln_time + "</p>"
-    overview_stats_div.innerHTML += "<p>Time taken by reference problem: " + ref_time + "</p>"
+    let result = Math.round(parseFloat(analysis["scores"]["overall_score"].split("%")[0]) * 100) / 100
+    overview_stats_div.innerHTML += "<p>Your score: " + result + "%</p>"
+    overview_stats_div.innerHTML += "<p>Your computation time: " + soln_time + "s</p>"
+    overview_stats_div.innerHTML += "<p>Time taken by reference problem: " + ref_time + "s</p>"
     var comp_str = ""
     if(!(soln_time == ref_time)) {
         comp_str += "Looks like you were "
@@ -35,8 +32,15 @@ fetch(analysis_view_url + soln_id)
     }
     else
         comp_str += "Looks like your solution took more or less the same time to execute as the uploaded reference problem"
-    overview_stats_div.innerHTML += "<p>" + comp_str + "</p>"
-    overview_stats_div.innerHTML += "<br><br><div id='lprof_btn_div' class='d-flex justify-content-left'></div></div>"
+    overview_stats_div.innerHTML += "<p>" + comp_str + "</p><br><hr style='background-color:white'><br>"
+    var soln_text = analysis["solution_text"]
+    overview_stats_div.innerHTML += "<div id='soln_code'><p>"
+    for(let i = 0; i < soln_text.length; i++) {
+        overview_stats_div.innerHTML += "<span name='codeline' id='codeline_" + (i+1) + "' style='font-style: italic;'>" + (i+1) + "." + "&nbsp&nbsp&nbsp&nbsp" + soln_text[i].replace(/\s/g, '&nbsp') + "</span><br>"
+    }
+    overview_stats_div.innerHTML += "</p></div>"
+
+
     var fdefs = analysis["fdefs"]
     var lprof_str = ""
     write_lprof(lprof_btn_div, fdefs, lprof_str)
@@ -51,13 +55,13 @@ function display_lp_graph(fdef) {
     catch(err) {
         ;
     }
-    console.log(fdef)
     var lprof_dict = fdef["line_profile"]
     var percentage_times = []
     var line_nos = []
+    var line_pt_dict = {}
 
     for(line in lprof_dict) {
-        try{
+        try {
             var p_time = parseFloat(lprof_dict[line]["%time"])
             percentage_times.push(p_time)
         }
@@ -65,7 +69,9 @@ function display_lp_graph(fdef) {
             percentage_times.push(0.0)
         }
         var line_num = parseInt(line.split("_")[1])
-        line_nos.push(line_num - func_line_offset)
+        line_num = line_num - func_line_offset
+        line_nos.push(line_num)
+        line_pt_dict[line_num] = p_time
     }
 
     var labels = line_nos
@@ -85,10 +91,20 @@ function display_lp_graph(fdef) {
                 for(let i = 0; i < codelines.length; i++) {
                     codelines[i].style.color = "white"
                 }
+
                 var codeline = document.getElementById("codeline_" + activePointLabel)
-                var pc_time = percentage_times[parseInt(activePointLabel)-1]
+                var pc_time = line_pt_dict[activePointLabel]
                 let color_val = pc_time < 66.6 ? ((pc_time < 33.3)? "#06D6A0": "orange"): "red";
                 codeline.style.color = color_val
+                if(activePointLabel != 0) {
+                    var scroll_offset = 1
+                }
+                else {
+                    var scroll_offset = 0
+                }      
+                var codeline_id_for_scroll = "codeline_" + (activePointLabel - scroll_offset)
+                location.href = "#";
+                location.href = "#" + codeline_id_for_scroll;
             }
             catch(err) {
                 ;
@@ -128,12 +144,11 @@ function display_lp_graph(fdef) {
     };
 
     window.chart = new Chart(ctx, content);
-    console.log(window.chart)
 }
 
 function write_lprof(div, fdefs, lprof_str) {
     div.innerHTML = ""
-    lprof_str += "<div style='text-align:center;margin-top:10px' id='lprof_dropdown' class='dropdown'><button class='btn btn-secondary dropdown-toggle' type='button' id='dropdownMenuButton' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false'>Choose a function to profile!</button>" +
+    lprof_str += "<div style='text-align:center;float:center;margin-top:10px' id='lprof_dropdown' class='dropdown'><button style='float:right' class='btn btn-secondary dropdown-toggle' type='button' id='dropdownMenuButton' style='z-index: 1;' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false'>Graphical view</button>" +
                 "<div class='dropdown-menu' aria-labelledby='dropdownMenuButton'>"
     for(fdef in fdefs) {
         lprof_str += "<a class='dropdown-item' href='#' id='" + fdef + "_opt' >" + fdefs[fdef]["name"] + "</a>"

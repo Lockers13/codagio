@@ -29,7 +29,7 @@ fetch(profstats_url + "0") // 0 is flag for 'all' profile stats, as opposed to s
                     build_string += "<div class='card-body'>"
                     build_string += "<p>Your Score: " + stats_list[i]["analysis__scores__overall_score"] + "</p>" 
                     build_string += "<div class='text-center'>"
-                    build_string += "<a href='" + soln_base_url + "view/" + stats_list[i]["id"] + "'><button type='button' class='text-center go_btn'>View More</button></a></div>"
+                    build_string += "<a href='" + soln_base_url + "view" + "?soln_id=" +  stats_list[i]["id"] + "&prob_id=" + stats_list[i]["problem__id"] + "'><button type='button' class='text-center go_btn'>View More</button></a></div>"
                     build_string += "<div class='text-center' style='margin-top:10px;'>"
                     build_string += "<a href='" + soln_base_url + stats_list[i]["problem__id"] + "'><button type='button' class='text-center go_btn' style='background-color:#1d2b5b'>Try Again</button></a>"
                     build_string += "</div><p class='problem_author'>Problem Created by " + stats_list[i]["problem__author__user__username"]

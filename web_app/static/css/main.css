@@ -402,22 +402,28 @@ p field_desc {
  
 .view_left {
     float: left;
+    overflow: scroll;
     width: 50%;
     /* border: 1px solid red; */
     box-sizing: border-box;
     text-align:center;
+    border: 2px solid var(--green);
+    height: 80vh;
   }
 
 .view_right {
+    height: 80vh;
     float: left;
+    overflow: scroll;
     width: 50%;
     /* border: 1px solid red; */
     box-sizing: border-box;
     text-align:center;
+    border: 2px solid var(--green);
   }
 
 .individual_overview {
-    margin-left:10%;
+    margin-left:5%;
 }
 
 .central_header {
@@ -428,3 +434,14 @@ p field_desc {
     text-decoration-color: var(--green);
     padding-bottom:2px;
 }
+
+.row {
+    display: flex; /* equal height of the children */
+  }
+  
+.col {
+    flex: 1; /* additionally, equal width */
+    
+    padding: 1em;
+    border: solid;
+  }

@@ -306,6 +306,14 @@ def problem_view(request, category):
     context = {'title': 'CGC: Code For Code\'s Sake', 'problems': problems, 'category': category}
     return render(request, 'problem_view.html', context)
 
-def solution_view(request, soln_id):
-    context = {'soln_id': soln_id}
+def solution_view(request):
+    try:
+        soln_id = int(request.GET.get("soln_id"))
+        prob_id = int(request.GET.get("prob_id"))
+        if not (soln_id > 0 and prob_id > 0):
+            return render(request, 'profile.html')
+    except Exception as e:
+        print(str(e))
+        return render(request, 'profile.html')
+    context = {'soln_id': soln_id, 'prob_id': prob_id}
     return render(request, 'soln_view.html', context)

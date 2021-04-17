@@ -2,20 +2,25 @@
 {% load static %}
 {% block content %}
 
-<div class="view_container">
-   <h2 id="container_header" class="central_header"></h2><hr>
-   <div class="view_left" style="text-align:left;" id="soln_left">
+<div class="view_container row no-gutters">
+   
+   
+   <h2 id="container_header" class="central_header" style="margin-top:25px"></h2><br>
+   <div id='lprof_btn_div' style="width:100%"></div>
+   <div class="view_left col" style="text-align:left;" id="soln_left">
       <div id="overview_stats" class="individual_overview">
-         <h4><u>Your Solution</u></h4><br>
+         <br><h4><u>Your Solution</u></h4><br>
 
       </div>
 
    </div>
 
-
-   <div class="view_right" id="soln_right">
+   
+   <div class="view_right col" id="soln_right">
        <div id="detailed_stats">
-         <div height='400px' width='400px' style='width:80%;height:60vh;position:relative;'>
+         
+         
+         <div height='400px' width='400px' style='margin-top:10%;width:80%;height:60vh;position:relative;'>
             <canvas id='myChart' width='400' height='200'
                 style='position:absolute;top:0;bottom:0;right:0;left:0;margin:auto;'></canvas>
         </div>
@@ -26,7 +31,10 @@
 
 
 </div>
-
+<div style="text-align:center;margin-top:35px;">
+<a href="{% url 'code:solution' prob_id=prob_id %}"><button type='button' class='text-center go_btn btn-sm' style='width:15%;padding:10px;background-color:#1d2b5b'>Try Again</button></a>
+<a href=""><button type='button' class='text-center go_btn btn-sm' style='width:15%;padding:10px;background-color:rgb(240, 79, 79)'>Delete</button></a>
+</div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.js"></script>
 <script>const soln_id = "{{ soln_id }}"</script>
 <script type="text/javascript" src="{% static 'js/soln_view.js' %}"></script>
