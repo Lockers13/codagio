@@ -17,12 +17,14 @@ fetch(analysis_view_url + soln_id)
     console.log(data)
 
     var analysis = data["analysis"]
+    var fdefs = analysis["fdefs"]
+
     var ref_time = parseFloat(analysis["ref_time"])
     var soln_time = parseFloat(analysis["udef_func_time_tot"])
     let result = Math.round(parseFloat(analysis["scores"]["overall_score"].split("%")[0]) * 100) / 100
     overview_stats_div.innerHTML += "<p>Your score: " + result + "%</p>"
-    overview_stats_div.innerHTML += "<p>Your computation time: " + soln_time + "s</p>"
-    overview_stats_div.innerHTML += "<p>Time taken by reference problem: " + ref_time + "s</p>"
+    overview_stats_div.innerHTML += "<p>Total computation time: " + soln_time + "s</p>"
+    overview_stats_div.innerHTML += "<p>Total time taken by reference problem: " + ref_time + "s</p>"
     var comp_str = ""
     if(!(soln_time == ref_time)) {
         comp_str += "Looks like you were "
@@ -32,6 +34,15 @@ fetch(analysis_view_url + soln_id)
     }
     else
         comp_str += "Looks like your solution took more or less the same time to execute as the uploaded reference problem"
+    comp_str += "<ul>"
+    for (fdef in fdefs) {
+        var func_def = fdefs[fdef]
+        var fname = func_def["name"]
+        var ftime = func_def["cum_time"]
+        fdefs[fdef]["pc_multiplier"] = parseFloat(ftime)/soln_time
+        comp_str += "<li>Execution time of function '" + fname + "' => " + ftime + "s</li>"
+    }
+    comp_str += "</ul>"
     overview_stats_div.innerHTML += "<p>" + comp_str + "</p><br><hr style='background-color:white'><br>"
     var soln_text = analysis["solution_text"]
     overview_stats_div.innerHTML += "<div id='soln_code'><p>"
@@ -39,9 +50,6 @@ fetch(analysis_view_url + soln_id)
         overview_stats_div.innerHTML += "<span name='codeline' id='codeline_" + (i+1) + "' style='font-style: italic;'>" + (i+1) + "." + "&nbsp&nbsp&nbsp&nbsp" + soln_text[i].replace(/\s/g, '&nbsp') + "</span><br>"
     }
     overview_stats_div.innerHTML += "</p></div>"
-
-
-    var fdefs = analysis["fdefs"]
     var lprof_str = ""
     write_lprof(lprof_btn_div, fdefs, lprof_str)
     bind_lprof_btns(fdefs)
@@ -91,9 +99,9 @@ function display_lp_graph(fdef) {
                 for(let i = 0; i < codelines.length; i++) {
                     codelines[i].style.color = "white"
                 }
-
                 var codeline = document.getElementById("codeline_" + activePointLabel)
                 var pc_time = line_pt_dict[activePointLabel]
+                pc_time *= fdef["pc_multiplier"]
                 let color_val = pc_time < 66.6 ? ((pc_time < 33.3)? "#06D6A0": "orange"): "red";
                 codeline.style.color = color_val
                 if(activePointLabel != 0) {
@@ -148,7 +156,7 @@ function display_lp_graph(fdef) {
 
 function write_lprof(div, fdefs, lprof_str) {
     div.innerHTML = ""
-    lprof_str += "<div style='text-align:center;float:center;margin-top:10px' id='lprof_dropdown' class='dropdown'><button style='float:right' class='btn btn-secondary dropdown-toggle' type='button' id='dropdownMenuButton' style='z-index: 1;' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false'>Graphical view</button>" +
+    lprof_str += "<div style='text-align:center;float:center;margin-top:10px' id='lprof_dropdown' class='dropdown'><button style='float:right' class='btn btn-secondary dropdown-toggle' type='button' id='dropdownMenuButton' style='z-index: 1;' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false'>Line Profiling</button>" +
                 "<div class='dropdown-menu' aria-labelledby='dropdownMenuButton'>"
     for(fdef in fdefs) {
         lprof_str += "<a class='dropdown-item' href='#' id='" + fdef + "_opt' >" + fdefs[fdef]["name"] + "</a>"
