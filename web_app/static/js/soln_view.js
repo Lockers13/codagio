@@ -1,6 +1,9 @@
 const analysis_view_url = "http://localhost:8000/code/analysis/"
-const func_line_offset = 3
+const delete_response_url = "http://localhost:8000/users/profile/delete_response/"
+const delete_base_url = "http://localhost:8000/users/profile/delete/"
+const profile_base_url = "http://localhost:8000/users/profile"
 
+const func_line_offset = 3
 var ctx = document.getElementById('myChart').getContext('2d');
 ctx.canvas.width = 700;
 ctx.canvas.height = 500;
@@ -11,11 +14,19 @@ var detailed_stats_div = document.getElementById("detailed_stats")
 var lprof_btn_div = document.getElementById("lprof_btn_div")
 
 fetch(analysis_view_url + soln_id) 
-.then(response => response.json())
+.then(function(response) {
+    if(response.status==404) {
+        window.location.href =  profile_base_url
+        return []
+    }
+    else
+        return response.json()
+})
 .then(function (data) {
-    container_header.innerHTML = data["problem__name"]
-    console.log(data)
+    if(data.length == 0)
+        return
 
+    container_header.innerHTML = data["problem__name"]
     var analysis = data["analysis"]
     var fdefs = analysis["fdefs"]
 
@@ -53,6 +64,34 @@ fetch(analysis_view_url + soln_id)
     var lprof_str = ""
     write_lprof(lprof_btn_div, fdefs, lprof_str)
     bind_lprof_btns(fdefs)
+
+    function handle_decision(e) {
+        var target_id = e.target.id
+        if(target_id=="cancel")
+            return
+        else if(target_id=="confirm") {
+            var delete_response = document.getElementById("delete_response")
+            $.ajax({
+                url: delete_base_url + soln_id,
+                method: "DELETE",
+                headers: {'X-CSRFToken': csrf_token},
+              }).done(function(response) {
+                window.location.href = delete_response_url + "?prob_id=" + prob_id
+              }).fail(function (error) {
+                delete_response.innerHTML = "<p style='color:red'>Uh oh, there was an error deleting your solution!</p>"
+              });
+        }
+        else
+            return
+        }
+
+    var delete_button = document.getElementById("delete_button")
+    delete_button.addEventListener('click', function(e) {
+        e.preventDefault()
+        document.getElementById("confirm_delete").onclick = handle_decision
+        return
+    })
+    
 })
 
 function display_lp_graph(fdef) {

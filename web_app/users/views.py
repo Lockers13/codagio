@@ -5,6 +5,20 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 import json
+from rest_framework.decorators import api_view
+
+def delete_response(request):
+    prob_id = request.GET.get("prob_id")
+    context = {'prob_id': prob_id}
+    return render(request, 'delete_response.html', context)
+
+@api_view(['DELETE'])
+def delete_solution(request, pk):
+    try:
+        Solution.objects.get(id=pk).delete()
+    except Exception as e:
+        return Response("Ill-configured DELETE request: {0}".format(str(e)), status=status.HTTP_400_BAD_REQUEST)
+    return Response("DELETE OK", status=status.HTTP_200_OK)
 
 class ProfileStatsView(APIView):
 

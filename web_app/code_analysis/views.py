@@ -36,6 +36,11 @@ class AnalysisView(APIView):
             'analysis',
             'problem__name'
         ))
+        try:
+            solution = solutions[0]
+        except IndexError as ie:
+            print(str(ie))
+            return Response("GET NOT OK : {0}".format(str(ie)), status=status.HTTP_404_NOT_FOUND)
         return Response(solutions[0], status=status.HTTP_200_OK)
 
     def post(self, request):
@@ -314,6 +319,11 @@ def solution_view(request):
             return render(request, 'profile.html')
     except Exception as e:
         print(str(e))
+        return render(request, 'profile.html')
+    solutions = list(Solution.objects.filter(id=soln_id).all())
+    try:
+        solution = solutions[0]
+    except IndexError as ie:
         return render(request, 'profile.html')
     context = {'soln_id': soln_id, 'prob_id': prob_id}
     return render(request, 'soln_view.html', context)
