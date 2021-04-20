@@ -1,11 +1,21 @@
 {% extends "base.html" %}
 {% load static %}
 {% block content %}
+
+{% if prob_id %}
 <div style="text-align:center;margin-top:20%">
-<h5 style="color:#06D6A0;">Your solution was deleted successfully!</h5>
-<a href="{% url 'code:solution' prob_id=prob_id %}"><button type='button' class='text-center go_btn btn-sm'
-    style='width:15%;padding:10px;background-color:#1d2b5b'>Try Again</button></a>
-<a href="{% url 'users:profile' %}"><button type='button' class='text-center go_btn btn-sm' 
-    style='width:15%;padding:10px;background-color:#1d2b5b'>Return to profile</button></a>
+    <h5 style="color:#06D6A0;">Your solution was deleted successfully!</h5>
+    <a href="{% url 'code:solution' prob_id=prob_id %}"><button type='button' class='text-center go_btn btn-sm'
+            style='width:15%;padding:10px;background-color:#1d2b5b'>Try Again</button></a>
+    <a href="{% url 'users:profile' %}"><button type='button' class='text-center go_btn btn-sm'
+            style='width:15%;padding:10px;background-color:#1d2b5b'>Return to profile</button></a>
 </div>
+{% else %}
+<div style="text-align:center;margin-top:20%">
+    <h5 style="color:#06D6A0;">Your problem was deleted successfully!</h5>
+    <a href="{% url 'users:profile' %}"><button type='button' class='text-center go_btn btn-sm'
+            style='width:15%;padding:10px;background-color:#1d2b5b'>Return to profile</button></a>
+</div>
+{% endif %}
+
 {% endblock %}

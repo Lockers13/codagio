@@ -1,6 +1,6 @@
 const analysis_view_url = "http://localhost:8000/code/analysis/"
 const delete_response_url = "http://localhost:8000/users/profile/delete_response/"
-const delete_base_url = "http://localhost:8000/users/profile/delete/"
+const delete_base_url = "http://localhost:8000/users/profile/delete/solution/"
 const profile_base_url = "http://localhost:8000/users/profile"
 
 const func_line_offset = 3
@@ -40,7 +40,7 @@ fetch(analysis_view_url + soln_id)
     if(!(soln_time == ref_time)) {
         comp_str += "Looks like you were "
         comp_str += soln_time > ref_time? "slower": "faster"
-        comp_str += " than the reference problem by a fraction of "
+        comp_str += " than the reference problem by a factor of "
         comp_str += Math.round((soln_time > ref_time ? soln_time/ref_time: ref_time/soln_time) * 100) / 100
     }
     else

@@ -10,6 +10,8 @@
         <div id="overview_stats" class="individual_overview">
             <br>
             <h4><u>Your Problem:</u></h4><br><br>
+            <div id="detailed_stats_div"></div>
+            <br><h5><u>Source Code</u></h5><br>
             <div id="problem_code_div"></div><br><hr>
             <h5><u>Description</u></h5><br>
             <div id="problem_description_div"></div>
@@ -22,7 +24,7 @@
     <div class="view_right col" id="soln_right">
         <div id="detailed_stats">
 
-
+            <br><div style="text-align:left;margin-left:25px;"><h4><u>Performance Scatter Plot</u></h4></div><br>
             <div height='400px' width='400px' style='margin-top:10%;width:80%;height:60vh;position:relative;'>
                 <canvas id='myChart' width='400' height='200'
                     style='position:absolute;top:0;bottom:0;right:0;left:0;margin:auto;'></canvas>
@@ -64,7 +66,7 @@
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.js"></script>
-{{ problem.analysis.code_data|json_script:"problem_code" }}
+{{ problem.analysis|json_script:"problem_analysis" }}
 {{ problem.metadata.description|json_script:"problem_description" }}
 {{ problem.name|json_script:"problem_name" }}
 <script>
