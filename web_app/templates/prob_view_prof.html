@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+
+<div class="view_container row no-gutters">
+    <h2 id="container_header" class="central_header" style="margin:25 0 0 20"></h2>
+
+    <div id='lprof_btn_div' style="width:100%"></div>
+    <div class="view_left col" style="text-align:left;" id="soln_left">
+        <div id="overview_stats" class="individual_overview">
+            <br>
+            <h4><u>Your Problem:</u></h4><br><br>
+            <div id="problem_code_div"></div><br><hr>
+            <h5><u>Description</u></h5><br>
+            <div id="problem_description_div"></div>
+            
+        </div>
+
+    </div>
+
+
+    <div class="view_right col" id="soln_right">
+        <div id="detailed_stats">
+
+
+            <div height='400px' width='400px' style='margin-top:10%;width:80%;height:60vh;position:relative;'>
+                <canvas id='myChart' width='400' height='200'
+                    style='position:absolute;top:0;bottom:0;right:0;left:0;margin:auto;'></canvas>
+            </div>
+
+        </div>
+
+    </div>
+
+
+</div>
+<div style="text-align:center;margin-top:35px;">
+    <a href="" data-toggle='modal' data-target='#modalDeleteConfirm'><button type='button'
+            class='text-center go_btn btn-sm' style='width:15%;padding:10px;background-color:rgb(240, 79, 79)'
+            id='delete_button'>Delete</button></a>
+</div>
+<div style="text-align:center;margin-top:35px;" id="delete_response"></div>
+
+<div class="modal fade" id="modalDeleteConfirm" tabindex="-1" role="dialog"
+    aria-labelledby="modalDeleteConfirmCenterTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm" style="width:90%" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 style="color:black;text-align:center;" class="modal-title" id="modal_title">Confirm Deletion</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div style="color:black" class="modal-body" id="modal_body">
+                Are you sure you want to delete your problem? - All associated solution data will be deleted also.
+            </div>
+            <div style="color:black" class="modal-footer" id="confirm_delete">
+                <button type="button" class="btn btn-secondary" style="background-color: rgb(240, 79, 79);"
+                    data-dismiss="modal" id="confirm">Confirm</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal" id="cancel">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.js"></script>
+{{ problem.analysis.code_data|json_script:"problem_code" }}
+{{ problem.metadata.description|json_script:"problem_description" }}
+{{ problem.name|json_script:"problem_name" }}
+<script>
+    const prob_id = "{{ prob_id }}"
+    const csrf_token = "{{ csrf_token }}"
+</script>
+<script type="text/javascript" src="{% static 'js/prob_view_prof.js' %}"></script>
+{% endblock %}

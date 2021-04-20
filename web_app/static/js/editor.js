@@ -341,7 +341,7 @@ function init_editor() {
     let editor = ace.edit("editor");
     var main_signature = document.getElementById("main_signature").innerHTML
 
-    editor.setValue(main_signature + "\n    ### write your code below...");            ///Setting initial value here to quickly test
+    editor.setValue(main_signature + "\n    ### write your code here...");           
 
     editor.setOptions({
         // editor options

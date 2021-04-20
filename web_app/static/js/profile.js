@@ -1,9 +1,11 @@
 const profstats_url = "http://localhost:8000/users/profile_stats/"
+const retry_url = "http://localhost:8000/code/solution/"
 
-fetch(profstats_url + "0") // 0 is flag for 'all' profile stats, as opposed to stats for individual problem solution
+fetch(profstats_url) 
 .then(response => response.json())
 .then(function (data) {
-    const soln_base_url = 'http://localhost:8000/code/solution/'
+    const soln_base_url = 'http://localhost:8000/users/profile/solution/'
+    const prob_base_url = 'http://localhost:8000/users/profile/problem/'
 
     var toggle = document.getElementById("toggle")
 
@@ -29,9 +31,9 @@ fetch(profstats_url + "0") // 0 is flag for 'all' profile stats, as opposed to s
                     build_string += "<div class='card-body'>"
                     build_string += "<p>Your Score: " + stats_list[i]["analysis__scores__overall_score"] + "</p>" 
                     build_string += "<div class='text-center'>"
-                    build_string += "<a href='" + soln_base_url + "view" + "?soln_id=" +  stats_list[i]["id"] + "&prob_id=" + stats_list[i]["problem__id"] + "'><button type='button' class='text-center go_btn'>View More</button></a></div>"
+                    build_string += "<a href='" + soln_base_url + "view/?soln_id=" +  stats_list[i]["id"] + "&prob_id=" + stats_list[i]["problem__id"] + "'><button type='button' class='text-center go_btn'>View More</button></a></div>"
                     build_string += "<div class='text-center' style='margin-top:10px;'>"
-                    build_string += "<a href='" + soln_base_url + stats_list[i]["problem__id"] + "'><button type='button' class='text-center go_btn' style='background-color:#1d2b5b'>Try Again</button></a>"
+                    build_string += "<a href='" + retry_url + stats_list[i]["problem__id"] + "'><button type='button' class='text-center go_btn' style='background-color:#1d2b5b'>Try Again</button></a>"
                     build_string += "</div><p class='problem_author'>Problem Created by " + stats_list[i]["problem__author__user__username"]
                     build_string +=  " on " + stats_list[i]["problem__date_submitted"] + "</p></div>"
                     build_string += "</div></div></div></div>"
@@ -62,8 +64,8 @@ fetch(profstats_url + "0") // 0 is flag for 'all' profile stats, as opposed to s
                     build_string += "<p>Difficulty: " + stats_list[i]["metadata__difficulty"] + "</p>" 
                     build_string += "<p>Category: " + stats_list[i]["metadata__category"] + "</p>" 
                     build_string += "<p>Pass Threshold: " + stats_list[i]["metadata__pass_threshold"] + "</p>" 
-                    build_string += "<p>Description: " + stats_list[i]["metadata__description"] + "</p>" 
-                    build_string += "<a href='#'>"
+                    // build_string += "<p>Description: " + stats_list[i]["metadata__description"] + "</p>" 
+                    build_string += "<a href='" + prob_base_url + "view/?prob_id=" + stats_list[i]["id"] + "'>"
                     build_string += "<div class='text-center'>"
                     build_string += "<button type='button' class='text-center go_btn'>View More</button>"
                     build_string += "</div></a><p class='problem_author'>Problem Created on " + stats_list[i]["date_submitted"] + "</p></div>"

@@ -208,6 +208,7 @@ class SaveProblemView(APIView):
 
         code_data = processed_data["code"]
 
+
         make_utils.make_file(filename, code_data, processed_data)
 
         ### Depending on the type of uploaded problem, the processes for making an executable script, generating inputs, and generating outputs, will be different
@@ -232,6 +233,7 @@ class SaveProblemView(APIView):
         analyzer.profile(input_hash, solution=False, init_data=processed_data["init_data"])
         ### get final analysis dict
         analysis = analyzer.get_prog_dict()
+        analysis["code_data"] = code_data
         
         ### save uploaded problem, with associated inputs, outputs, and metadata to DB
         problem, created = Problem.objects.update_or_create(
@@ -305,25 +307,9 @@ def problem_upload(request, problem_cat):
 
     return render(request, 'problem_upload.html', context)
 
-def problem_view(request, category):
+def problem_view_general(request, category):
     problems = Problem.objects.filter(metadata__category__contains=category).all()
     ### turn inner json dict into python dict before passing to template
     context = {'title': 'CGC: Code For Code\'s Sake', 'problems': problems, 'category': category}
-    return render(request, 'problem_view.html', context)
+    return render(request, 'problem_view_general.html', context)
 
-def solution_view(request):
-    try:
-        soln_id = int(request.GET.get("soln_id"))
-        prob_id = int(request.GET.get("prob_id"))
-        if not (soln_id > 0 and prob_id > 0):
-            return render(request, 'profile.html')
-    except Exception as e:
-        print(str(e))
-        return render(request, 'profile.html')
-    solutions = list(Solution.objects.filter(id=soln_id).all())
-    try:
-        solution = solutions[0]
-    except IndexError as ie:
-        return render(request, 'profile.html')
-    context = {'soln_id': soln_id, 'prob_id': prob_id}
-    return render(request, 'soln_view.html', context)

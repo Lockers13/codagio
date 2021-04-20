@@ -17,7 +17,7 @@
             <a href="#">
                 <div class="row">
                     <div class="col-lg-4">
-                    <a href="{% url 'code:problem_view' category='mathematics' %}" class="field_desc">
+                    <a href="{% url 'code:problem_view_general' category='mathematics' %}" class="field_desc">
                       <img class="rounded-circle" src="{% static 'images/math_pi.png' %}" alt="Generic placeholder image" width="140" height="140">
                       <br><br>
                       <h2>Mathematics</h2><br>
@@ -25,7 +25,7 @@
                     </a>
                     </div>
                     <div class="col-lg-4">
-                    <a href="{% url 'code:problem_view' category='string_manipulation' %}" class="field_desc">
+                    <a href="{% url 'code:problem_view_general' category='string_manipulation' %}" class="field_desc">
                       <img class="rounded-circle" src="{% static 'images/string_manipulation.png' %}"  alt="Generic placeholder image" width="140" height="140">
                       <br><br>
                       <h2>String Manipulation</h2><br>
@@ -33,7 +33,7 @@
                     </a>
                     </div>
                     <div class="col-lg-4">
-                    <a href="{% url 'code:problem_view' category='file_io' %}" class="field_desc">
+                    <a href="{% url 'code:problem_view_general' category='file_io' %}" class="field_desc">
                       <img class="rounded-circle" src="{% static 'images/file_io.png' %}"  alt="Generic placeholder image" width="140" height="140">
                       <br><br>
                       <h2>File I/O</h2><br>
@@ -47,7 +47,7 @@
         <button type="button" class="collapsible">Brush up on your theory</button>
         <div class="content">
             <p class="problem_desc"></p>
-            <a href="{% url 'code:problem_view' category='mathematics' %}">
+            <a href="{% url 'code:problem_view_general' category='mathematics' %}">
                 <div class="text-center">
                     <button type="button" class="text-center go_btn">
                         Enter
@@ -59,7 +59,7 @@
         <button type="button" class="collapsible">Share your thoughts in our forum</button>
         <div class="content">
             <p class="problem_desc"></p>
-            <a href="{% url 'code:problem_view' category='mathematics' %}">
+            <a href="{% url 'code:problem_view_general' category='mathematics' %}">
                 <div class="text-center">
                     <button type="button" class="text-center go_btn">
                         Enter

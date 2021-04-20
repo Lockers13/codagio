@@ -24,39 +24,32 @@ class ProfileStatsView(APIView):
 
     http_method_names = ['get', 'post']
 
-    def get(self, request, spec):
+    def get(self, request):
         uid = request.user.id
-
         try:
-            spec = int(spec)
-            if spec == 0:
-                problem_stats = list(Problem.objects.filter(author_id=uid).all().values(
-                    'metadata__difficulty',
-                    'metadata__category',
-                    'metadata__pass_threshold',
-                    'name',
-                    'date_submitted',
-                    'metadata__description',
-                    'id',
-                ))
+            problem_stats = list(Problem.objects.filter(author_id=uid).all().values(
+                'metadata__difficulty',
+                'metadata__category',
+                'metadata__pass_threshold',
+                'name',
+                'date_submitted',
+                'metadata__description',
+                'id',
+            ))
 
-                solution_stats = list(Solution.objects.filter(submitter_id=uid).all().values(
-                    'analysis__scores__overall_score',
-                    'problem__name',
-                    'problem__author__user__username',
-                    'problem__date_submitted',
-                    'problem__id',
-                    'id',
-                ))
+            solution_stats = list(Solution.objects.filter(submitter_id=uid).all().values(
+                'analysis__scores__overall_score',
+                'problem__name',
+                'problem__author__user__username',
+                'problem__date_submitted',
+                'problem__id',
+                'id',
+            ))
 
-                return Response([solution_stats, problem_stats], status=status.HTTP_200_OK)
-            else:
-                return Response("Ill-configured GET request: {0}".format(str(e)), status=status.HTTP_400_BAD_REQUEST)
+            return Response([solution_stats, problem_stats], status=status.HTTP_200_OK)
                 
         except Exception as e:
             return Response("Ill-configured GET request: {0}".format(str(e)), status=status.HTTP_400_BAD_REQUEST)
-
-
 
 
 def profile(request):
@@ -76,3 +69,44 @@ def profile(request):
     }
 
     return render(request, 'profile.html', context)
+
+def solution_view(request):
+    try:
+        soln_id = int(request.GET.get("soln_id"))
+        prob_id = int(request.GET.get("prob_id"))
+        if not (soln_id > 0 and prob_id > 0):
+            return render(request, 'profile.html')
+    except Exception as e:
+        print(str(e))
+        return render(request, 'profile.html')
+    solutions = list(Solution.objects.filter(id=soln_id).all())
+    try:
+        solution = solutions[0]
+    except IndexError as ie:
+        return render(request, 'profile.html')
+    context = {'soln_id': soln_id, 'prob_id': prob_id}
+    return render(request, 'soln_view_prof.html', context)
+
+def problem_view(request):
+    try:
+        prob_id = int(request.GET.get("prob_id"))
+        if not (prob_id > 0):
+            return render(request, 'profile.html')
+    except Exception as e:
+        print("Exception in users.problem_view : {0}".format(str(e)))
+        return render(request, 'profile.html')
+
+    problems = list(Problem.objects.filter(id=prob_id).all())
+    ### turn inner json dict into python dict before passing to template
+    try:
+        problem = problems[0]
+    except IndexError as ie:
+        print("Exception in users.problem_view : {0}".format(str(ie)))
+        return render(request, 'profile.html')
+    
+    context = {
+        'prob_id': prob_id,
+        'problem': problem,
+    }
+
+    return render(request, 'prob_view_prof.html', context)

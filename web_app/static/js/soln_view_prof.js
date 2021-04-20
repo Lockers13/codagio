@@ -67,9 +67,7 @@ fetch(analysis_view_url + soln_id)
 
     function handle_decision(e) {
         var target_id = e.target.id
-        if(target_id=="cancel")
-            return
-        else if(target_id=="confirm") {
+        if(target_id=="confirm") {
             var delete_response = document.getElementById("delete_response")
             $.ajax({
                 url: delete_base_url + soln_id,

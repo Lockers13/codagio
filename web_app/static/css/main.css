@@ -3,6 +3,7 @@
     --green:#06D6A0;
     --white:#FFFFFF;
     --blue: #1d2b5b;
+    --red: rgb(240, 79, 79);
 }
 
 html {
@@ -444,4 +445,12 @@ p field_desc {
     
     padding: 1em;
     border: solid;
+  }
+
+.icons_link {
+    position: fixed;
+    left: 50%;
+    bottom: 20px;
+    transform: translate(-50%, -50%);
+    margin: 0 auto;
   }
