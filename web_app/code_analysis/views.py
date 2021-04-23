@@ -28,20 +28,7 @@ class AnalysisView(APIView):
     """Class based view for handling the analysis of submitted solutions"""
 
     ### only 'post' requests to this API endpoint are allowed
-    http_method_names = ['post', 'get']
-
-    def get(self, request, soln_id):
-
-        solutions = list(Solution.objects.filter(id=soln_id).all().values(
-            'analysis',
-            'problem__name'
-        ))
-        try:
-            solution = solutions[0]
-        except IndexError as ie:
-            print(str(ie))
-            return Response("GET NOT OK : {0}".format(str(ie)), status=status.HTTP_404_NOT_FOUND)
-        return Response(solutions[0], status=status.HTTP_200_OK)
+    http_method_names = ['post']
 
     def post(self, request):
         """Built-in django function to handle post requests to API endpoint
@@ -284,7 +271,7 @@ def solution_upload(request, prob_id):
                 'main_signature': main_signature,
                 }
 
-    return render(request, 'code.html', context)
+    return render(request, 'main_view/code.html', context)
 
 def problem_upload(request, problem_cat):
     ### obviously, since the user is creating a problem, there is no problem data to retrieve from DB
@@ -305,11 +292,11 @@ def problem_upload(request, problem_cat):
                 'cat': problem_cat,
                 }
 
-    return render(request, 'problem_upload.html', context)
+    return render(request, 'main_view/problem_upload.html', context)
 
-def problem_view_general(request, category):
+def problem_view(request, category):
     problems = Problem.objects.filter(metadata__category__contains=category).all()
     ### turn inner json dict into python dict before passing to template
     context = {'title': 'CGC: Code For Code\'s Sake', 'problems': problems, 'category': category}
-    return render(request, 'problem_view_general.html', context)
+    return render(request, 'main_view/problem_view.html', context)
 

@@ -12,6 +12,7 @@
       <div id="overview_stats" class="individual_overview">
          <br>
          <h4><u>Your Solution</u></h4><br>
+         
 
       </div>
 
@@ -61,11 +62,14 @@
     </div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.js"></script>
+{{ solution.analysis|json_script:"solution_analysis" }}
+{{ solution.id|json_script:"solution_id" }}
+{{ prob_id|json_script:"problem_id" }}
+{{ solution.problem__name|json_script:"problem_name" }}
+
 <script>
-   const soln_id = "{{ soln_id }}"
-   const prob_id = "{{ prob_id }}"
    const csrf_token = "{{ csrf_token }}"
 </script>
-<script type="text/javascript" src="{% static 'js/soln_view_prof.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/profile_view/solution_view.js' %}"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.js"></script>
 {% endblock %}

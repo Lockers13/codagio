@@ -8,6 +8,6 @@ urlpatterns = [
     path('problem_upload/<str:problem_cat>', code_views.problem_upload, name="problem_upload"),
     path("analysis/", code_views.AnalysisView.as_view(), name="analysis"),
     path("analysis/<int:soln_id>", code_views.AnalysisView.as_view(), name="analysis_view_stats"),
-    path("problem_view_general/<str:category>", code_views.problem_view_general, name="problem_view_general"),
+    path("problem_view/<str:category>", code_views.problem_view, name="problem_view"),
 ]
 

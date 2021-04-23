@@ -1,97 +1,86 @@
-const analysis_view_url = "http://localhost:8000/code/analysis/"
 const delete_response_url = "http://localhost:8000/users/profile/delete_response/"
 const delete_base_url = "http://localhost:8000/users/profile/delete/solution/"
-const profile_base_url = "http://localhost:8000/users/profile"
 
 const func_line_offset = 3
+
 var ctx = document.getElementById('myChart').getContext('2d');
 ctx.canvas.width = 700;
 ctx.canvas.height = 500;
+
+var solution_analysis = JSON.parse(document.getElementById("solution_analysis").textContent)
+var soln_id = JSON.parse(document.getElementById("solution_id").textContent)
+var prob_id = JSON.parse(document.getElementById("problem_id").textContent)
+var problem_name = JSON.parse(document.getElementById("problem_name").textContent)
 
 var container_header =  document.getElementById("container_header")
 var overview_stats_div = document.getElementById("overview_stats")
 var detailed_stats_div = document.getElementById("detailed_stats")
 var lprof_btn_div = document.getElementById("lprof_btn_div")
 
-fetch(analysis_view_url + soln_id) 
-.then(function(response) {
-    if(response.status==404) {
-        window.location.href =  profile_base_url
-        return []
+container_header.innerHTML = problem_name
+var analysis = solution_analysis
+var fdefs = analysis["fdefs"]
+
+var ref_time = parseFloat(analysis["ref_time"])
+var soln_time = parseFloat(analysis["udef_func_time_tot"])
+let result = Math.round(parseFloat(analysis["scores"]["overall_score"].split("%")[0]) * 100) / 100
+overview_stats_div.innerHTML += "<p>Your score: " + result + "%</p>"
+overview_stats_div.innerHTML += "<p>Total computation time: " + soln_time + "s</p>"
+overview_stats_div.innerHTML += "<p>Total time taken by reference problem: " + ref_time + "s</p>"
+var comp_str = ""
+if(!(soln_time == ref_time)) {
+    comp_str += "Looks like you were "
+    comp_str += soln_time > ref_time? "slower": "faster"
+    comp_str += " than the reference problem by a factor of "
+    comp_str += Math.round((soln_time > ref_time ? soln_time/ref_time: ref_time/soln_time) * 100) / 100
+}
+else
+    comp_str += "Looks like your solution took more or less the same time to execute as the uploaded reference problem"
+comp_str += "<ul>"
+for (fdef in fdefs) {
+    var func_def = fdefs[fdef]
+    var fname = func_def["name"]
+    var ftime = func_def["cum_time"]
+    fdefs[fdef]["pc_multiplier"] = parseFloat(ftime)/soln_time
+    comp_str += "<li>Execution time of function '" + fname + "' => " + ftime + "s</li>"
+}
+comp_str += "</ul>"
+overview_stats_div.innerHTML += "<p>" + comp_str + "</p><br><hr style='background-color:white'><br>"
+var soln_text = analysis["solution_text"]
+overview_stats_div.innerHTML += "<div id='soln_code'><p>"
+for(let i = 0; i < soln_text.length; i++) {
+    overview_stats_div.innerHTML += "<span name='codeline' id='codeline_" + (i+1) + "' style='font-style: italic;'>" + (i+1) + "." + "&nbsp&nbsp&nbsp&nbsp" + soln_text[i].replace(/\s/g, '&nbsp') + "</span><br>"
+}
+overview_stats_div.innerHTML += "</p></div>"
+var lprof_str = ""
+write_lprof(lprof_btn_div, fdefs, lprof_str)
+bind_lprof_btns(fdefs)
+
+function handle_decision(e) {
+    var target_id = e.target.id
+    if(target_id=="confirm") {
+        var delete_response = document.getElementById("delete_response")
+        $.ajax({
+            url: delete_base_url + soln_id,
+            method: "DELETE",
+            headers: {'X-CSRFToken': csrf_token},
+            }).done(function(response) {
+            window.location.href = delete_response_url + "?prob_id=" + prob_id
+            }).fail(function (error) {
+            delete_response.innerHTML = "<p style='color:red'>Uh oh, there was an error deleting your solution!</p>"
+            });
     }
     else
-        return response.json()
+        return
+    }
+
+var delete_button = document.getElementById("delete_button")
+delete_button.addEventListener('click', function(e) {
+    e.preventDefault()
+    document.getElementById("confirm_delete").onclick = handle_decision
+    return
 })
-.then(function (data) {
-    if(data.length == 0)
-        return
-
-    container_header.innerHTML = data["problem__name"]
-    var analysis = data["analysis"]
-    var fdefs = analysis["fdefs"]
-
-    var ref_time = parseFloat(analysis["ref_time"])
-    var soln_time = parseFloat(analysis["udef_func_time_tot"])
-    let result = Math.round(parseFloat(analysis["scores"]["overall_score"].split("%")[0]) * 100) / 100
-    overview_stats_div.innerHTML += "<p>Your score: " + result + "%</p>"
-    overview_stats_div.innerHTML += "<p>Total computation time: " + soln_time + "s</p>"
-    overview_stats_div.innerHTML += "<p>Total time taken by reference problem: " + ref_time + "s</p>"
-    var comp_str = ""
-    if(!(soln_time == ref_time)) {
-        comp_str += "Looks like you were "
-        comp_str += soln_time > ref_time? "slower": "faster"
-        comp_str += " than the reference problem by a factor of "
-        comp_str += Math.round((soln_time > ref_time ? soln_time/ref_time: ref_time/soln_time) * 100) / 100
-    }
-    else
-        comp_str += "Looks like your solution took more or less the same time to execute as the uploaded reference problem"
-    comp_str += "<ul>"
-    for (fdef in fdefs) {
-        var func_def = fdefs[fdef]
-        var fname = func_def["name"]
-        var ftime = func_def["cum_time"]
-        fdefs[fdef]["pc_multiplier"] = parseFloat(ftime)/soln_time
-        comp_str += "<li>Execution time of function '" + fname + "' => " + ftime + "s</li>"
-    }
-    comp_str += "</ul>"
-    overview_stats_div.innerHTML += "<p>" + comp_str + "</p><br><hr style='background-color:white'><br>"
-    var soln_text = analysis["solution_text"]
-    overview_stats_div.innerHTML += "<div id='soln_code'><p>"
-    for(let i = 0; i < soln_text.length; i++) {
-        overview_stats_div.innerHTML += "<span name='codeline' id='codeline_" + (i+1) + "' style='font-style: italic;'>" + (i+1) + "." + "&nbsp&nbsp&nbsp&nbsp" + soln_text[i].replace(/\s/g, '&nbsp') + "</span><br>"
-    }
-    overview_stats_div.innerHTML += "</p></div>"
-    var lprof_str = ""
-    write_lprof(lprof_btn_div, fdefs, lprof_str)
-    bind_lprof_btns(fdefs)
-
-    function handle_decision(e) {
-        var target_id = e.target.id
-        if(target_id=="confirm") {
-            var delete_response = document.getElementById("delete_response")
-            $.ajax({
-                url: delete_base_url + soln_id,
-                method: "DELETE",
-                headers: {'X-CSRFToken': csrf_token},
-              }).done(function(response) {
-                window.location.href = delete_response_url + "?prob_id=" + prob_id
-              }).fail(function (error) {
-                delete_response.innerHTML = "<p style='color:red'>Uh oh, there was an error deleting your solution!</p>"
-              });
-        }
-        else
-            return
-        }
-
-    var delete_button = document.getElementById("delete_button")
-    delete_button.addEventListener('click', function(e) {
-        e.preventDefault()
-        document.getElementById("confirm_delete").onclick = handle_decision
-        return
-    })
     
-})
-
 function display_lp_graph(fdef) {
    // document.getElementById("graph_heading").innerHTML = "<p style='margin:50px 0px 0px 0px;text-align:center'>Time spent in function => " + fdef["cum_time"] + " seconds</p>"
     try {
