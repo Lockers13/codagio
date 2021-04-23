@@ -271,7 +271,7 @@ def solution_upload(request, prob_id):
                 'main_signature': main_signature,
                 }
 
-    return render(request, 'main_view/code.html', context)
+    return render(request, 'main/code.html', context)
 
 def problem_upload(request, problem_cat):
     ### obviously, since the user is creating a problem, there is no problem data to retrieve from DB
@@ -292,11 +292,11 @@ def problem_upload(request, problem_cat):
                 'cat': problem_cat,
                 }
 
-    return render(request, 'main_view/problem_upload.html', context)
+    return render(request, 'main/problem_upload.html', context)
 
 def problem_view(request, category):
     problems = Problem.objects.filter(metadata__category__contains=category).all()
     ### turn inner json dict into python dict before passing to template
     context = {'title': 'CGC: Code For Code\'s Sake', 'problems': problems, 'category': category}
-    return render(request, 'main_view/problem_view.html', context)
+    return render(request, 'main/problem_view.html', context)
 

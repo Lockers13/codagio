@@ -15,7 +15,7 @@ def delete_response(request):
         prob_id = None
         
     context = {'prob_id': prob_id}
-    return render(request, 'profile_view/delete_response.html', context)
+    return render(request, 'profile/delete_response.html', context)
 
 @api_view(['DELETE'])
 def delete_solution(request, pk):
@@ -81,17 +81,17 @@ def profile(request):
         'profile': profiles[0],
     }
 
-    return render(request, 'profile_view/profile.html', context)
+    return render(request, 'profile/profile_view.html', context)
 
 def solution_view(request):
     try:
         soln_id = int(request.GET.get("soln_id"))
         prob_id = int(request.GET.get("prob_id"))
         if not (soln_id > 0 and prob_id > 0):
-            return render(request, 'profile_view/profile.html')
+            return render(request, 'profile/profile_view.html')
     except Exception as e:
         print(str(e))
-        return render(request, 'profile_view/profile.html')
+        return render(request, 'profile/profile_view.html')
     
     try:
         solutions = list(Solution.objects.filter(id=soln_id).all().values(
@@ -101,41 +101,41 @@ def solution_view(request):
             ))
     except Exception as e:
         print("Error during db operation in users.solution_view : {0}".format(str(e)))
-        return render(request, 'profile_view/profile.html')
+        return render(request, 'profile/profile_view.html')
 
     try:
         solution = solutions[0]
     except IndexError as ie:
-        return render(request, 'profile_view/profile.html')
+        return render(request, 'profile/profile_view.html')
 
     context = {'solution': solution, 'prob_id': prob_id}
 
-    return render(request, 'profile_view/solution_view.html', context)
+    return render(request, 'profile/solution_view.html', context)
 
 def problem_view(request):
     try:
         prob_id = int(request.GET.get("prob_id"))
         if not (prob_id > 0):
-            return render(request, 'profile_view/profile.html')
+            return render(request, 'profile/profile_view.html')
     except Exception as e:
         print("Exception in users.problem_view : {0}".format(str(e)))
-        return render(request, 'profile_view/profile.html')
+        return render(request, 'profile/profile_view.html')
     try:
         problems = list(Problem.objects.filter(id=prob_id).all())
     except Exception as e:
         print("Error during db operation in users.problem_view : {0}".format(str(e)))
-        return render(request, 'profile_view/profile.html')
+        return render(request, 'profile/profile_view.html')
         
     ### turn inner json dict into python dict before passing to template
     try:
         problem = problems[0]
     except IndexError as ie:
         print("Exception in users.problem_view : {0}".format(str(ie)))
-        return render(request, 'profile_view/profile.html')
+        return render(request, 'profile/profile_view.html')
     
     context = {
         'prob_id': prob_id,
         'problem': problem,
     }
 
-    return render(request, 'profile_view/problem_view.html', context)
+    return render(request, 'profile/problem_view.html', context)
