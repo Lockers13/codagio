@@ -137,8 +137,9 @@ function display_lp_graph(fdef) {
                     var scroll_offset = 0
                 }      
                 var codeline_id_for_scroll = "codeline_" + (activePointLabel - scroll_offset)
-                location.href = "#";
-                location.href = "#" + codeline_id_for_scroll;
+                // location.href = "#";
+                // location.href = "#" + codeline_id_for_scroll;
+                document.getElementById(codeline_id_for_scroll).scrollIntoView(true)
             }
             catch(err) {
                 ;
