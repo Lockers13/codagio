@@ -1,4 +1,4 @@
-const profstats_url = "http://localhost:8000/users/profile_stats/"
+const profstats_url = "http://localhost:8000/api/profile/stats/"
 const retry_url = "http://localhost:8000/code/solution/"
 
 fetch(profstats_url) 

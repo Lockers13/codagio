@@ -1,5 +1,7 @@
 const editor = init_editor()
 const func_line_offset = 3
+const code_analysis_url = "http://localhost:8000/api/code/analysis/"
+
 const ERROR_CODES = {
     10: "Uh-oh...Looks like your code threw a run-time error!",
     11: "Uh-oh...Looks like there's a syntax error in your code!",
@@ -74,7 +76,7 @@ $("#sub_form").submit(function (e) {
     solution_text_box.value = sub_text
 
     $.ajax({
-        url: 'http://localhost:8000/code/analysis/',
+        url: code_analysis_url,
         type: 'POST',
         data: new FormData(this),
         processData: false,

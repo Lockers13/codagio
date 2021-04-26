@@ -1,4 +1,5 @@
 const MAX_FILE_UPLOAD_SIZE = 1000000
+const problem_upload_url = "http://localhost:8000/api/code/save_problem/"
 
 $("#prob_form").submit(function(e) {
     e.preventDefault();
@@ -53,7 +54,7 @@ $("#prob_form").submit(function(e) {
     // end of file size check
 
     $.ajax({
-        url: 'http://localhost:8000/code/save_problem/',
+        url: problem_upload_url,
         type: 'POST',
         data: new FormData(this),
         processData: false,

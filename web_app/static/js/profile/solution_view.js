@@ -1,5 +1,5 @@
 const delete_response_url = "http://localhost:8000/users/profile/delete_response/"
-const delete_base_url = "http://localhost:8000/users/profile/delete/solution/"
+const delete_base_url = "http://localhost:8000/api/profile/delete/solution/"
 
 const func_line_offset = 3
 

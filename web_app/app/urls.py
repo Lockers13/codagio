@@ -25,4 +25,5 @@ urlpatterns = [
     path('code/', include(('code_analysis.urls', 'code_analysis'), namespace="code")),
     path('users/', include(('users.urls', 'users'), namespace="users")),
     path('about/', views.about, name="about"),
+    path('api/', include(('api.urls', 'api'), namespace="api")),
 ]

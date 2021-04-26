@@ -1,11 +1,6 @@
 from django.shortcuts import render, redirect
 from code_analysis.models import Problem, Solution
 from .models import Profile
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
-import json
-from rest_framework.decorators import api_view
 
 def delete_response(request):
     try:
@@ -16,54 +11,6 @@ def delete_response(request):
         
     context = {'prob_id': prob_id}
     return render(request, 'profile/delete_response.html', context)
-
-@api_view(['DELETE'])
-def delete_solution(request, pk):
-    try:
-        Solution.objects.get(id=pk).delete()
-    except Exception as e:
-        return Response("Ill-configured DELETE request: {0}".format(str(e)), status=status.HTTP_400_BAD_REQUEST)
-    return Response("DELETE OK", status=status.HTTP_200_OK)
-
-@api_view(['DELETE'])
-def delete_problem(request, pk):
-    try:
-        Problem.objects.get(id=pk).delete()
-    except Exception as e:
-        return Response("Ill-configured DELETE request: {0}".format(str(e)), status=status.HTTP_400_BAD_REQUEST)
-    return Response("DELETE OK", status=status.HTTP_200_OK)
-
-class ProfileStatsView(APIView):
-
-    http_method_names = ['get', 'post']
-
-    def get(self, request):
-        uid = request.user.id
-        try:
-            problem_stats = list(Problem.objects.filter(author_id=uid).all().values(
-                'metadata__difficulty',
-                'metadata__category',
-                'metadata__pass_threshold',
-                'name',
-                'date_submitted',
-                'metadata__description',
-                'id',
-            ))
-
-            solution_stats = list(Solution.objects.filter(submitter_id=uid).all().values(
-                'analysis__scores__overall_score',
-                'problem__name',
-                'problem__author__user__username',
-                'problem__date_submitted',
-                'problem__id',
-                'id',
-            ))
-
-            return Response([solution_stats, problem_stats], status=status.HTTP_200_OK)
-                
-        except Exception as e:
-            return Response("Ill-configured GET request: {0}".format(str(e)), status=status.HTTP_400_BAD_REQUEST)
-
 
 def profile(request):
     uid = request.user.id
@@ -126,7 +73,6 @@ def problem_view(request):
         print("Error during db operation in users.problem_view : {0}".format(str(e)))
         return render(request, 'profile/profile_view.html')
         
-    ### turn inner json dict into python dict before passing to template
     try:
         problem = problems[0]
     except IndexError as ie:

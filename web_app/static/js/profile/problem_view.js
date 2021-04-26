@@ -1,4 +1,4 @@
-const delete_base_url = "http://localhost:8000/users/profile/delete/problem/"
+const delete_base_url = "http://localhost:8000/api/profile/delete/problem/"
 const delete_response_url = "http://localhost:8000/users/profile/delete_response/"
 
 var problem_code_div = document.getElementById("problem_code_div")
