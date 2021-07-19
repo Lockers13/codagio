@@ -8,7 +8,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
-    
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="preconnect" href="https://fonts.gstatic.com">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;700;800&display=swap" rel="stylesheet">
@@ -18,7 +18,7 @@
     <link rel="icon" href="{% static 'images/icon.png' %}">
     <title>CGC - Code for Code's Sake</title>
 </head>
- 
+
 <header>
     <!-- Fixed navbar -->
     <!-- Add fixed-top to navbar class if want to be fixed in place-->
@@ -42,6 +42,7 @@
                      <ul class="dropdown-menu">
                          <li><a class="dropdown-item" href="{% url 'code:problem_upload' problem_cat='default' %}">Default</a></li>
                          <li><a class="dropdown-item" href="{% url 'code:problem_upload' problem_cat='file_io' %}">File I/O</a></li>
+                         <li><a class="dropdown-item" href="{% url 'code:problem_upload' problem_cat='networking' %}">Networking</a></li>
                      </ul>
                  </li>
                  <li class="nav-item">
@@ -66,7 +67,7 @@
 </header>
 
 <body style="overscroll-behavior-x: none;margin-top:5%;">
-    
+
     <!-- <div id="sidebar">
         {% block sidebar %}
         <ul>

@@ -25,6 +25,8 @@ class Profiler:
             inputs = input_dict
         elif input_type == "default":
             inputs = input_dict[input_type]["custom"]
+        elif input_type == "networking":
+            inputs = input_dict[input_type]["urls"]
         return inputs, input_type
 
     def __get_udef_info(self):
@@ -169,6 +171,8 @@ class Profiler:
                     output = run_subprocess_ctrld(base_cmd, pro_file, json_str, init_data=self.__init_data, stage="line_profile")
                 else:
                     output = run_subprocess_ctrld(base_cmd, pro_file, json_str, stage="line_profile")
+            elif self.__input_type == "networking":
+                output = run_subprocess_ctrld(base_cmd, pro_file, self.__sample_inputs[0], stage="line_profile")
 
             process_lprof_out(output)
 
@@ -247,6 +251,9 @@ class Profiler:
                 output = run_subprocess_ctrld(base_cmd, self.__filename, json_str, init_data=self.__init_data, stage="c_profile")
             else:
                 output = run_subprocess_ctrld(base_cmd, self.__filename, json_str, stage="c_profile")
+        elif self.__input_type == "networking":
+            output = run_subprocess_ctrld(base_cmd, self.__filename, self.__sample_inputs[0], stage="c_profile")
+
 
         process_cprof_out(output)
 

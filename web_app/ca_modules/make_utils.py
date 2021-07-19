@@ -31,6 +31,8 @@ def make_file(path, code, problem_data):
                 text_to_write = ctemps["TEMPLATE_CODE_DEFAULT_WITH_DATA"]
             else:
                 text_to_write = ctemps["TEMPLATE_CODE_DEFAULT"]
+        elif input_type == "networking":
+            text_to_write = ctemps["TEMPLATE_CODE_NETWORKING"]
 
         for line in text_to_write:
             if "template_function" in line:
@@ -99,6 +101,17 @@ def gen_sample_outputs(filename, inputs, init_data=None, input_type="default"):
             except:
                 pass
         return outputs
+    elif input_type == "networking":
+        urls = inputs
+        for url in urls:
+            output = spc.run_subprocess_ctrld(base_cmd, filename, url)
+            cleaned_split_output = output.decode("utf-8").replace('\r', '').splitlines()
+            if cleaned_split_output[-1] == "None":
+                cleaned_split_output = cleaned_split_output[:-1]
+            ### uncomment below line for debugging
+            # print("CSO =>", cleaned_split_output)
+            outputs.append(cleaned_split_output)
+        return outputs
 
 def get_code_from_file(path):
     with open(path, 'r') as f:
@@ -139,6 +152,15 @@ def handle_uploaded_file_inputs(processed_data):
         g.write(decoded_chunk)
         files.append("file_{0}.py".format(count+1))
     return input_dict, files
+
+def get_networking_urls(processed_data):
+    input_dict = {'networking': {}}
+    input_dict["networking"]["urls"] = []
+    urls = list(processed_data["metadata"]["urls"])
+    for url in urls:
+        input_dict["networking"]["urls"].append(url)
+    return input_dict
+
 
 def json_reorder(hashmap):
     new_hm = {}

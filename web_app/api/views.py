@@ -152,6 +152,8 @@ class SaveProblemView(APIView):
             uploaded_form = ca_forms.IOProblemUploadForm(request.POST, request.FILES)
         elif request.data["category"] == "default":
             uploaded_form = ca_forms.DefaultProblemUploadForm(request.POST, request.FILES)
+        elif request.data["category"] == "networking":
+            uploaded_form = ca_forms.NetworkingProblemUploadForm(request.POST, request.FILES)
 
         try:
             if not uploaded_form.is_valid():
@@ -161,7 +163,8 @@ class SaveProblemView(APIView):
             return Response(ERROR_CODES["Form Submission Error"], status=status.HTTP_400_BAD_REQUEST)
 
         processed_data = pm.retrieve_form_data(uploaded_form, submission_type="problem_upload")
-        
+
+
         ### if an error response was returned from processing function, then return it from this view
         if isinstance(processed_data, Response):
             return processed_data
@@ -192,7 +195,6 @@ class SaveProblemView(APIView):
 
         code_data = processed_data["code"]
 
-
         make_utils.make_file(filename, code_data, processed_data)
 
         ### Depending on the type of uploaded problem, the processes for making an executable script, generating inputs, and generating outputs, will be different
@@ -212,6 +214,10 @@ class SaveProblemView(APIView):
             input_hash["default"]["custom"] = problem_inputs
             ### generate sample outputs, given auto-generated or custom inputs
             outputs = make_utils.gen_sample_outputs(filename, problem_inputs, init_data=processed_data["init_data"])
+        elif processed_data["category"] == "networking":
+            input_hash = make_utils.get_networking_urls(processed_data)
+            outputs = make_utils.gen_sample_outputs(filename, input_hash["networking"]["urls"], input_type="networking")
+
  
         ### profile uploaded reference problem (will only do cProfile and not line_profile as 'solution' is set to false)
         analyzer.profile(input_hash, solution=False, init_data=processed_data["init_data"])

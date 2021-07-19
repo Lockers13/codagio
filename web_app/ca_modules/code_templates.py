@@ -78,6 +78,15 @@ TEMPLATE_CODE_FILE_WITH_DATA = ["def prep_output():",
                 "        print('EXCEPTION: semantic error in submitted program: {0}'.format(str(e)))\n",
                 "main()"]
 
+TEMPLATE_CODE_NETWORKING = ["def main():",
+                "    try:",
+                "        url = argv[1]",
+                "        print(\"{0}\".format(template_function(url)))",
+                "    except Exception as e:",
+                "        print('EXCEPTION: semantic error in submitted program: {0}'.format(str(e)))\n",
+                "main()"
+]
+
 def get_ctemp_dict():
 
     ctemps = {
@@ -86,6 +95,7 @@ def get_ctemp_dict():
         "TEMPLATE_CODE_DEFAULT_WITH_DATA": TEMPLATE_CODE_DEFAULT_WITH_DATA,
         "TEMPLATE_CODE_FILE": TEMPLATE_CODE_FILE,
         "TEMPLATE_CODE_FILE_WITH_DATA": TEMPLATE_CODE_FILE_WITH_DATA,
+        "TEMPLATE_CODE_NETWORKING": TEMPLATE_CODE_NETWORKING,
     }
     
     return ctemps

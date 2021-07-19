@@ -22,13 +22,14 @@ class Verifier:
         self.__init_data = problem_data["init_data"]
 
     def __get_sample_inputs_and_type(self, inputs):
-
         input_dict = inputs
         input_type = next(iter(input_dict))
         if input_type == "files":
             inputs = input_dict
         elif input_type == "default":
             inputs = input_dict[input_type]["custom"]
+        elif input_type == "networking":
+            inputs = input_dict
         return inputs, input_type
 
     def __gen_sub_outputs(self):
@@ -94,6 +95,22 @@ class Verifier:
                 sub_outputs.append(cleaned_split_output)
                 ### remove throwaway files after uploaded script has been run on them => if they exist!
             return sub_outputs
+        elif self.__input_type == "networking":
+            urls = self.__sample_inputs["networking"]["urls"]
+            for url in urls:
+                try:
+                    output = run_subprocess_ctrld(base_cmd, self.__filename, url)
+                except Exception as e:
+                    raise Exception("{0}".format(str(e)))   
+                cleaned_split_output = output.decode("utf-8").replace('\r', '').splitlines()
+                if cleaned_split_output[-1] == "None":
+                    cleaned_split_output = cleaned_split_output[:-1]
+                ### uncomment below line for debugging
+                # print("CSO =>", cleaned_split_output)
+                sub_outputs.append(cleaned_split_output)
+                ### remove throwaway files after uploaded script has been run on them => if they exist!
+            return sub_outputs
+            
 
     def __detail_inputs(self):
         """Utility function to get info about input type, length, etc.
@@ -110,12 +127,17 @@ class Verifier:
             num_tests = len(self.__sample_inputs)
             input_lengths = [len(inp) for inp in self.__sample_inputs]
             input_types = [type(inp[0]).__name__.lower() for inp in self.__sample_inputs]
+        elif self.__input_type == "networking":
+            num_tests = 1
+            input_lengths = ["API URL"]
+            input_types = ["url"]
+
         return num_tests, input_lengths, input_types
     
     def verify_output(self):
         """Public method for verifying matches between submitted program's output, and sample outputs.
 
-        Returns score as percentage (string) of exact matches (this point may need reviewing)."""\
+        Returns score as percentage (string) of exact matches (this point may need reviewing)."""
         
         def get_result_stats():
             num_outputs = len(sub_output)
@@ -147,7 +169,9 @@ class Verifier:
             return result_dict
 
         sample_outputs = self.__sample_outputs
+        print("SAMPOUT =>", sample_outputs)
         sub_outputs = self.__gen_sub_outputs()
+        print("SUBOUT =>", sub_outputs)
         self.__program_dict["scores"] = {}
         scores = self.__program_dict["scores"]
         ### stores input details (cf. __init__)

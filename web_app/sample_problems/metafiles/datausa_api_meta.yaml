@@ -1,0 +1,17 @@
+difficulty: "Easy"
+constraints:
+  num_args: 1
+  allowed_abs_imports: ["urllib.request", "urllib.parse"]
+  allowed_rel_imports:
+    requests : ["get"]
+    urllib.parse: ["urljoin", "urlencode"]
+    json: ["loads"]
+  disallowed_functions: []
+input_type: 
+  networking:
+    "api"
+num_tests: 1
+category: ["networking"]
+main_function: "get_population_data"
+pass_threshold: 85
+urls: ["https://datausa.io/api/data?"]
