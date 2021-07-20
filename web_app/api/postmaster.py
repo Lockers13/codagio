@@ -5,9 +5,10 @@ from users.models import Profile
 from rest_framework import generics, status
 from rest_framework.response import Response
 from django.contrib.auth.models import User
-from . import settings
+from app import settings
 from datetime import datetime
 import json 
+from code_analysis import forms as ca_forms
 
 ERROR_CODES = settings.SUBMISSION_ERROR_CODES
 
@@ -105,3 +106,14 @@ def get_relevant_db_entries(data, submission_type="solution"):
             print("POST NOT OK: uid db error (error getting author) => {0}".format(str(e)))
             return Response(ERROR_CODES["Server-Side Error"], status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         return author
+
+def get_uploaded_form(request, problem=True):
+    if problem:
+        category_forms = {
+            'file_io': ca_forms.IOProblemUploadForm(request.POST, request.FILES),
+            'default': ca_forms.DefaultProblemUploadForm(request.POST, request.FILES),
+            'networking': ca_forms.NetworkingProblemUploadForm(request.POST, request.FILES),
+        }
+        return category_forms[request.data["category"]]
+    else:
+        return ca_forms.SolutionSubmissionForm(request.POST)

@@ -13,7 +13,7 @@ from ca_modules.analyzer import Analyzer
 from datetime import datetime
 from users.models import Profile
 from django.contrib.auth.models import User
-from app import postmaster as pm
+from . import postmaster as pm
 from app import settings
 from code_analysis import forms as ca_forms
 
@@ -33,7 +33,7 @@ class AnalysisView(APIView):
         Returns an HTTP response of some kind"""
 
         
-        uploaded_form = ca_forms.SolutionSubmissionForm(request.POST)
+        uploaded_form = pm.get_uploaded_form(request, problem=False)
 
         try:
             if not uploaded_form.is_valid():
@@ -148,12 +148,7 @@ class SaveProblemView(APIView):
         ### get data, process it, and handle errors
         # processed_data = pm.retrieve_form_data(request, submission_type="problem_upload")
 
-        if request.data["category"] == "file_io":
-            uploaded_form = ca_forms.IOProblemUploadForm(request.POST, request.FILES)
-        elif request.data["category"] == "default":
-            uploaded_form = ca_forms.DefaultProblemUploadForm(request.POST, request.FILES)
-        elif request.data["category"] == "networking":
-            uploaded_form = ca_forms.NetworkingProblemUploadForm(request.POST, request.FILES)
+        uploaded_form = pm.get_uploaded_form(request)
 
         try:
             if not uploaded_form.is_valid():
@@ -163,7 +158,6 @@ class SaveProblemView(APIView):
             return Response(ERROR_CODES["Form Submission Error"], status=status.HTTP_400_BAD_REQUEST)
 
         processed_data = pm.retrieve_form_data(uploaded_form, submission_type="problem_upload")
-
 
         ### if an error response was returned from processing function, then return it from this view
         if isinstance(processed_data, Response):
