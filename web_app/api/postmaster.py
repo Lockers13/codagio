@@ -9,6 +9,7 @@ from app import settings
 from datetime import datetime
 import json 
 from code_analysis import forms as ca_forms
+from ca_modules import make_utils
 
 ERROR_CODES = settings.SUBMISSION_ERROR_CODES
 
@@ -117,3 +118,27 @@ def get_uploaded_form(request, problem=True):
         return category_forms[request.data["category"]]
     else:
         return ca_forms.SolutionSubmissionForm(request.POST)
+
+def get_sample_inputs_outputs(filename, processed_data):
+    def file_io():
+        input_hash = make_utils.handle_uploaded_file_inputs(processed_data)
+        files = ["{0}.py".format(x) for x in input_hash["files"].keys()]
+        outputs = make_utils.gen_sample_outputs(filename, files, init_data=processed_data["init_data"], input_type="file")
+        return input_hash, outputs
+    def default():
+        input_hash = {"default": {}}
+        input_hash["default"]["custom"] = processed_data["inputs"]
+        outputs = make_utils.gen_sample_outputs(filename, input_hash["default"]["custom"], init_data=processed_data["init_data"])
+        return input_hash, outputs
+    def networking():
+        input_hash = make_utils.get_networking_urls(processed_data)
+        outputs = make_utils.gen_sample_outputs(filename, input_hash["networking"]["urls"], input_type="networking")
+        return input_hash, outputs
+
+    switch_dict = {
+        'file_io': file_io,
+        'default': default,
+        'networking': networking
+    }
+
+    return switch_dict[processed_data["category"]]()
