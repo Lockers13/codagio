@@ -1,0 +1,15 @@
+difficulty: "Medium"
+constraints:
+  num_args: 1
+  allowed_abs_imports: []
+  allowed_rel_imports:
+    requests : ["get"]
+    re: ["compile"]
+  disallowed_functions: []
+input_type: 
+  networking:
+    False
+num_tests: 1
+category: ["networking"]
+main_function: "get_word_freq_topn"
+pass_threshold: 98
