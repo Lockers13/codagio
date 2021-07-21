@@ -91,7 +91,7 @@ class AnalysisView(APIView):
             percentage_score = analyzer.verify(problem_data)
         except Exception as e:
             msg = str(e)
-            print("POST NOT OK: {0}".format(msg))
+            print("POSTdd NOT OK: {0}".format(msg))
             if "semantic" in msg:
                 return Response(ERROR_CODES["Semantic Error"], status=status.HTTP_400_BAD_REQUEST)
             elif "retcode = 124" in msg:

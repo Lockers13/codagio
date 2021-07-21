@@ -113,7 +113,6 @@ def get_uploaded_form(request, problem=True):
         category_forms = {
             'file_io': ca_forms.IOProblemUploadForm(request.POST, request.FILES),
             'default': ca_forms.DefaultProblemUploadForm(request.POST, request.FILES),
-            'networking': ca_forms.NetworkingProblemUploadForm(request.POST, request.FILES),
         }
         return category_forms[request.data["category"]]
     else:
@@ -130,15 +129,10 @@ def get_sample_inputs_outputs(filename, processed_data):
         input_hash["default"]["custom"] = processed_data["inputs"]
         outputs = make_utils.gen_sample_outputs(filename, input_hash["default"]["custom"], init_data=processed_data["init_data"])
         return input_hash, outputs
-    def networking():
-        input_hash = make_utils.get_networking_urls(processed_data)
-        outputs = make_utils.gen_sample_outputs(filename, input_hash["networking"]["urls"], input_type="networking")
-        return input_hash, outputs
 
     switch_dict = {
         'file_io': file_io,
         'default': default,
-        'networking': networking
     }
 
     return switch_dict[processed_data["category"]]()

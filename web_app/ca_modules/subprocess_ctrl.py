@@ -1,7 +1,7 @@
 import subprocess
 import os
 
-def run_subprocess_ctrld(base_cmd, filename, json_arg, stage="verification", init_data=None):
+def run_subprocess_ctrld(base_cmd, filename, input_arg=None, stage="verification", init_data=None):
     """Function for the running of subprocesses in a more controlled way, with various types of error checking + exception handling, &c.
 
     Returns the 'utf-8' decoded output of the run subprocess on success, exception is raised otherwise"""
@@ -14,9 +14,11 @@ def run_subprocess_ctrld(base_cmd, filename, json_arg, stage="verification", ini
     ### we obviously do not want to split the json input on whitespace
     cmd_list.append(filename)
 
-    cmd_list.append(json_arg)
+    if input_arg != None:
+        cmd_list.append(input_arg)
     if init_data is not None:
         cmd_list.append(init_data)
+
     try:
         ### run subprocess, redirecting stdout to pipe to be read
         process = subprocess.Popen(cmd_list, stdout=subprocess.PIPE)
@@ -34,8 +36,8 @@ def run_subprocess_ctrld(base_cmd, filename, json_arg, stage="verification", ini
     if ret == 124:
         try:
             os.remove(filename)
-            if os.path.isfile(json_arg):
-                os.remove(json_arg)
+            if os.path.isfile(input_arg):
+                os.remove(input_arg)
         except Exception as e:
             pass
         raise Exception("Error during {0} stage - subprocess timed out: retcode = {1}".format(stage, ret))

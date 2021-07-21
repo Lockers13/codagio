@@ -9,9 +9,8 @@ constraints:
   disallowed_functions: []
 input_type: 
   networking:
-    "api"
+    False
 num_tests: 1
 category: ["networking"]
 main_function: "get_population_data"
 pass_threshold: 85
-urls: ["https://datausa.io/api/data?"]

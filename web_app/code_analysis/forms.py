@@ -21,6 +21,21 @@ class SolutionSubmissionForm(forms.Form):
     solution = forms.CharField(widget=forms.HiddenInput())
 
 class BaseProblemUploadForm(forms.Form):
+    def clean_inputs(self):
+        content = self.cleaned_data['inputs']
+        if content is None:
+            return None
+        content_type = content.content_type.split('/')[0]
+        if content.size > settings.MAX_UPLOAD_SIZE_INPUTS:
+            raise forms.ValidationError(_('Please keep filesize under %s. Current filesize %s') % (filesizeformat(settings.MAX_UPLOAD_SIZE), filesizeformat(content.size)))
+        try:
+            content = json.loads(content.read())
+            # if not isinstance(content[0], list):
+            #     raise Exception("POST NOT OK: Incorrectly formatted custom inputs!")
+        except Exception as e:
+            raise Exception("Invalid JSON in input file!")
+        return content
+
     def clean_program(self):
         content = self.cleaned_data['program']
         content_type = content.content_type.split('/')[0]
@@ -68,22 +83,4 @@ class IOProblemUploadForm(BaseProblemUploadForm):
     target_file = forms.FileField(required=True, widget=forms.ClearableFileInput(attrs={'style':'display:block;margin-top:20px;', 'class':'form-control-sm'}))
 
 class DefaultProblemUploadForm(BaseProblemUploadForm):
-    def clean_inputs(self):
-        content = self.cleaned_data['inputs']
-        content_type = content.content_type.split('/')[0]
-        if content.size > settings.MAX_UPLOAD_SIZE_INPUTS:
-            raise forms.ValidationError(_('Please keep filesize under %s. Current filesize %s') % (filesizeformat(settings.MAX_UPLOAD_SIZE), filesizeformat(content.size)))
-        try:
-            content = json.loads(content.read())
-            if not isinstance(content[0], list):
-                raise Exception("POST NOT OK: Incorrectly formatted custom inputs!")
-        except Exception as e:
-            raise Exception("Invalid JSON in input file!")
-        return content
-
-    inputs = forms.FileField(required=True, widget=forms.ClearableFileInput(attrs={'style':'display:block;margin-top:20px;', 'class':'form-control-sm'}))
-
-class NetworkingProblemUploadForm(BaseProblemUploadForm):
-
-    def clean_api(self):
-        pass
+    inputs = forms.FileField(required=False, widget=forms.ClearableFileInput(attrs={'style':'display:block;margin-top:20px;', 'class':'form-control-sm'}))

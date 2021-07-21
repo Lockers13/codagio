@@ -28,8 +28,6 @@ class Verifier:
             inputs = input_dict
         elif input_type == "default":
             inputs = input_dict[input_type]["custom"]
-        elif input_type == "networking":
-            inputs = input_dict
         return inputs, input_type
 
     def __gen_sub_outputs(self):
@@ -56,12 +54,12 @@ class Verifier:
             for target_file in file_list:
                 if self.__init_data is not None:
                     try:
-                        output = run_subprocess_ctrld(base_cmd, self.__filename, target_file, init_data=self.__init_data)
+                        output = run_subprocess_ctrld(base_cmd, self.__filename, input_arg=target_file, init_data=self.__init_data)
                     except Exception as e:
                         raise Exception("hhh{0}".format(str(e)))
                 else:
                     try:
-                        output = run_subprocess_ctrld(base_cmd, self.__filename, target_file)
+                        output = run_subprocess_ctrld(base_cmd, self.__filename, input_arg=target_file)
                     except Exception as e:
                         raise Exception("hhh{0}".format(str(e)))           
                 ### clean up the returned output of subprocess - '\r' for windows, and 'None' because sometimes python sp.Popen adds this at the end (probably return value)
@@ -75,15 +73,36 @@ class Verifier:
                 os.remove(target_file)
             return sub_outputs
         elif self.__input_type == "default":
-            for i in range(len(self.__sample_inputs)):
+            if self.__sample_inputs is not None:
+                for i in range(len(self.__sample_inputs)):
+                    if self.__init_data is not None:
+                        try:
+                            output = run_subprocess_ctrld(base_cmd, self.__filename, input_arg=json.dumps(self.__sample_inputs[i]), init_data=self.__init_data)
+                        except Exception as e:
+                            raise Exception("{0}".format(str(e)))
+                    else:
+                        try:
+                            output = run_subprocess_ctrld(base_cmd, self.__filename, input_arg=json.dumps(self.__sample_inputs[i]))
+                        except Exception as e:
+                            raise Exception("{0}".format(str(e)))                   
+                    ### clean up the returned output of subprocess - '\r' for windows, and 'None' because sometimes python sp.Popen adds this at the end (probably return value)
+                    cleaned_split_output = output.decode("utf-8").replace('\r', '').splitlines()
+                    if cleaned_split_output[-1] == "None":
+                        cleaned_split_output = cleaned_split_output[:-1]
+                    ### uncomment below line for debugging
+                    # print("CSO =>", cleaned_split_output)
+                    sub_outputs.append(cleaned_split_output)
+                    ### remove throwaway files after uploaded script has been run on them => if they exist!
+                return sub_outputs
+            else:
                 if self.__init_data is not None:
                     try:
-                        output = run_subprocess_ctrld(base_cmd, self.__filename, json.dumps(self.__sample_inputs[i]), init_data=self.__init_data)
+                        output = run_subprocess_ctrld(base_cmd, self.__filename, init_data=self.__init_data)
                     except Exception as e:
                         raise Exception("{0}".format(str(e)))
                 else:
                     try:
-                        output = run_subprocess_ctrld(base_cmd, self.__filename, json.dumps(self.__sample_inputs[i]))
+                        output = run_subprocess_ctrld(base_cmd, self.__filename)
                     except Exception as e:
                         raise Exception("{0}".format(str(e)))                   
                 ### clean up the returned output of subprocess - '\r' for windows, and 'None' because sometimes python sp.Popen adds this at the end (probably return value)
@@ -95,22 +114,7 @@ class Verifier:
                 sub_outputs.append(cleaned_split_output)
                 ### remove throwaway files after uploaded script has been run on them => if they exist!
             return sub_outputs
-        elif self.__input_type == "networking":
-            urls = self.__sample_inputs["networking"]["urls"]
-            for url in urls:
-                try:
-                    output = run_subprocess_ctrld(base_cmd, self.__filename, url)
-                except Exception as e:
-                    raise Exception("{0}".format(str(e)))   
-                cleaned_split_output = output.decode("utf-8").replace('\r', '').splitlines()
-                if cleaned_split_output[-1] == "None":
-                    cleaned_split_output = cleaned_split_output[:-1]
-                ### uncomment below line for debugging
-                # print("CSO =>", cleaned_split_output)
-                sub_outputs.append(cleaned_split_output)
-                ### remove throwaway files after uploaded script has been run on them => if they exist!
-            return sub_outputs
-            
+        
 
     def __detail_inputs(self):
         """Utility function to get info about input type, length, etc.
@@ -124,13 +128,14 @@ class Verifier:
             input_lengths = ["# lines: {0}".format(len(self.__sample_inputs["files"]["file_{0}".format(i+1)].splitlines())) for i in range(num_keys)]
             input_types = ["file" for x in range(num_tests)]
         elif self.__input_type == "default":
-            num_tests = len(self.__sample_inputs)
-            input_lengths = [len(inp) for inp in self.__sample_inputs]
-            input_types = [type(inp[0]).__name__.lower() for inp in self.__sample_inputs]
-        elif self.__input_type == "networking":
-            num_tests = 1
-            input_lengths = ["API URL"]
-            input_types = ["url"]
+            if self.__sample_inputs is not None:
+                num_tests = len(self.__sample_inputs)
+                input_lengths = [len(inp) for inp in self.__sample_inputs]
+                input_types = [type(inp[0]).__name__.lower() for inp in self.__sample_inputs]
+            else:
+                num_tests = 1
+                input_lengths = ["N/A"]
+                input_types = ["No input provided!"]
 
         return num_tests, input_lengths, input_types
     
@@ -169,9 +174,9 @@ class Verifier:
             return result_dict
 
         sample_outputs = self.__sample_outputs
-        print("SAMPOUT =>", sample_outputs)
+        # print("SAMPOUT =>", sample_outputs)
         sub_outputs = self.__gen_sub_outputs()
-        print("SUBOUT =>", sub_outputs)
+        # print("SUBOUT =>", sub_outputs)
         self.__program_dict["scores"] = {}
         scores = self.__program_dict["scores"]
         ### stores input details (cf. __init__)

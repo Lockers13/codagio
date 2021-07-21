@@ -45,8 +45,6 @@ def problem_upload(request, problem_cat):
         form = submission_forms.DefaultProblemUploadForm(initial=initial_state)
     elif problem_cat == "file_io":
         form = submission_forms.IOProblemUploadForm(initial=initial_state)
-    elif problem_cat == "networking":
-        form = submission_forms.NetworkingProblemUploadForm(initial=initial_state)
 
     ### set template context
     context = { 'title': 'CGC | Home',

@@ -32,7 +32,10 @@ def make_file(path, code, problem_data):
             else:
                 text_to_write = ctemps["TEMPLATE_CODE_DEFAULT"]
         elif input_type == "networking":
-            text_to_write = ctemps["TEMPLATE_CODE_NETWORKING"]
+            if is_input is None:
+                text_to_write = ctemps["TEMPLATE_CODE_NETWORKING"]
+            else:
+                text_to_write = ctemps["TEMPLATE_CODE_NETWORKING_WITH_DATA"]
 
         for line in text_to_write:
             if "template_function" in line:
@@ -44,6 +47,7 @@ def make_file(path, code, problem_data):
     input_type = list(problem_data["metadata"]["input_type"].keys())[0]
     main_function = problem_data["metadata"]["main_function"]
     init_data = problem_data["init_data"]
+    is_input = problem_data.get("inputs", None)
 
     with open(path, 'w') as f:
         write_prequel(f)
@@ -72,11 +76,24 @@ def gen_sample_outputs(filename, inputs, init_data=None, input_type="default"):
     outputs = []
     if input_type == "default":
         programmatic_inputs = inputs
-        for i in range(len(programmatic_inputs)): 
+        if inputs is not None:
+            for i in range(len(programmatic_inputs)): 
+                if init_data is not None: 
+                    output = spc.run_subprocess_ctrld(base_cmd, filename, input_arg=json.dumps(programmatic_inputs[i]), init_data=init_data)
+                else:
+                    output = spc.run_subprocess_ctrld(base_cmd, filename, input_arg=json.dumps(programmatic_inputs[i]))
+                cleaned_split_output = output.decode("utf-8").replace('\r', '').splitlines()
+                if cleaned_split_output[-1] == "None":
+                    cleaned_split_output = cleaned_split_output[:-1]
+                ### uncomment below line for debugging
+                # print("CSO =>", cleaned_split_output)
+                outputs.append(cleaned_split_output)
+            return outputs
+        else:
             if init_data is not None: 
-                output = spc.run_subprocess_ctrld(base_cmd, filename, json.dumps(programmatic_inputs[i]), init_data=init_data)
+                output = spc.run_subprocess_ctrld(base_cmd, filename, init_data=init_data)
             else:
-                output = spc.run_subprocess_ctrld(base_cmd, filename, json.dumps(programmatic_inputs[i]))
+                output = spc.run_subprocess_ctrld(base_cmd, filename)
             cleaned_split_output = output.decode("utf-8").replace('\r', '').splitlines()
             if cleaned_split_output[-1] == "None":
                 cleaned_split_output = cleaned_split_output[:-1]
@@ -87,9 +104,9 @@ def gen_sample_outputs(filename, inputs, init_data=None, input_type="default"):
     elif input_type == "file":
         for script in inputs:
             if init_data is not None:
-                output = spc.run_subprocess_ctrld(base_cmd, filename, script, init_data=init_data)
+                output = spc.run_subprocess_ctrld(base_cmd, filename, input_arg=script, init_data=init_data)
             else:
-                output = spc.run_subprocess_ctrld(base_cmd, filename, script)
+                output = spc.run_subprocess_ctrld(base_cmd, filename, input_arg=script)
             cleaned_split_output = output.decode("utf-8").replace('\r', '').splitlines()
             if cleaned_split_output[-1] == "None":
                 cleaned_split_output = cleaned_split_output[:-1]
@@ -100,17 +117,6 @@ def gen_sample_outputs(filename, inputs, init_data=None, input_type="default"):
                 os.remove(script)
             except:
                 pass
-        return outputs
-    elif input_type == "networking":
-        urls = inputs
-        for url in urls:
-            output = spc.run_subprocess_ctrld(base_cmd, filename, url)
-            cleaned_split_output = output.decode("utf-8").replace('\r', '').splitlines()
-            if cleaned_split_output[-1] == "None":
-                cleaned_split_output = cleaned_split_output[:-1]
-            ### uncomment below line for debugging
-            # print("CSO =>", cleaned_split_output)
-            outputs.append(cleaned_split_output)
         return outputs
 
 def get_code_from_file(path):
@@ -150,15 +156,6 @@ def handle_uploaded_file_inputs(processed_data):
             input_dict["files"]["file_{0}".format(count+1)] += decoded_chunk
         g.write(decoded_chunk)
     return input_dict
-
-def get_networking_urls(processed_data):
-    input_dict = {'networking': {}}
-    input_dict["networking"]["urls"] = []
-    urls = list(processed_data["metadata"]["urls"])
-    for url in urls:
-        input_dict["networking"]["urls"].append(url)
-    return input_dict
-
 
 def json_reorder(hashmap):
     new_hm = {}
