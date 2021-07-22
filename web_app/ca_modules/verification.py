@@ -38,8 +38,8 @@ class Verifier:
         sub_outputs = []
         ### need to get underlying OS as syntax of timeout utility differs between linux and mac, and is nonexistent on windows
         platform = sys.platform.lower()
-        VERIF_TIMEOUT = "5"
-        VERIF_MEMOUT = "500"
+        VERIF_TIMEOUT = "8"
+        VERIF_MEMOUT = "1000"
         timeout_cmd = "gtimeout {0}".format(VERIF_TIMEOUT) if platform == "darwin" else "timeout {0} -m {1}".format(VERIF_TIMEOUT, VERIF_MEMOUT) if platform == "linux" or platform == "linux2" else ""
         base_cmd = "{0} python".format(timeout_cmd)
         file_list = []
@@ -74,25 +74,25 @@ class Verifier:
             return sub_outputs
         elif self.__input_type == "default":
             if self.__sample_inputs is not None:
-                for i in range(len(self.__sample_inputs)):
-                    if self.__init_data is not None:
+                if self.__init_data is not None:
                         try:
-                            output = run_subprocess_ctrld(base_cmd, self.__filename, input_arg=json.dumps(self.__sample_inputs[i]), init_data=self.__init_data)
+                            output = run_subprocess_ctrld(base_cmd, self.__filename, input_arg=json.dumps(self.__sample_inputs), init_data=self.__init_data)
                         except Exception as e:
                             raise Exception("{0}".format(str(e)))
-                    else:
-                        try:
-                            output = run_subprocess_ctrld(base_cmd, self.__filename, input_arg=json.dumps(self.__sample_inputs[i]))
-                        except Exception as e:
-                            raise Exception("{0}".format(str(e)))                   
-                    ### clean up the returned output of subprocess - '\r' for windows, and 'None' because sometimes python sp.Popen adds this at the end (probably return value)
-                    cleaned_split_output = output.decode("utf-8").replace('\r', '').splitlines()
-                    if cleaned_split_output[-1] == "None":
-                        cleaned_split_output = cleaned_split_output[:-1]
-                    ### uncomment below line for debugging
-                    # print("CSO =>", cleaned_split_output)
-                    sub_outputs.append(cleaned_split_output)
-                    ### remove throwaway files after uploaded script has been run on them => if they exist!
+                else:
+                    try:
+                        output = run_subprocess_ctrld(base_cmd, self.__filename, input_arg=json.dumps(self.__sample_inputs))
+                    except Exception as e:
+                        raise Exception("{0}".format(str(e)))  
+                                 
+                ### clean up the returned output of subprocess - '\r' for windows, and 'None' because sometimes python sp.Popen adds this at the end (probably return value)
+                cleaned_split_output = output.decode("utf-8").replace('\r', '').splitlines()
+                if cleaned_split_output[-1] == "None":
+                    cleaned_split_output = cleaned_split_output[:-1]
+                ### uncomment below line for debugging
+                # print("CSO =>", cleaned_split_output)
+                sub_outputs.append(cleaned_split_output)
+                ### remove throwaway files after uploaded script has been run on them => if they exist!
                 return sub_outputs
             else:
                 if self.__init_data is not None:
@@ -129,9 +129,9 @@ class Verifier:
             input_types = ["file" for x in range(num_tests)]
         elif self.__input_type == "default":
             if self.__sample_inputs is not None:
-                num_tests = len(self.__sample_inputs)
-                input_lengths = [len(inp) for inp in self.__sample_inputs]
-                input_types = [type(inp[0]).__name__.lower() for inp in self.__sample_inputs]
+                num_tests = 1
+                input_lengths = len(self.__sample_inputs)
+                input_types = type(self.__sample_inputs[0]).__name__.lower()
             else:
                 num_tests = 1
                 input_lengths = ["N/A"]
@@ -162,7 +162,7 @@ class Verifier:
                 result_dict["success_rate"] = "File IO"
             num_failures = len(mismatches)
             result_dict["num_failures"] = num_failures
-            result_dict["num_tests"] = test_stats[1][count]
+            result_dict["num_tests"] = test_stats[1]
             try:
                 result_dict["failure_rate"] = round((int(num_failures)/num_outputs), 4) * 100
             except Exception as e:
@@ -183,15 +183,17 @@ class Verifier:
         test_stats = self.__detail_inputs()
 
         overall_score = 0
+        
         ### loop to compare sub output with sample output in one go, as if they were two columns, one beside the other
         for count, (sub_output, samp_output) in enumerate(zip(sub_outputs, sample_outputs)):
             result_dict = get_result_stats()
+            print("YO")
             status = "success" if result_dict["success_rate"] == 100 else "failure"
             scores["test_{0}".format(count+1)] = {}
             test = scores["test_{0}".format(count+1)]
             test["status"] = status
-            test["input_length"] = test_stats[1][count]
-            test["input_type"] = test_stats[2][count]
+            test["input_length"] = test_stats[1]
+            test["input_type"] = test_stats[2]
             test["detailed_stats"] = result_dict
             overall_score += result_dict["success_rate"] / 100
 

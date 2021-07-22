@@ -7,9 +7,11 @@ constraints:
     re: ["compile"]
   disallowed_functions: []
 input_type: 
-  networking:
+  default:
     False
 num_tests: 1
 category: ["networking"]
 main_function: "get_word_freq_topn"
 pass_threshold: 98
+init_data: True
+input_length: 0

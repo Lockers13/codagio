@@ -8,15 +8,14 @@ TEMPLATE_CODE_DEFAULT = ["def prep_input():",
                 "        print(\"Error: please make sure correct input has been provided\")",
                 "        sys.exit(1)\n",
                 "def main():",
-                "    input_list = prep_input()",
+                "    input_list_or_init_data = prep_input()",
                 "    try:",
-                "        for inp in input_list:",
-                "            print(\"{0} {1}\".format(inp, template_function(inp)))",
+                "        print(\"{0}\".format(template_function(input_list_or_init_data)))",
                 "    except Exception as e:",
                 "        print('EXCEPTION: semantic error in submitted program: {0}'.format(str(e)))\n",
                 "main()"]
 
-TEMPLATE_CODE_DEFAULT_WITH_DATA = ["def prep_input():",
+TEMPLATE_CODE_DEFAULT_WITH_INPUT_AND_DATA = ["def prep_input():",
                 "    try:",
                 "        return json_load(argv[1]), json_load(argv[2])",
                 "    except IndexError:",
@@ -25,8 +24,7 @@ TEMPLATE_CODE_DEFAULT_WITH_DATA = ["def prep_input():",
                 "def main():",
                 "    input_list, init_data = prep_input()",
                 "    try:",
-                "        for inp in input_list:",
-                "            print(\"{0} {1}\".format(inp, template_function(inp, init_data)))",
+                "        print(\"{0}\".format(template_function(input_list, init_data)))",
                 "    except Exception as e:",
                 "        print('EXCEPTION: semantic error in submitted program: {0}'.format(str(e)))\n",
                 "main()"]
@@ -78,36 +76,15 @@ TEMPLATE_CODE_FILE_WITH_DATA = ["def prep_output():",
                 "        print('EXCEPTION: semantic error in submitted program: {0}'.format(str(e)))\n",
                 "main()"]
 
-TEMPLATE_CODE_NETWORKING = ["def main():",
-                "    try:",
-                "        if len(argv) == 2:",
-                "            custom_input = json_load(argv[1])",
-                "            print(\"{0}\".format(template_function(custom_input)))",
-                "    except Exception as e:",
-                "        print('EXCEPTION: semantic error in submitted program: {0}'.format(str(e)))\n",
-                "main()"
-]
-
-TEMPLATE_CODE_NETWORKING_WITH_DATA = ["def main():",
-                "    try:",
-                "        init_data = json_load(argv[1])",
-                "        print(\"{0}\".format(template_function(init_data)))",
-                "    except Exception as e:",
-                "        print('EXCEPTION: semantic error in submitted program: {0}'.format(str(e)))\n",
-                "main()"
-]
-
 
 def get_ctemp_dict():
 
     ctemps = {
         "IMPORTS": IMPORTS,
         "TEMPLATE_CODE_DEFAULT": TEMPLATE_CODE_DEFAULT,
-        "TEMPLATE_CODE_DEFAULT_WITH_DATA": TEMPLATE_CODE_DEFAULT_WITH_DATA,
+        "TEMPLATE_CODE_DEFAULT_WITH_INPUT_AND_DATA": TEMPLATE_CODE_DEFAULT_WITH_INPUT_AND_DATA,
         "TEMPLATE_CODE_FILE": TEMPLATE_CODE_FILE,
         "TEMPLATE_CODE_FILE_WITH_DATA": TEMPLATE_CODE_FILE_WITH_DATA,
-        "TEMPLATE_CODE_NETWORKING": TEMPLATE_CODE_NETWORKING,
-        "TEMPLATE_CODE_NETWORKING_WITH_DATA": TEMPLATE_CODE_NETWORKING_WITH_DATA,
     }
     
     return ctemps

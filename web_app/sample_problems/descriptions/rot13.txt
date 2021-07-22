@@ -1,9 +1,15 @@
-Challenge - write a function which implements the classic Rot13 Cipher
+Challenge - write a function which takes as its sole parameter a list of randomized alphabetic ascii strings
+and for each string in the list prints the original string together with the result of applying the classic
+Rot13 cypher to it, viz.:
+
+hello : uryyb
 
 Exception handling must be implemented for the following cases:
 
-1. The input passed to the function is not a string
-(On exception return the string  "Error: input is not a string!")
+1. If the input item is not a string, the print the item together with the message 
+"Error, input is not a string", viz.:
+
+["a", "b", "c"] : Error, input is not a string
 
 In the editor, you are allowed to make the following imports to complete this task:
 

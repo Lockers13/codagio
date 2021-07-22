@@ -27,15 +27,13 @@ def make_file(path, code, problem_data):
             else:
                 text_to_write = ctemps["TEMPLATE_CODE_FILE"]
         elif input_type == "default": ### CHANGE 'auto' TO 'default' AFTER PROBLEM UPLOAD VIEW IS CLEANED !!!
-            if init_data is not None:
-                text_to_write = ctemps["TEMPLATE_CODE_DEFAULT_WITH_DATA"]
-            else:
+            if is_inputs:
+                if is_init_data:
+                    text_to_write = ctemps["TEMPLATE_CODE_DEFAULT_WITH_INPUT_AND_DATA"]
+                else:
+                    text_to_write = ctemps["TEMPLATE_CODE_DEFAULT"]
+            elif is_init_data:
                 text_to_write = ctemps["TEMPLATE_CODE_DEFAULT"]
-        elif input_type == "networking":
-            if is_input is None:
-                text_to_write = ctemps["TEMPLATE_CODE_NETWORKING"]
-            else:
-                text_to_write = ctemps["TEMPLATE_CODE_NETWORKING_WITH_DATA"]
 
         for line in text_to_write:
             if "template_function" in line:
@@ -47,7 +45,8 @@ def make_file(path, code, problem_data):
     input_type = list(problem_data["metadata"]["input_type"].keys())[0]
     main_function = problem_data["metadata"]["main_function"]
     init_data = problem_data["init_data"]
-    is_input = problem_data.get("inputs", None)
+    is_init_data = problem_data["metadata"]["init_data"]
+    is_inputs = problem_data["metadata"]["inputs"]
 
     with open(path, 'w') as f:
         write_prequel(f)
@@ -69,25 +68,24 @@ def gen_sample_outputs(filename, inputs, init_data=None, input_type="default"):
     Returns a list of outputs that are subsequently stored in DB as field associated with given problem"""
     
     platform = sys.platform.lower()
-    SAMPUP_TIMEOUT = "5"
-    SAMPUP_MEMOUT = "500"
+    SAMPUP_TIMEOUT = "8"
+    SAMPUP_MEMOUT = "1000"
     timeout_cmd = "gtimeout {0}".format(SAMPUP_TIMEOUT) if platform == "darwin" else "timeout {0} -m {1}".format(SAMPUP_TIMEOUT, SAMPUP_MEMOUT) if platform == "linux" or platform == "linux2" else ""
     base_cmd = "{0} python".format(timeout_cmd)
     outputs = []
     if input_type == "default":
         programmatic_inputs = inputs
         if inputs is not None:
-            for i in range(len(programmatic_inputs)): 
-                if init_data is not None: 
-                    output = spc.run_subprocess_ctrld(base_cmd, filename, input_arg=json.dumps(programmatic_inputs[i]), init_data=init_data)
-                else:
-                    output = spc.run_subprocess_ctrld(base_cmd, filename, input_arg=json.dumps(programmatic_inputs[i]))
-                cleaned_split_output = output.decode("utf-8").replace('\r', '').splitlines()
-                if cleaned_split_output[-1] == "None":
-                    cleaned_split_output = cleaned_split_output[:-1]
-                ### uncomment below line for debugging
-                # print("CSO =>", cleaned_split_output)
-                outputs.append(cleaned_split_output)
+            if init_data is not None: 
+                output = spc.run_subprocess_ctrld(base_cmd, filename, input_arg=json.dumps(programmatic_inputs), init_data=init_data)
+            else:
+                output = spc.run_subprocess_ctrld(base_cmd, filename, input_arg=json.dumps(programmatic_inputs))
+            cleaned_split_output = output.decode("utf-8").replace('\r', '').splitlines()
+            if cleaned_split_output[-1] == "None":
+                cleaned_split_output = cleaned_split_output[:-1]
+            ### uncomment below line for debugging
+            # print("CSO =>", cleaned_split_output)
+            outputs.append(cleaned_split_output)
             return outputs
         else:
             if init_data is not None: 

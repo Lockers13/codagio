@@ -1,10 +1,21 @@
-Challenge - write a function which takes a hexadecimal string as its sole parameter and returns its corresponding integer value.
+Challenge - write a function which takes a list of hexadecimal strings as its sole parameter,
+and for each string in the list prints the original string together with its decimal value
+in the following format, e.g.:
+
+0xAF : 175
 
 Exception handling must be implemented for the following cases:
 
-1. The string passed to the function does not begin with the characters '0x'
-(On exception return the string  "Error: the provided string does not begin with a leading '0x'")
-2. The string does begin with the characters '0x', but is not in valid hexadecimal format
-(On exception return the string  "Error: the provided string contains invalid characters!")
+1. If the string passed to the function does not begin with the characters '0x',
+then print the string together with the message "Error: does not begin with a leading '0x'", viz.:
+
+934 : Error: does not begin with a leading '0x'
+
+2. If the string does begin with the characters '0x', but is not in valid hexadecimal format
+then print the string together with the message "Error: invalid characters", viz.:
+
+0x12FQ2 : Error: invalid characters
+
+-------------------------------------------------------------------------------------
 
 Good Luck!

@@ -54,6 +54,8 @@ def retrieve_form_data(form, submission_type="solution"):
             processed_data["metadata"]["description"] = description
             processed_data["date_submitted"] = datetime.now()
             processed_data["inputs"] = data.get("inputs", None)
+            processed_data["metadata"]["inputs"] = True if processed_data["inputs"] is not None else False
+            processed_data["metadata"]["init_data"] = True if processed_data["init_data"] is not None else False
         except Exception as e:
             print("POST NOT OK: Error during intial processing of uploaded data - {0}".format(str(e)))
             return Response(ERROR_CODES["Form Submission Error"], status=status.HTTP_400_BAD_REQUEST)

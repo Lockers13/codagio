@@ -147,7 +147,7 @@ class Profiler:
             #         print(line)
             
             platform = sys.platform.lower()
-            LPROF_TIMEOUT = "15"
+            LPROF_TIMEOUT = "12"
             LPROF_MEMOUT = "1000"
             # call kernprof as subprocess, redirecting stdout to pipe, and read results
             timeout_cmd = "gtimeout {0}".format(LPROF_TIMEOUT) if platform == "darwin" else "timeout {0} -m {1}".format(LPROF_TIMEOUT, LPROF_MEMOUT) if platform == "linux" or platform == "linux2" else ""
@@ -163,7 +163,7 @@ class Profiler:
                     output = run_subprocess_ctrld(base_cmd, pro_file, input_arg="lprof_script.py", stage="line_profile")
                 os.remove("lprof_script.py")
             elif self.__input_type == "default":
-                input_arg = json.dumps(self.__sample_inputs[0]) if self.__sample_inputs  is not None else None
+                input_arg = json.dumps(self.__sample_inputs) if self.__sample_inputs  is not None else None
                 # crucially, readlines() is blocking for pipes
                 if self.__init_data is not None:
                     output = run_subprocess_ctrld(base_cmd, pro_file, input_arg=input_arg, init_data=self.__init_data, stage="line_profile")
@@ -228,8 +228,8 @@ class Profiler:
                     pass
 
         platform = sys.platform.lower()
-        CPROF_TIMEOUT = "5"
-        CPROF_MEMOUT = "500"
+        CPROF_TIMEOUT = "8"
+        CPROF_MEMOUT = "1000"
         # call cProfile as subprocess, redirecting stdout to pipe, and read results, as before
         timeout_cmd = "gtimeout {0}".format(CPROF_TIMEOUT) if platform == "darwin" else "timeout {0} -m {1}".format(CPROF_TIMEOUT, CPROF_MEMOUT) if platform == "linux" or platform == "linux2" else ""
         base_cmd = "{0} python -m cProfile -s time".format(timeout_cmd) 
@@ -242,7 +242,7 @@ class Profiler:
                 output = run_subprocess_ctrld(base_cmd, self.__filename, input_arg="cprof_script.py", stage="c_profile")
             os.remove("cprof_script.py")
         elif self.__input_type == "default":
-            input_arg = json.dumps(self.__sample_inputs[0]) if self.__sample_inputs is not None else None
+            input_arg = json.dumps(self.__sample_inputs) if self.__sample_inputs is not None else None
             if self.__init_data is not None:
                 output = run_subprocess_ctrld(base_cmd, self.__filename, input_arg=input_arg, init_data=self.__init_data, stage="c_profile")
             else:

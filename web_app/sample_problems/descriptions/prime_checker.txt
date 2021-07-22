@@ -1,9 +1,15 @@
-Challenge - write a simple function which returns True if the passed number is prime & false otherwise.
+Challenge - write a function which takes a list of numbers as its sole parameter,
+and for each number in the list prints the original number together with the value True if it is prime,
+and False otherwise, e.g.:
+
+11 : True
 
 Exception handling must be implemented for the following cases:
 
-1. Something other than an integer is passed to the function 
-(On exception return the string  "Not an integer!")
+1. If the list element is not an integer, then print the item together with
+the message "Not an integer", viz.:
+
+balloon : Not an integer
 
 In the editor, you are allowed to import the following modules to complete this task:
 
