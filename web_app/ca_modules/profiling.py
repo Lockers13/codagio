@@ -167,6 +167,8 @@ class Profiler:
                 # crucially, readlines() is blocking for pipes
                 if self.__init_data is not None:
                     output = run_subprocess_ctrld(base_cmd, pro_file, input_arg=input_arg, init_data=self.__init_data, stage="line_profile")
+                    print("Lprof OUT =>", output)
+
                 else:
                     output = run_subprocess_ctrld(base_cmd, pro_file, input_arg=input_arg, stage="line_profile")
 
@@ -244,7 +246,10 @@ class Profiler:
         elif self.__input_type == "default":
             input_arg = json.dumps(self.__sample_inputs) if self.__sample_inputs is not None else None
             if self.__init_data is not None:
+                print("input =>", input_arg)
+                print("init_data =>", self.__init_data)
                 output = run_subprocess_ctrld(base_cmd, self.__filename, input_arg=input_arg, init_data=self.__init_data, stage="c_profile")
+                print("Cprof out =>", output)
             else:
                 output = run_subprocess_ctrld(base_cmd, self.__filename, input_arg=input_arg, stage="c_profile")
 

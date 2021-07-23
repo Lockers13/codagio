@@ -1,0 +1,16 @@
+difficulty: "Medium"
+constraints:
+  num_args: 2
+  allowed_abs_imports: []
+  allowed_rel_imports:
+    requests : ["get"]
+    re: ["compile"]
+  disallowed_functions: []
+input_type: 
+  default:
+    custom
+num_tests: 1
+category: ["networking", "iteration"]
+main_function: "get_word_freq"
+pass_threshold: 90
+input_length: 1000

@@ -46,7 +46,10 @@ def retrieve_form_data(form, submission_type="solution"):
                     raise Exception("Invalid JSON in init_data_file! - {0}".format(str(e)))
             else:
                 processed_data["init_data"] = None
-            processed_data["name"] = data.get("name")
+            processed_data["name"] = data.get("name").replace("(", "[").replace(")", "]")
+            if "(" in processed_data["name"] or ")" in processed_data["name"]:
+                print("POST NOT OK: Problem Name cannot contain parnetheses!")
+                return Response(ERROR_CODES["Form Submission Error"], status=status.HTTP_400_BAD_REQUEST)
             description = data.get("description")
             processed_data["program_file"] = data.get("program")
             processed_data["code"] = [line.decode("utf-8") for line in processed_data["program_file"].read().splitlines()]
