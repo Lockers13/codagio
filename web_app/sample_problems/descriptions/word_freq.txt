@@ -1,0 +1,18 @@
+Challenge - write a function that takes as its first parameter a list of commonly occurring english words,
+and a configuration object (hashmap) as its second argument.
+
+In the config object (which is a dictionary) there is a 'url' field.
+Make a GET request to this url, which will return the text of a well known classic novel.
+
+Parse the text returned and record the frequency of occurence of each word in the text.
+Then iterate through the list of provided words, and for each word in the list, print the word itself,
+together with the frequency with which it occurs in the text, viz.:
+
+happy : 25
+together : 13
+
+If the word does not occur in the text, set its frequency to 0.
+
+------------------------------------------------------------------------------
+
+Good Luck!

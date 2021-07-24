@@ -192,7 +192,6 @@ class SaveProblemView(APIView):
         make_utils.make_file(filename, code_data, processed_data)
 
         inputs, outputs = pm.get_sample_inputs_outputs(filename, processed_data)
-
         ### profile uploaded reference problem (will only do cProfile and not line_profile as 'solution' is set to false)
         analyzer.profile(processed_data, solution=False)
         ### get final analysis dict

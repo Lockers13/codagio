@@ -37,7 +37,7 @@ class Verifier:
         file_list = []
 
         ### if input_type is 'file', then iterate over input dict, writing each file to disk as 'file1, file2, filen'
-        if self.__input_type == "files":
+        if self.__input_type == "file":
             for i in range(len(self.__sample_inputs["files"].keys())):
                 key = "file_{0}".format(i+1) 
                 with open("{0}.py".format(key), 'w') as f:
@@ -113,7 +113,7 @@ class Verifier:
 
         Returns tuple of relevant datapoints"""
 
-        if self.__input_type == "files":
+        if self.__input_type == "file":
             num_tests = len(self.__sample_inputs["files"].keys())
             ### get number of lines in each file (in a list => [len(file1), len(file2), len(fileN)])
             num_keys = len(self.__sample_inputs["files"].keys())
@@ -179,7 +179,6 @@ class Verifier:
         ### loop to compare sub output with sample output in one go, as if they were two columns, one beside the other
         for count, (sub_output, samp_output) in enumerate(zip(sub_outputs, sample_outputs)):
             result_dict = get_result_stats()
-            print("YO")
             status = "success" if result_dict["success_rate"] == 100 else "failure"
             scores["test_{0}".format(count+1)] = {}
             test = scores["test_{0}".format(count+1)]

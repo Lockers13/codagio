@@ -7,7 +7,7 @@ class Problem(models.Model):
     name = models.CharField(max_length=50, default=None)
     metadata = JSONField(default=dict)
     outputs = JSONField()
-    inputs = JSONField()
+    inputs = JSONField(null=True)
     analysis = JSONField(default=dict)
     init_data = JSONField(null=True)
     date_submitted = models.DateField()

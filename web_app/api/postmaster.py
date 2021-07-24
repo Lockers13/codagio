@@ -57,7 +57,10 @@ def retrieve_form_data(form, submission_type="solution"):
             processed_data["metadata"]["description"] = description
             processed_data["date_submitted"] = datetime.now()
             processed_data["inputs"] = data.get("inputs", None)
-            processed_data["metadata"]["inputs"] = True if processed_data["inputs"] is not None else False
+            if processed_data["category"] == "file_io":
+                 processed_data["metadata"]["inputs"] = "file"
+            else:
+                processed_data["metadata"]["inputs"] = True if processed_data["inputs"] is not None else False
             processed_data["metadata"]["init_data"] = True if processed_data["init_data"] is not None else False
         except Exception as e:
             print("POST NOT OK: Error during intial processing of uploaded data - {0}".format(str(e)))
@@ -126,8 +129,10 @@ def get_uploaded_form(request, problem=True):
 def get_sample_inputs_outputs(filename, processed_data):
     def file_io():
         input_hash = make_utils.handle_uploaded_file_inputs(processed_data)
-        files = ["{0}.py".format(x) for x in processed_data["inputs"].keys()]
-        outputs = make_utils.gen_sample_outputs(filename, files, processed_data, init_data=processed_data["init_data"], input_type="file")
+        files = ["{0}.py".format(x) for x in input_hash["files"].keys()]
+        processed_data["inputs"] = files
+        outputs = make_utils.gen_sample_outputs(filename, processed_data, init_data=processed_data["init_data"], input_type="file")
+        processed_data["inputs"] = input_hash
         return input_hash, outputs
     def default():
         inputs = processed_data["inputs"]
