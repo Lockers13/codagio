@@ -53,8 +53,8 @@ class Analyzer:
         verifier = Verifier(self, paragon)
         return verifier.verify_output()
 
-    def profile(self, inputs, solution=True, init_data=None):
-        profiler = Profiler(self, inputs, init_data=init_data)
+    def profile(self, problem_data, solution=True):
+        profiler = Profiler(self, problem_data)
         
         profiler.cprof()
 

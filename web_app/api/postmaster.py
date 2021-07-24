@@ -126,14 +126,13 @@ def get_uploaded_form(request, problem=True):
 def get_sample_inputs_outputs(filename, processed_data):
     def file_io():
         input_hash = make_utils.handle_uploaded_file_inputs(processed_data)
-        files = ["{0}.py".format(x) for x in input_hash["files"].keys()]
-        outputs = make_utils.gen_sample_outputs(filename, files, init_data=processed_data["init_data"], input_type="file")
+        files = ["{0}.py".format(x) for x in processed_data["inputs"].keys()]
+        outputs = make_utils.gen_sample_outputs(filename, files, processed_data, init_data=processed_data["init_data"], input_type="file")
         return input_hash, outputs
     def default():
-        input_hash = {"default": {}}
-        input_hash["default"]["custom"] = processed_data["inputs"]
-        outputs = make_utils.gen_sample_outputs(filename, input_hash["default"]["custom"], init_data=processed_data["init_data"])
-        return input_hash, outputs
+        inputs = processed_data["inputs"]
+        outputs = make_utils.gen_sample_outputs(filename, processed_data, init_data=processed_data["init_data"])
+        return inputs, outputs
 
     switch_dict = {
         'file_io': file_io,

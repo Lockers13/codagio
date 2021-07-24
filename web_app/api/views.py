@@ -105,7 +105,7 @@ class AnalysisView(APIView):
         if passed:
             try:
                 # default kwarg is init_data=None
-                analyzer.profile(problem_data["inputs"], init_data=problem_data["init_data"])            
+                analyzer.profile(problem_data)            
             except Exception as e:
                 print("POST NOT OK: {0}".format(str(e)))
                 return Response(ERROR_CODES["Server-Side Error"], status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -191,10 +191,10 @@ class SaveProblemView(APIView):
 
         make_utils.make_file(filename, code_data, processed_data)
 
-        input_hash, outputs = pm.get_sample_inputs_outputs(filename, processed_data)
+        inputs, outputs = pm.get_sample_inputs_outputs(filename, processed_data)
 
         ### profile uploaded reference problem (will only do cProfile and not line_profile as 'solution' is set to false)
-        analyzer.profile(input_hash, solution=False, init_data=processed_data["init_data"])
+        analyzer.profile(processed_data, solution=False)
         ### get final analysis dict
         analysis = analyzer.get_prog_dict()
         analysis["code_data"] = code_data
@@ -205,7 +205,7 @@ class SaveProblemView(APIView):
             defaults = {
                 'outputs': outputs,
                 'metadata': processed_data["metadata"],
-                'inputs': input_hash,
+                'inputs': inputs,
                 'analysis': analysis,
                 'init_data': processed_data["init_data"],
                 'date_submitted': processed_data["date_submitted"],

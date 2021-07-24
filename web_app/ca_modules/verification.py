@@ -18,17 +18,9 @@ class Verifier:
         self.__program_dict = analyzer.get_prog_dict()
         self.__sample_outputs = problem_data["outputs"]
         self.__meta = problem_data["metadata"]
-        self.__sample_inputs, self.__input_type = self.__get_sample_inputs_and_type(problem_data["inputs"])
+        self.__sample_inputs, self.__input_type = problem_data["inputs"], next(iter(self.__meta["input_type"]))
         self.__init_data = problem_data["init_data"]
-
-    def __get_sample_inputs_and_type(self, inputs):
-        input_dict = inputs
-        input_type = next(iter(input_dict))
-        if input_type == "files":
-            inputs = input_dict
-        elif input_type == "default":
-            inputs = input_dict[input_type]["custom"]
-        return inputs, input_type
+        self.__num_tests = self.__meta["num_tests"]
 
     def __gen_sub_outputs(self):
         """Private utility method to make hashes from output of provided submission program.

@@ -62,11 +62,12 @@ def make_file(path, code, problem_data):
 
         write_sequel(f, fname)
 
-def gen_sample_outputs(filename, inputs, init_data=None, input_type="default"):
+def gen_sample_outputs(filename, problem_data, init_data=None, input_type="default"):
     """Utility function invoked whenever a reference problem is submitted
 
     Returns a list of outputs that are subsequently stored in DB as field associated with given problem"""
     
+    inputs = problem_data["inputs"]
     platform = sys.platform.lower()
     SAMPUP_TIMEOUT = "8"
     SAMPUP_MEMOUT = "1000"
