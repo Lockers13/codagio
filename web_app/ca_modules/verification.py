@@ -1,11 +1,10 @@
-import hashlib 
-import subprocess
 import sys
 import os
 import json
 import random
 from .subprocess_ctrl import run_subprocess_ctrld
 from django.utils.translation import gettext_lazy as _
+from .output_processor import process_output
 
 class Verifier:
 
@@ -44,70 +43,19 @@ class Verifier:
                     f.write(self.__sample_inputs["files"][key])
                 file_list.append("{0}.py".format(key))
             for target_file in file_list:
-                if self.__init_data is not None:
-                    try:
-                        output = run_subprocess_ctrld(base_cmd, self.__filename, input_arg=target_file, init_data=self.__init_data)
-                    except Exception as e:
-                        raise Exception("hhh{0}".format(str(e)))
-                else:
-                    try:
-                        output = run_subprocess_ctrld(base_cmd, self.__filename, input_arg=target_file)
-                    except Exception as e:
-                        raise Exception("hhh{0}".format(str(e)))           
-                ### clean up the returned output of subprocess - '\r' for windows, and 'None' because sometimes python sp.Popen adds this at the end (probably return value)
-                cleaned_split_output = output.decode("utf-8").replace('\r', '').splitlines()
-                if cleaned_split_output[-1] == "None":
-                    cleaned_split_output = cleaned_split_output[:-1]
-                ### uncomment below line for debugging
-                # print("CSO =>", cleaned_split_output)
-                sub_outputs.append(cleaned_split_output)
-                ### remove throwaway files after uploaded script has been run on them => if they exist!
+                output = process_output(base_cmd, self.__filename, input_arg=target_file, init_data=self.__init_data)
+                sub_outputs.append(output)
                 os.remove(target_file)
-            return sub_outputs
         elif self.__input_type == "default":
             if self.__sample_inputs is not None:
                 for sample_input in self.__sample_inputs:
-                    if self.__init_data is not None:
-                            try:
-                                output = run_subprocess_ctrld(base_cmd, self.__filename, input_arg=json.dumps(sample_input), init_data=self.__init_data)
-                            except Exception as e:
-                                raise Exception("{0}".format(str(e)))
-                    else:
-                        try:
-                            output = run_subprocess_ctrld(base_cmd, self.__filename, input_arg=json.dumps(sample_input))
-                        except Exception as e:
-                            raise Exception("{0}".format(str(e)))  
-                                    
-                    ### clean up the returned output of subprocess - '\r' for windows, and 'None' because sometimes python sp.Popen adds this at the end (probably return value)
-                    cleaned_split_output = output.decode("utf-8").replace('\r', '').splitlines()
-                    if cleaned_split_output[-1] == "None":
-                        cleaned_split_output = cleaned_split_output[:-1]
-                    ### uncomment below line for debugging
-                    # print("CSO =>", cleaned_split_output)
-                    sub_outputs.append(cleaned_split_output)
+                    output = process_output(base_cmd, self.__filename, input_arg=json.dumps(sample_input), init_data=self.__init_data)
+                    sub_outputs.append(output)
                     ### remove throwaway files after uploaded script has been run on them => if they exist!
-                return sub_outputs
             else:
-                if self.__init_data is not None:
-                    try:
-                        output = run_subprocess_ctrld(base_cmd, self.__filename, init_data=self.__init_data)
-                    except Exception as e:
-                        raise Exception("{0}".format(str(e)))
-                else:
-                    try:
-                        output = run_subprocess_ctrld(base_cmd, self.__filename)
-                    except Exception as e:
-                        raise Exception("{0}".format(str(e)))                   
-                ### clean up the returned output of subprocess - '\r' for windows, and 'None' because sometimes python sp.Popen adds this at the end (probably return value)
-                cleaned_split_output = output.decode("utf-8").replace('\r', '').splitlines()
-                if cleaned_split_output[-1] == "None":
-                    cleaned_split_output = cleaned_split_output[:-1]
-                ### uncomment below line for debugging
-                # print("CSO =>", cleaned_split_output)
-                sub_outputs.append(cleaned_split_output)
-                ### remove throwaway files after uploaded script has been run on them => if they exist!
-            return sub_outputs
-        
+                output = process_output(base_cmd, self.__filename, init_data=self.__init_data)
+                sub_outputs.append(output)
+        return sub_outputs
 
     def __detail_inputs(self):
         """Utility function to get info about input type, length, etc.

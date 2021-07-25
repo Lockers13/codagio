@@ -23,7 +23,7 @@ def run_subprocess_ctrld(base_cmd, filename, input_arg=None, stage="verification
         ### run subprocess, redirecting stdout to pipe to be read
         process = subprocess.Popen(cmd_list, stdout=subprocess.PIPE)
     except Exception as e:
-        raise Exception(str(e))
+        raise Exception("YOYO" + str(e))
     ### crucially 'readlines()' and 'read()' are blocking for pipes
     output = process.stdout.read() if stage == "verification" else process.stdout.readlines()
     ### manually catch semantic error in submitted program by reading printed output that we control if an eexception is caught during its execution
