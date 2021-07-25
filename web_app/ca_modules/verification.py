@@ -66,25 +66,26 @@ class Verifier:
             return sub_outputs
         elif self.__input_type == "default":
             if self.__sample_inputs is not None:
-                if self.__init_data is not None:
+                for sample_input in self.__sample_inputs:
+                    if self.__init_data is not None:
+                            try:
+                                output = run_subprocess_ctrld(base_cmd, self.__filename, input_arg=json.dumps(sample_input), init_data=self.__init_data)
+                            except Exception as e:
+                                raise Exception("{0}".format(str(e)))
+                    else:
                         try:
-                            output = run_subprocess_ctrld(base_cmd, self.__filename, input_arg=json.dumps(self.__sample_inputs), init_data=self.__init_data)
+                            output = run_subprocess_ctrld(base_cmd, self.__filename, input_arg=json.dumps(sample_input))
                         except Exception as e:
-                            raise Exception("{0}".format(str(e)))
-                else:
-                    try:
-                        output = run_subprocess_ctrld(base_cmd, self.__filename, input_arg=json.dumps(self.__sample_inputs))
-                    except Exception as e:
-                        raise Exception("{0}".format(str(e)))  
-                                 
-                ### clean up the returned output of subprocess - '\r' for windows, and 'None' because sometimes python sp.Popen adds this at the end (probably return value)
-                cleaned_split_output = output.decode("utf-8").replace('\r', '').splitlines()
-                if cleaned_split_output[-1] == "None":
-                    cleaned_split_output = cleaned_split_output[:-1]
-                ### uncomment below line for debugging
-                # print("CSO =>", cleaned_split_output)
-                sub_outputs.append(cleaned_split_output)
-                ### remove throwaway files after uploaded script has been run on them => if they exist!
+                            raise Exception("{0}".format(str(e)))  
+                                    
+                    ### clean up the returned output of subprocess - '\r' for windows, and 'None' because sometimes python sp.Popen adds this at the end (probably return value)
+                    cleaned_split_output = output.decode("utf-8").replace('\r', '').splitlines()
+                    if cleaned_split_output[-1] == "None":
+                        cleaned_split_output = cleaned_split_output[:-1]
+                    ### uncomment below line for debugging
+                    # print("CSO =>", cleaned_split_output)
+                    sub_outputs.append(cleaned_split_output)
+                    ### remove throwaway files after uploaded script has been run on them => if they exist!
                 return sub_outputs
             else:
                 if self.__init_data is not None:

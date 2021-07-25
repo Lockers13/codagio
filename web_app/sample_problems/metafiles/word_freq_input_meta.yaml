@@ -14,3 +14,4 @@ category: ["networking", "iteration"]
 main_function: "get_word_freq"
 pass_threshold: 90
 input_length: 1000
+time_profile: True

@@ -13,3 +13,4 @@ num_tests: 3
 category: file_io
 main_function: "show_function_details"
 pass_threshold: 100
+time_profile: True

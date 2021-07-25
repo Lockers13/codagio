@@ -15,3 +15,4 @@ main_function: "get_word_freq_topn"
 pass_threshold: 98
 init_data: True
 input_length: 0
+time_profile: True

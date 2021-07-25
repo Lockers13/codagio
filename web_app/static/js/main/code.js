@@ -117,8 +117,13 @@ $("#sub_form").submit(function (e) {
                 write_skeleton(pseudo_section, samp_skels, skel_str)
                 write_overview_stats(overview_section, analysis, overview_str, abs_success=true)
                 bind_detail_links(scores)
-                write_lprof(profiling_section, fdefs, lprof_str)
-                bind_lprof_btns(fdefs)   
+                if(analysis["time_profile"] == true) {
+                    write_lprof(profiling_section, fdefs, lprof_str)
+                    bind_lprof_btns(fdefs)
+                }
+                else {
+                    profiling_section.innerHTML = "<br>Sorry, line profiling has not been configured for this problem!"
+                }
             }
             else {
                 overall.style.color = "orange"
@@ -236,16 +241,17 @@ function display_lp_graph(fdef) {
 
 function write_overview_stats(section, analysis, content_str, abs_success=false) {
     section.innerHTML = ""
-    var ufunc_tot = Math.round(parseFloat(analysis["udef_func_time_tot"]) * 10000) / 10000
-    var ref_func_tot = Math.round(parseFloat(analysis["ref_time"]) * 10000) / 10000
+    var ufunc_tot = analysis["time_profile"] == true? Math.round(parseFloat(analysis["udef_func_time_tot"]) * 10000) / 10000: "Time profiling has not been configured for this problem!"
+    var ref_func_tot = analysis["time_profile"] == true? Math.round(parseFloat(analysis["ref_time"]) * 10000) / 10000: "Time profiling has not been configured for this problem!"
     if(abs_success) {
         content_str += "<br><p>Total Time spent executing your functions: " + ufunc_tot + "</p>"
         content_str += "<p>Total Time spent executing functions of reference program: " + ref_func_tot + "</p><br>"
         content_str += "<ul>"
         var fdefs = analysis["fdefs"]
         for(fdef in fdefs) {
+            var cumulative_time = analysis["time_profile"] == true? fdefs[fdef]["cum_time"]: "Time profiling has not been configured for this problem!"
             content_str += "<li>Function Name: " + fdefs[fdef]["name"] + "<br>" +
-                            "Cumulative Time spent in function: " + fdefs[fdef]["cum_time"] + "</li><br>"
+                            "Cumulative Time spent in function: " + cumulative_time+ "</li><br>"
         }
         content_str += "</ul><br>"
     }

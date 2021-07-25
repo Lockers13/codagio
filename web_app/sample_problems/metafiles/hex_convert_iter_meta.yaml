@@ -13,3 +13,4 @@ num_tests: 1
 category: ["mathematics", "string_manipulation", "computer_architecture"]
 main_function: "hex_vert"
 pass_threshold: 100
+time_profile: True

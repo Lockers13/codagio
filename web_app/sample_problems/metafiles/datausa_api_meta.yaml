@@ -14,3 +14,4 @@ num_tests: 1
 category: ["networking"]
 main_function: "get_population_data"
 pass_threshold: 85
+time_profile: True

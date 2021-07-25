@@ -13,3 +13,4 @@ num_tests: 3
 category: ["file_io", "data_structures"]
 main_function: "name_searcher"
 pass_threshold: 100
+time_profile: True

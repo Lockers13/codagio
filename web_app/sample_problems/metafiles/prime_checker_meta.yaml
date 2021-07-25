@@ -8,8 +8,9 @@ constraints:
 input_type:
   default:
     "integer"
-input_length: 1000
-num_tests: 3
+input_length: 1
+num_tests: 10
 category: mathematics
 main_function: "is_prime"
 pass_threshold: 100
+time_profile: False

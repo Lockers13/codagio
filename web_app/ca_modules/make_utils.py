@@ -77,16 +77,17 @@ def gen_sample_outputs(filename, problem_data, init_data=None, input_type="defau
     if input_type == "default":
         programmatic_inputs = inputs
         if inputs is not None:
-            if init_data is not None: 
-                output = spc.run_subprocess_ctrld(base_cmd, filename, input_arg=json.dumps(programmatic_inputs), init_data=init_data)
-            else:
-                output = spc.run_subprocess_ctrld(base_cmd, filename, input_arg=json.dumps(programmatic_inputs))
-            cleaned_split_output = output.decode("utf-8").replace('\r', '').splitlines()
-            if cleaned_split_output[-1] == "None":
-                cleaned_split_output = cleaned_split_output[:-1]
-            ### uncomment below line for debugging
-            # print("CSO =>", cleaned_split_output)
-            outputs.append(cleaned_split_output)
+            for inp in programmatic_inputs:
+                if init_data is not None: 
+                    output = spc.run_subprocess_ctrld(base_cmd, filename, input_arg=json.dumps(inp), init_data=init_data)
+                else:
+                    output = spc.run_subprocess_ctrld(base_cmd, filename, input_arg=json.dumps(inp))
+                cleaned_split_output = output.decode("utf-8").replace('\r', '').splitlines()
+                if cleaned_split_output[-1] == "None":
+                    cleaned_split_output = cleaned_split_output[:-1]
+                ### uncomment below line for debugging
+                # print("CSO =>", cleaned_split_output)
+                outputs.append(cleaned_split_output)
             return outputs
         else:
             if init_data is not None: 

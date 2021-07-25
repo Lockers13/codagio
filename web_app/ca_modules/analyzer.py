@@ -55,11 +55,10 @@ class Analyzer:
 
     def profile(self, problem_data, solution=True):
         profiler = Profiler(self, problem_data)
-        
-        profiler.cprof()
-
-        if solution:
-            profiler.lprof()
+        if self.__metadata["time_profile"]:
+            profiler.cprof()
+            if solution:
+                profiler.lprof()
 
         #profiler.gnu_time_stats()
 

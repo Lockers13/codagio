@@ -113,7 +113,12 @@ class AnalysisView(APIView):
         ### get analysis dict
 
         analysis = analyzer.get_prog_dict()
+        
         analysis["ref_time"] = problem.analysis["udef_func_time_tot"]
+        if not problem.metadata.get("time_profile"):
+            analysis["time_profile"] = False
+        else:
+            analysis["time_profile"] = True
         analysis["pass_threshold"] = problem_data["metadata"]["pass_threshold"]
         analysis["solution_text"] = code_data
         ### write comparison stats (with reference problem) to analysis dict
