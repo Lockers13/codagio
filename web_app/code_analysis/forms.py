@@ -28,12 +28,19 @@ class BaseProblemUploadForm(forms.Form):
         content_type = content.content_type.split('/')[0]
         if content.size > settings.MAX_UPLOAD_SIZE_INPUTS:
             raise forms.ValidationError(_('Please keep filesize under %s. Current filesize %s') % (filesizeformat(settings.MAX_UPLOAD_SIZE), filesizeformat(content.size)))
-        try:
-            content = json.loads(content.read())
-            # if not isinstance(content[0], list):
-            #     raise Exception("POST NOT OK: Incorrectly formatted custom inputs!")
-        except Exception as e:
-            raise Exception("Invalid JSON in input file!")
+        content = json.loads(content.read())
+        if not isinstance(content, list):
+                raise Exception("POST NOT OK: Incorrectly formatted custom inputs!")
+        if not isinstance(content[0], list):
+            if len(content) > 10:
+                raise Exception("POST NOT OK: Simple input list too long!")
+        else:
+            if len(content) > 3:
+                raise Exception("POST NOT OK: Nested iterative input list too long!")
+            else:
+                total_len = sum([len(x) for x in content])
+                if total_len > 5000:
+                    raise Exception("POST NOT OK: Too many inputs in list elements!")
         return content
 
     def clean_program(self):

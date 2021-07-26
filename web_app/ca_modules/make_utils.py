@@ -7,7 +7,7 @@ import hashlib
 import sys
 import random
 import string
-from . import subprocess_ctrl as spc
+from .output_processor import process_output
 from . import code_templates
 
 def make_file(path, code, problem_data):
@@ -78,46 +78,27 @@ def gen_sample_outputs(filename, problem_data, init_data=None, input_type="defau
         programmatic_inputs = inputs
         if inputs is not None:
             for inp in programmatic_inputs:
-                if init_data is not None: 
-                    output = spc.run_subprocess_ctrld(base_cmd, filename, input_arg=json.dumps(inp), init_data=init_data)
-                else:
-                    output = spc.run_subprocess_ctrld(base_cmd, filename, input_arg=json.dumps(inp))
-                cleaned_split_output = output.decode("utf-8").replace('\r', '').splitlines()
-                if cleaned_split_output[-1] == "None":
-                    cleaned_split_output = cleaned_split_output[:-1]
+                input_arg = json.dumps(inp) 
+                output = process_output(base_cmd, filename, input_arg=input_arg, init_data=init_data)
                 ### uncomment below line for debugging
                 # print("CSO =>", cleaned_split_output)
-                outputs.append(cleaned_split_output)
-            return outputs
+                outputs.append(output)
         else:
-            if init_data is not None: 
-                output = spc.run_subprocess_ctrld(base_cmd, filename, init_data=init_data)
-            else:
-                output = spc.run_subprocess_ctrld(base_cmd, filename)
-            cleaned_split_output = output.decode("utf-8").replace('\r', '').splitlines()
-            if cleaned_split_output[-1] == "None":
-                cleaned_split_output = cleaned_split_output[:-1]
+            output = process_output(base_cmd, filename, init_data=init_data)
             ### uncomment below line for debugging
             # print("CSO =>", cleaned_split_output)
-            outputs.append(cleaned_split_output)
-        return outputs
+            outputs.append(output)
     elif input_type == "file":
         for script in inputs:
-            if init_data is not None:
-                output = spc.run_subprocess_ctrld(base_cmd, filename, input_arg=script, init_data=init_data)
-            else:
-                output = spc.run_subprocess_ctrld(base_cmd, filename, input_arg=script)
-            cleaned_split_output = output.decode("utf-8").replace('\r', '').splitlines()
-            if cleaned_split_output[-1] == "None":
-                cleaned_split_output = cleaned_split_output[:-1]
+            output = process_output(base_cmd, filename, input_arg=script, init_data=init_data)
             ### uncomment below line for debugging
             # print("CSO =>", cleaned_split_output)
-            outputs.append(cleaned_split_output)
+            outputs.append(output)
             try:
                 os.remove(script)
             except:
                 pass
-        return outputs
+    return outputs
 
 def get_code_from_file(path):
     with open(path, 'r') as f:

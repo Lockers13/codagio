@@ -2,7 +2,6 @@ import sys
 import os
 import json
 import random
-from .subprocess_ctrl import run_subprocess_ctrld
 from django.utils.translation import gettext_lazy as _
 from .output_processor import process_output
 

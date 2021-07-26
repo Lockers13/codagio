@@ -4,7 +4,7 @@ import platform
 import re
 import json
 import sys
-from .subprocess_ctrl import run_subprocess_ctrld
+from .output_processor import process_output
 
 class Profiler:
 
@@ -150,20 +150,12 @@ class Profiler:
             if self.__input_type == "file":
                 with open('lprof_script.py', 'w') as f:
                     f.write(self.__sample_inputs["files"]["file_1"])
-                if self.__init_data is not None:
-                    output = run_subprocess_ctrld(base_cmd, pro_file, input_arg="lprof_script.py", init_data=self.__init_data, stage="line_profile")
-                else:
-                    output = run_subprocess_ctrld(base_cmd, pro_file, input_arg="lprof_script.py", stage="line_profile")
+                output = process_output(base_cmd, pro_file, input_arg="lprof_script.py", init_data=self.__init_data, stage="line_profile")
                 os.remove("lprof_script.py")
             elif self.__input_type == "default":
                 input_arg = json.dumps(self.__sample_inputs[0]) if self.__sample_inputs is not None else None
                 # crucially, readlines() is blocking for pipes
-                if self.__init_data is not None:
-                    output = run_subprocess_ctrld(base_cmd, pro_file, input_arg=input_arg, init_data=self.__init_data, stage="line_profile")
-
-                else:
-                    output = run_subprocess_ctrld(base_cmd, pro_file, input_arg=input_arg, stage="line_profile")
-
+                output = process_output(base_cmd, pro_file, input_arg=input_arg, init_data=self.__init_data, stage="line_profile")
             process_lprof_out(output)
 
             ### clean up ###
@@ -230,18 +222,12 @@ class Profiler:
         if self.__input_type == "file":
             with open('cprof_script.py', 'w') as f:
                 f.write(self.__sample_inputs["files"]["file_1"])
-            if self.__init_data is not None:
-                output = run_subprocess_ctrld(base_cmd, self.__filename, input_arg="cprof_script.py", init_data=self.__init_data, stage="c_profile")
-            else:
-                output = run_subprocess_ctrld(base_cmd, self.__filename, input_arg="cprof_script.py", stage="c_profile")
+            output = process_output(base_cmd, self.__filename, input_arg="cprof_script.py", init_data=self.__init_data, stage="c_profile")
             os.remove("cprof_script.py")
         elif self.__input_type == "default":
             input_arg = json.dumps(self.__sample_inputs[0]) if self.__sample_inputs is not None else None
-            print("CPROF INPR ARG =>", input_arg)
-            if self.__init_data is not None:
-                output = run_subprocess_ctrld(base_cmd, self.__filename, input_arg=input_arg, init_data=self.__init_data, stage="c_profile")
-            else:
-                output = run_subprocess_ctrld(base_cmd, self.__filename, input_arg=input_arg, stage="c_profile")
+            output = process_output(base_cmd, self.__filename, input_arg=input_arg, init_data=self.__init_data, stage="c_profile")
+
 
         process_cprof_out(output)
 
