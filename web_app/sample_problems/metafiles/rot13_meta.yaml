@@ -13,4 +13,4 @@ num_tests: 3
 category: ["string_manipulation", "encryption"]
 main_function: "rot13"
 pass_threshold: 80
-time_profile: True
+time_profile: False
