@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+<div class="home">
+<div class="container" id="problems">
+    <br>
+    <h1 style="text-align:center;text-transform:capitalize;"><u>Courses</u></h1>
+    <br>
+    {% for course in courses %}
+    <button type="button" class="collapsible">{{ course.name }}</button>
+    <div class="content">
+        <p class="problem_desc" style="white-space: pre-wrap;">{{ course.description }}</p>
+        <a href="#">
+            <div class="text-center">
+                <button type="button" class="text-center go_btn">
+                    Get started
+                </button>
+            </div>
+        </a>
+        <p class="problem_author"> Tutor: {{ course.tutor }}</p>
+    </div>
+
+    {% endfor %} 
+</div>
+</div>
+
+<script type="text/javascript" src="{% static 'js/utils/collapse.js' %}"></script>
+
+{% endblock content %}
+
+

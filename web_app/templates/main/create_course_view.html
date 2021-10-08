@@ -13,9 +13,14 @@
                 {% csrf_token %}
                 <div class="form-group col-sm-12 col-md-12 col-lg-12 col-xl-12 item"><span class="upload-form-field">Course Name:</span> <span class="problem_name">{{ form.name }}</span></div>
                 <div class="form-group col-sm-12 col-md-12 col-lg-12 col-xl-12 item"><span class="upload-form-field">Course Description:</span> <span class="problem_desc">{{ form.description }}</span></div>
+                <div class="text-center">
+                    <button id="sub_btn" type="submit" class="submit_form_btn">CREATE</button>
+                </div>
             </form>
         </div>
+        <div><p id="cc_res" style="text-align:center;"></p></div>
     </div>
 </div>
-        
+
+<script type="text/javascript" src="{% static 'js/main/create_course.js' %}"></script> 
 {% endblock %}

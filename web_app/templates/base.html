@@ -56,17 +56,20 @@
                 </li>
                 {% endif %}
                 <li class="nav-item" style="float:right">
-                <div>
-                    <a class="nav-link" href="{% url 'about' %}">About Us</a>
-                </div>
+                    <div>
+                        <a class="nav-link" href="{% url 'classes:search_course_view' %}">Find A Course</a>
+                    </div>
                 </li>
                 <li class="nav-item" style="float:right">
                     <div>
                         {% if user.profile.role == "tutor" %}
-                        <a class="nav-link" href="{% url 'classes:create_course' %}">Create A Course</a>
-                        {% else %}
-                        <a class="nav-link" href="#">Find A Course</a>
+                        <a class="nav-link" href="{% url 'classes:create_course_view' %}">Create A Course</a>
                         {% endif %}
+                    </div>
+                </li>
+                <li class="nav-item" style="float:right">
+                    <div>
+                        <a class="nav-link" href="{% url 'about' %}">About Us</a>
                     </div>
                 </li>
             </ul>
