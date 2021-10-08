@@ -1,4 +1,5 @@
 const create_course_url = "http://localhost:8000/classes/create_course/"
+let course_landing_url = "http://localhost:8000/classes/course_landing/"
 
 $("#create_course_form").submit(function(e) {
     e.preventDefault();
@@ -12,8 +13,7 @@ $("#create_course_form").submit(function(e) {
     })
     .done(function(resp_data) {
         console.log(resp_data)
-        cc_res.style.color = "green"
-        cc_res.innerHTML = "Congrats, your problem was uploaded successfully!"
+        window.location.href = course_landing_url + resp_data // resp_data on success is course_id
     })
     .fail(function(resp_data) {
         console.log(resp_data)
