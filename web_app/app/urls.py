@@ -26,4 +26,5 @@ urlpatterns = [
     path('users/', include(('users.urls', 'users'), namespace="users")),
     path('about/', views.about, name="about"),
     path('api/', include(('api.urls', 'api'), namespace="api")),
+    path('classes/', include(('classes.urls', 'classes'), namespace="classes")),
 ]

@@ -60,6 +60,7 @@ INSTALLED_APPS = [
     'code_analysis',
     'accounts',
     'api',
+    'classes',
 ]
 
 MIDDLEWARE = [
