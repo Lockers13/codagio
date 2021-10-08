@@ -31,7 +31,7 @@ class AnalysisView(APIView):
         """Built-in django function to handle post requests to API endpoint
         
         Returns an HTTP response of some kind"""
-
+        print("YO")
         
         uploaded_form = pm.get_uploaded_form(request, problem=False)
 
@@ -47,6 +47,7 @@ class AnalysisView(APIView):
         if isinstance(processed_data, Response):
             return processed_data
         ### get problem instance from DB
+        
         ret_obj = pm.get_relevant_db_entries(processed_data, submission_type="solution")
         
         if isinstance(ret_obj, Response):
@@ -202,10 +203,10 @@ class SaveProblemView(APIView):
         ### get final analysis dict
         analysis = analyzer.get_prog_dict()
         analysis["code_data"] = code_data
-        
+        print("HI")
         ### save uploaded problem, with associated inputs, outputs, and metadata to DB
         problem, created = Problem.objects.update_or_create(
-            name=processed_data["name"], author_id=processed_data["author_id"],
+            name=processed_data["name"], author_id=processed_data["author_id"], course_id=processed_data["course_id"],
             defaults = {
                 'outputs': outputs,
                 'metadata': processed_data["metadata"],
@@ -213,6 +214,7 @@ class SaveProblemView(APIView):
                 'analysis': analysis,
                 'init_data': processed_data["init_data"],
                 'date_submitted': processed_data["date_submitted"],
+                'course_id': processed_data["course_id"],
                 }
             )
         problem.save()

@@ -14,6 +14,7 @@
                     {% csrf_token %}
                     <div>
                         <div class="form-group col-sm-12 col-md-12 col-lg-12 col-xl-12">{{ form.author_id }}</div>
+                        <div class="form-group col-sm-12 col-md-12 col-lg-12 col-xl-12">{{ form.course_id }}</div>
                         <div class="form-group col-sm-12 col-md-12 col-lg-12 col-xl-12 item"><span class="upload-form-field">Problem Name:</span> <span class="problem_name">{{ form.name }}</span></div>
                         <div class="form-group col-sm-12 col-md-12 col-lg-12 col-xl-12 item"><span class="upload-form-field">Problem Description:</span><span class="problem_desc">&nbsp&nbsp{{ form.description }}</span></div>
 
@@ -38,7 +39,7 @@
         </div>
     </div>
 
-
+    <script type="text/javascript"> window.CSRF_TOKEN = "{{ csrf_token }}"; </script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script type="text/javascript" src="{% static 'js/main/problem_upload.js' %}"></script> 
 {% endblock %}

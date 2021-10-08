@@ -33,12 +33,13 @@ def solution_upload(request, prob_id):
 
     return render(request, 'main/code.html', context)
 
-def problem_upload(request, problem_cat):
+def problem_upload(request, problem_cat, course_id):
     ### obviously, since the user is creating a problem, there is no problem data to retrieve from DB
     ### nevertheless we minimally set the initial state of the form with the small amount of data we do have
     initial_state = {
         'author_id': request.user.id,
         'category': problem_cat,
+        'course_id': course_id,
     }
     ### check the type of problem being uploaded, and load appropriate form
     if problem_cat == "default":

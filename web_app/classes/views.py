@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from . import forms as course_forms
-from .models import Course
+from .models import Course, Enrolment
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.decorators import api_view
@@ -25,12 +25,20 @@ def create_course(request):
         return Response("Failure: {0}".format(str(e)), status=status.HTTP_400_BAD_REQUEST)
 
 def search_course_view(request):
-    courses = list(Course.objects.all())
+    courses =[enrolment.course for enrolment in list(Enrolment.objects.filter(student=request.user).all())]
     context = {'title': 'CGC: Code For Code\'s Sake', 'courses': courses}
     return render(request, 'main/course_view.html', context)
+
+def enrol_course(request):
+    # enrolment, created = Enrolment.objects.update_or_create(
+    #     student=request.user,
+    #     defaults={'course': courses[0]}
+    # )
+    # enrolment.save()
+    pass
 
 def course_landing(request, course_id):
     problems = list(Problem.objects.filter(course_id=course_id).all())
     course = Course.objects.filter(id=course_id).first()
-    context = {'title': 'CGC: Code For Code\'s Sake', 'problems': problems, 'course': course, 'user_profile': request.user.profile}
+    context = {'title': 'CGC: Code For Code\'s Sake', 'problems': problems, 'course': course, 'user': request.user.profile}
     return render(request, 'main/course_landing.html', context)

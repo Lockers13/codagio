@@ -57,6 +57,7 @@ $("#prob_form").submit(function(e) {
         url: problem_upload_url,
         type: 'POST',
         data: new FormData(this),
+        csrfmiddlewaretoken: window.CSRF_TOKEN,
         processData: false,
         contentType: false,
     })

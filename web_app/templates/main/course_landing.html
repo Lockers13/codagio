@@ -6,7 +6,7 @@
     <br>
     <h1>{{ course.name }}</h1>
     <div>
-        <p>{{ course.description }}</p>
+        <p>{{ course.description }}</p> 
     </div>
     <h3 style="text-align:center;text-transform:capitalize;"><u>Problems</u></h1>
     {% if problems %}
@@ -18,7 +18,11 @@
     {% endif %}
     <br><br>
     {% if user_profile.role == "tutor" %}
-        <button>Upload a problem</button>
+    <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown">Upload A Problem</a>
+    <ul class="dropdown-menu">
+        <li><a class="dropdown-item" href="{% url 'code:problem_upload' problem_cat='default' course_id=course.id %}">Default</a></li>
+        <li><a class="dropdown-item" href="{% url 'code:problem_upload' problem_cat='file_io' course_id=course.id %}">File I/O</a></li>
+    </ul>
     {% endif %}
 <!--
     <h1 style="text-align:center;text-transform:capitalize;"><u>Courses</u></h1>

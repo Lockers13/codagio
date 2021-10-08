@@ -37,6 +37,7 @@ def retrieve_form_data(form, submission_type="solution"):
             processed_data["category"] = data.get("category")
             processed_data["target_file"] = data.get("target_file", None)
             processed_data["data_file"] = data.get("data_file", None)
+            processed_data["course_id"] = data.get("course_id", None)
             if processed_data["data_file"] is not None:
                 processed_data["data_file"].seek(0)
                 processed_data["init_data"] = processed_data["data_file"].read().decode("utf-8")
@@ -107,10 +108,6 @@ def get_relevant_db_entries(data, submission_type="solution"):
     elif submission_type == "problem_upload":
         try:
             author = User.objects.filter(id=data.get("author_id")).first()
-            ### only allow registered superusers to upload problems - this feature may need reviewing!
-            if not author.is_superuser:
-                print("POST NOT OK: author not superuser")
-                return Response(ERROR_CODES["Permission Denied Error"], status=status.HTTP_403_FORBIDDEN)
         except Exception as e:
             print("POST NOT OK: uid db error (error getting author) => {0}".format(str(e)))
             return Response(ERROR_CODES["Server-Side Error"], status=status.HTTP_500_INTERNAL_SERVER_ERROR)
