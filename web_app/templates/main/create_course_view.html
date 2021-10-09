@@ -12,6 +12,7 @@
             <form id="create_course_form" action="" method="post" enc="multipart/form-data">
                 {% csrf_token %}
                 <div class="form-group col-sm-12 col-md-12 col-lg-12 col-xl-12 item"><span class="upload-form-field">Course Name:</span> <span class="problem_name">{{ form.name }}</span></div>
+                <div class="form-group col-sm-12 col-md-12 col-lg-12 col-xl-12 item"><span class="upload-form-field">Course Code:</span> <span class="problem_name">{{ form.code }}</span></div>
                 <div class="form-group col-sm-12 col-md-12 col-lg-12 col-xl-12 item"><span class="upload-form-field">Course Description:</span> <span class="problem_desc">{{ form.description }}</span></div>
                 <div class="text-center">
                     <button id="sub_btn" type="submit" class="submit_form_btn">CREATE</button>

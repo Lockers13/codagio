@@ -23,15 +23,31 @@
 
         {% endfor %}
     {% else %}
-        <p>You are not enrolled in any courses!</p>
+        <p style="text-align:center;">You are not enrolled in any courses!</p>
     {% endif %}
     <br>
-    <button>Enrol in a course now!</button>
+    <div class="row no-gutters">
+        <div class="col-sm-12 col-md-12 col-lg-12 col-xl-12 nopadding">
+            <div>
+                <h2 class="text-center" style="padding:20px;"><u>Enrol in a Course Now!</u></h2>
+            </div>
+            <div class="text-left upload_form" style="padding-left:20px;">
+                <form id="enrol_course_form" action="" method="post" enc="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="form-group col-sm-12 col-md-12 col-lg-12 col-xl-12 item"><span class="upload-form-field">Course Code (Max Length => 15):</span> <span class="problem_name">{{ form.code }}</span></div>
+                    <div class="text-center">
+                        <button id="sub_btn" type="submit" class="submit_form_btn">ENROL</button>
+                    </div>
+                </form>
+            </div>
+            <div><p id="ce_res" style="text-align:center;"></p></div>
+        </div>
+    </div>
 </div>
 </div>
-
+<script type="text/javascript">window.CSRF_TOKEN = "{{ csrf_token }}";</script> 
 <script type="text/javascript" src="{% static 'js/utils/collapse.js' %}"></script>
-
+<script type="text/javascript" src="{% static 'js/main/enrol_course.js' %}"></script>
 {% endblock content %}
 
 
