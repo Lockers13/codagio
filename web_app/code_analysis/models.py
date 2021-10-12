@@ -16,10 +16,11 @@ class Problem(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE, null=True)
 
 class Solution(models.Model):
-    submitter = models.ForeignKey(Profile, on_delete=models.CASCADE)
+    submitter = models.ForeignKey(User, on_delete=models.CASCADE)
     problem = models.ForeignKey(Problem, on_delete=models.CASCADE)
     analysis = JSONField()
     date_submitted = models.DateField()
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, null=True)
     
     class Meta:
-        unique_together = ('submitter', 'problem')
+        unique_together = ('submitter', 'problem',  'course_id')

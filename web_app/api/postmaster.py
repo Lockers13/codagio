@@ -21,9 +21,11 @@ def retrieve_form_data(form, submission_type="solution"):
     if submission_type == "solution":
         processed_data = {}
         try:
+            print("FCD =>", form.cleaned_data)
             processed_data["prob_id"] = int(form.cleaned_data.get("problem_id"))
             processed_data["uid"] = int(form.cleaned_data.get("user_id"))
             processed_data["code_data"] = form.cleaned_data.get("solution")
+            processed_data["course_id"] = form.cleaned_data.get("course_id", None)
         except Exception as e:
             print("POST NOT OK: Error during intial processing of uploaded data - {0}".format(str(e)))
             return Response(ERROR_CODES["Form Submission Error"], status=status.HTTP_400_BAD_REQUEST)

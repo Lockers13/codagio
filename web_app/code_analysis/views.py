@@ -12,11 +12,13 @@ def solution_upload(request, prob_id):
     difficulty = metadata['difficulty']
     description = metadata['description']
     main_signature = problem.analysis.get("main_signature", None)
+    
 
     initial_state = {
         'user_id': request.user.id,
         'problem_id': prob_id,
         'solution': "",
+        'course_id': problem.course_id,
     }
 
     ### load appropriate form

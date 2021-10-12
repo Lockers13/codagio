@@ -19,6 +19,7 @@ class SolutionSubmissionForm(forms.Form):
     problem_id = forms.IntegerField(widget=forms.HiddenInput(), required=True)
     user_id = forms.IntegerField(widget=forms.HiddenInput(), required=True)
     solution = forms.CharField(widget=forms.HiddenInput())
+    course_id = forms.IntegerField(widget=forms.HiddenInput(), required=True)
 
 class BaseProblemUploadForm(forms.Form):
     def clean_inputs(self):

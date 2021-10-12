@@ -11,13 +11,24 @@
     <h3 style="text-align:center;text-transform:capitalize;"><u>Problems</u></h1>
     {% if problems %}
         {% for problem in problems %}
-            <button type="button" class="collapsible">{{ problem.name }}</button>
+            <button type="button" class="collapsible">{{ problem.name }} ({{ problem.metadata.difficulty }}) </button>
+            <div class="content">
+                <p class="problem_desc" style="white-space: pre-wrap;">{{ problem.metadata.description }}</p>
+                <a href="{% url 'code:solution' prob_id=problem.id %}">
+                    <div class="text-center">
+                        <button type="button" class="text-center go_btn">
+                            Get started
+                        </button>
+                    </div>
+                </a>
+                <p class="problem_author"> Created by {{ problem.author__username }}</p>
+            </div>
         {% endfor %}
     {% else %}
         <p>There do not appear to be any problems associated with this course</p>
     {% endif %}
     <br><br>
-    {% if user_profile.role == "tutor" %}
+    {% if user.profile.role == "tutor" %}
     <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown">Upload A Problem</a>
     <ul class="dropdown-menu">
         <li><a class="dropdown-item" href="{% url 'code:problem_upload' problem_cat='default' course_id=course.id %}">Default</a></li>

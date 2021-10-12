@@ -3,6 +3,8 @@
 {% block content %}
 <div class="home">
 <div class="container" id="problems">
+
+{% if user.profile.role == "student" %}
     <br>
     <h1 style="text-align:center;text-transform:capitalize;"><u>Courses</u></h1>
     <br>
@@ -11,10 +13,10 @@
         <button type="button" class="collapsible">{{ course.name }}</button>
         <div class="content">
             <p class="problem_desc" style="white-space: pre-wrap;">{{ course.description }}</p>
-            <a href="#">
+            <a href="{% url 'classes:course_landing' course_id=course.id %}">
                 <div class="text-center">
                     <button type="button" class="text-center go_btn">
-                        Get started
+                        Go to Course
                     </button>
                 </div>
             </a>
@@ -43,11 +45,54 @@
             <div><p id="ce_res" style="text-align:center;"></p></div>
         </div>
     </div>
+
+{% elif user.profile.role == "tutor" %}
+
+<br>
+<h1 style="text-align:center;text-transform:capitalize;"><u>Your Courses</u></h1>
+<br>
+{% if courses %}
+{% for course in courses %}
+<button type="button" class="collapsible">{{ course.name }}</button>
+<div class="content">
+    <p class="problem_desc" style="white-space: pre-wrap;">{{ course.description }}</p>
+    <a href="{% url 'classes:course_landing' course_id=course.id %}">
+        <div class="text-center">
+            <button type="button" class="text-center go_btn">
+                Go to Course
+            </button>
+        </div>
+    </a>
+</div>
+{% endfor %}
+{% else %}
+<p style="white-space: pre-wrap;">Oops, you have not created any courses yet!</p>
+{% endif %}
+<div class="row no-gutters">
+    <div class="col-sm-12 col-md-12 col-lg-12 col-xl-12 nopadding">
+        <div>
+            <h2 class="text-center" style="padding:20px;"><u>Create Your Course Below</u></h2>
+        </div>
+        <div class="text-left upload_form" style="padding-left:20px;">
+            <form id="create_course_form" action="" method="post" enc="multipart/form-data">
+                {% csrf_token %}
+                <div class="form-group col-sm-12 col-md-12 col-lg-12 col-xl-12 item"><span class="upload-form-field">Course Name:</span> <span class="problem_name">{{ form.name }}</span></div>
+                <div class="form-group col-sm-12 col-md-12 col-lg-12 col-xl-12 item"><span class="upload-form-field">Course Code:</span> <span class="problem_name">{{ form.code }}</span></div>
+                <div class="form-group col-sm-12 col-md-12 col-lg-12 col-xl-12 item"><span class="upload-form-field">Course Description:</span> <span class="problem_desc">{{ form.description }}</span></div>
+                <div class="text-center">
+                    <button id="sub_btn" type="submit" class="submit_form_btn">CREATE</button>
+                </div>
+            </form>
+        </div>
+        <div><p id="cc_res" style="text-align:center;"></p></div>
+    </div>
+</div>
+{% endif %}
 </div>
 </div>
 <script type="text/javascript">window.CSRF_TOKEN = "{{ csrf_token }}";</script> 
 <script type="text/javascript" src="{% static 'js/utils/collapse.js' %}"></script>
-<script type="text/javascript" src="{% static 'js/main/enrol_course.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/main/course.js' %}"></script> 
 {% endblock content %}
 
 
