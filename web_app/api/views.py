@@ -16,6 +16,7 @@ from django.contrib.auth.models import User
 from . import postmaster as pm
 from app import settings
 from code_analysis import forms as ca_forms
+from classes.models import Course, Enrolment
 
 ################################################ code analysis API endpoints #######################################
 
@@ -162,7 +163,7 @@ class SaveProblemView(APIView):
             if not uploaded_form.is_valid():
                 return Response(ERROR_CODES["Form Submission Error"], status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
-            print("POST NOT OK: {0}".format(str(e)))
+            print("1POST NOT OK: {0}".format(str(e)))
             return Response(ERROR_CODES["Form Submission Error"], status=status.HTTP_400_BAD_REQUEST)
 
         processed_data = pm.retrieve_form_data(uploaded_form, submission_type="problem_upload")
@@ -187,7 +188,7 @@ class SaveProblemView(APIView):
         try:
             validation_result = analyzer.visit_ast()
         except Exception as e:
-            print("POST NOT OK: {0}".format(str(e)))
+            print("2POST NOT OK: {0}".format(str(e)))
             os.remove(filename)
             return Response(ERROR_CODES["Syntax Error"], status=status.HTTP_400_BAD_REQUEST)
         
@@ -277,3 +278,39 @@ def delete_problem(request, pk):
     except Exception as e:
         return Response("Ill-configured DELETE request: {0}".format(str(e)), status=status.HTTP_400_BAD_REQUEST)
     return Response("DELETE OK", status=status.HTTP_200_OK)
+
+############################################## Course API endpoints ################################################
+
+@api_view(['POST'])
+def create_course(request):
+    try:
+        course, created = Course.objects.update_or_create(
+            tutor=request.user,
+            name = request.POST.get("name", None),
+            defaults={'name': request.POST.get("name", None), 
+                'description': request.POST.get("description", None),
+                'code': request.POST.get("code", None)
+            }
+        )
+        course.save()
+        return Response(str(course.id), status=status.HTTP_200_OK)
+    except Exception as e:
+        return Response("Failure: {0}".format(str(e)), status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['POST'])
+def enrol_course(request):
+    try:
+        course_code = request.POST.get("code", None)
+        course = Course.objects.filter(code=course_code).first()
+        if course:
+            enrolment, created = Enrolment.objects.update_or_create(
+                student=request.user,
+                course = course,
+                defaults={}
+            )
+            enrolment.save()
+            return Response(str(course.id), status=status.HTTP_200_OK)
+        else:
+            return Response("Failure: no such course", status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        return Response("Failure {0}".format(str(e)), status=status.HTTP_400_BAD_REQUEST)

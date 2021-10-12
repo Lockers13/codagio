@@ -1,6 +1,6 @@
-const create_course_url = "http://localhost:8000/classes/create_course/"
+const create_course_url = "http://localhost:8000/api/courses/create_course/"
 let course_landing_url = "http://localhost:8000/classes/course_landing/"
-const enrol_course_url = "http://localhost:8000/classes/enrol_course/"
+const enrol_course_url = "http://localhost:8000/api/courses/enrol_course/"
 
 $("#enrol_course_form").submit(function(e) {
     e.preventDefault();

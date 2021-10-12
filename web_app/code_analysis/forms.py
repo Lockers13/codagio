@@ -67,8 +67,8 @@ class BaseProblemUploadForm(forms.Form):
             if content.size > settings.MAX_UPLOAD_SIZE_DATA_FILE:
                 raise forms.ValidationError(_('Please keep filesize under %s. Current filesize %s') % (filesizeformat(settings.MAX_UPLOAD_SIZE), filesizeformat(content.size)))
         json_obj = json.loads(content.read())
-        if not isinstance(json_obj, dict):
-            raise Exception("Error: init data is must be in the form of a hashmap (dictionary)!")
+        # if not isinstance(json_obj, dict):
+        #     raise Exception("Error: init data is must be in the form of a hashmap (dictionary)!")
         return content
 
     def clean_meta_file(self):
