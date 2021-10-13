@@ -27,8 +27,12 @@
     {% else %}
         <p style="text-align:center;">You are not enrolled in any courses!</p>
     {% endif %}
+    <br><br>
+    <div style="text-align:center">
+    <button id="enrol_form_btn" value="0">Click here to enrol in a new course</button>
+    </div>
     <br>
-    <div class="row no-gutters">
+    <div id="enrol_form_div" class="row no-gutters" style="visibility:hidden;">
         <div class="col-sm-12 col-md-12 col-lg-12 col-xl-12 nopadding">
             <div>
                 <h2 class="text-center" style="padding:20px;"><u>Enrol in a Course Now!</u></h2>
@@ -68,7 +72,12 @@
 {% else %}
 <p style="white-space: pre-wrap;">Oops, you have not created any courses yet!</p>
 {% endif %}
-<div class="row no-gutters">
+<br><br>
+<div style="text-align:center">
+<button id="cc_form_btn" value="0">Click here to create a new course</button>
+</div>
+<br>
+<div id="cc_form_div" style="visibility:hidden" class="row no-gutters">
     <div class="col-sm-12 col-md-12 col-lg-12 col-xl-12 nopadding">
         <div>
             <h2 class="text-center" style="padding:20px;"><u>Create Your Course Below</u></h2>

@@ -6,12 +6,27 @@
     <div class="text-center showcase">
         <h1 class="cgc-title"> CGC </h1>
         <h1 class="second-title">Codē Gratia Codis</h1>
-        <p>Or in plain english...code for code's sake!</p>
+        <br><br>
+        <p>Welcome back {{ user.username }}...!</p>
+        
         <a href="#problems"><button class="scroll-down-btn" id="scroll-down-btn"> <img src="{% static 'images/scroll-down.png' %}"/></button></a>
     </div>
 
     <div class="container">
-        <button type="button" class="collapsible">View Problems</button>
+        <button type="button" class="collapsible">Courses</button>
+        <div class="content">
+            
+            <a href="{% url 'classes:search_course_view' user_role=user.profile.role %}">
+                <div class="text-center">
+                    <br>
+                    <button type="button" class="text-center go_btn">
+                        Check out your courses here =>
+                    </button>
+                </div>
+            </a>
+            <p class="problem_author"></p>
+        </div>
+        <!-- <button type="button" class="collapsible">View Problems</button>
         <div class="content">
             <p class="problem_desc"></p>
             <a href="#">
@@ -51,7 +66,7 @@
                 </div>
             </a>
             <p class="problem_author"></p>
-        </div>
+        </div> -->
         <button type="button" class="collapsible">Brush up on your theory</button>
         <div class="content">
             <p class="problem_desc"></p>

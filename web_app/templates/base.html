@@ -40,11 +40,6 @@
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'users:profile' %}">View Profile</a>
                 </li>
-                <li class="nav-item" style="float:right">
-                    <div>
-                        <a class="nav-link" href="{% url 'classes:search_course_view' user_role=user.profile.role %}">Find A Course</a>
-                    </div>
-                </li>
                 {% else %}
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'accounts:login' %}">Login</a>
