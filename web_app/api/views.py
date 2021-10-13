@@ -314,3 +314,14 @@ def enrol_course(request):
             return Response("Failure: no such course", status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
         return Response("Failure {0}".format(str(e)), status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['DELETE'])
+def delete_entity(request, del_type, del_id):
+    if del_type == "problem":
+        try:
+            Problem.objects.get(id=del_id).delete()
+        except Exception as e:
+            return Response("Ill-configured DELETE request: {0}".format(str(e)), status=status.HTTP_400_BAD_REQUEST)
+        return Response("DELETE OK", status=status.HTTP_200_OK)
+    else:
+        return Response("Failure", status=status.HTTP_400_BAD_REQUEST)

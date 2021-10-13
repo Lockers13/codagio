@@ -11,6 +11,7 @@ urlpatterns = [
     path('code/save_problem/', api_views.SaveProblemView.as_view(), name="save_problem"),
     path('courses/create_course/', api_views.create_course, name="create_course"),
     path('courses/enrol_course/', api_views.enrol_course, name="enrol_course"),
+    path('courses/delete/<str:del_type>/<int:del_id>/', api_views.delete_entity, name="delete_entity"),
     # path('save_problem/', code_views.SaveProblemView.as_view(), name="save_problem"),
 ]
 

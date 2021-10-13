@@ -7,13 +7,16 @@
         <h1 class="cgc-title"> CGC </h1>
         <h1 class="second-title">Codē Gratia Codis</h1>
         <br><br>
+        {% if user.is_authenticated %}
         <p>Welcome back {{ user.username }}...!</p>
-        
+        {% endif %}
         <a href="#problems"><button class="scroll-down-btn" id="scroll-down-btn"> <img src="{% static 'images/scroll-down.png' %}"/></button></a>
     </div>
 
     <div class="container">
+        {% if user.is_authenticated %}
         <button type="button" class="collapsible">Courses</button>
+        
         <div class="content">
             
             <a href="{% url 'classes:search_course_view' user_role=user.profile.role %}">
@@ -26,6 +29,7 @@
             </a>
             <p class="problem_author"></p>
         </div>
+        {% endif %}
         <!-- <button type="button" class="collapsible">View Problems</button>
         <div class="content">
             <p class="problem_desc"></p>

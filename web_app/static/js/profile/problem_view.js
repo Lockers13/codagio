@@ -60,8 +60,6 @@ function handle_decision(e) {
             delete_response.innerHTML = "<p style='color:red'>Uh oh, there was an error deleting your solution!</p>"
         });
     }
-    else
-        return
 }
 
 function get_json_text(json_arr, code = false) {

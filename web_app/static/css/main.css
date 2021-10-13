@@ -141,7 +141,7 @@ body::-webkit-scrollbar-thumb {
     border: 2px solid var(--green);
     border-radius: 20px;
     color: white;
-    width: 40%;
+    margin: 0 40% 0 40%;
 }
 
 .problem_author{
