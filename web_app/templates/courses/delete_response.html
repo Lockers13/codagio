@@ -3,13 +3,15 @@
 {% block content %}
 
 <div style="text-align:center;margin-top:20%">
-    <h5 style="color:#06D6A0;">Your {{ del_type }} was deleted successfully!</h5><br>
+    <h5 style="color:#06D6A0;">{{ de_msg }}</h5><br>
+    {% if del_type == "problem" %}
         <a class="nav-link dropdown-toggle text-center go_btn" href="#" data-toggle="dropdown">Upload A New Problem</a>
         <ul class="dropdown-menu">
             <li><a class="dropdown-item" href="{% url 'code:problem_upload' problem_cat='default' course_id=course.id %}">Default</a></li>
             <li><a class="dropdown-item" href="{% url 'code:problem_upload' problem_cat='file_io' course_id=course.id %}">File I/O</a></li>
         </ul>
     <br>
+    {% endif %}
     <a href="{% url 'classes:course_landing' course_id=course.id %}"><button type='button' class='text-center go_btn btn-sm'
         style='width:15%;padding:10px;background-color:#1d2b5b'>Return to course page</button></a>
     <br><br>

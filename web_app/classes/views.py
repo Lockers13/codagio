@@ -12,10 +12,10 @@ from code_analysis.models import Problem
 #     return render(request, 'main/create_course_view.html', context)
 
 def delete_response(request, del_type, course_id):
-    if del_type == "problem":
-        course = Course.objects.filter(id=course_id).first()
-        context = {'course': course, "del_type": del_type}
-        return render(request, 'courses/delete_response.html', context)
+    course = Course.objects.filter(id=course_id).first()
+    de_msg ="Your problem was deleted successully!" if del_type == "problem" else "Your course was deactivated successfully!" if del_type == "course" else ""
+    context = {'course': course, "de_msg": de_msg, "del_type": del_type}
+    return render(request, 'courses/delete_response.html', context)
 
 def search_course_view(request, user_role):
     if user_role == "student":
