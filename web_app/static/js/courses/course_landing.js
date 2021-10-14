@@ -2,7 +2,9 @@ let delete_base_url = "http://localhost:8000/api/courses/delete/course/"
 let delete_response_url = "http://localhost:8000/classes/delete_response/course/"
 
 var confirm_deactivate = document.getElementById("confirm_deactivate")
-confirm_deactivate.onclick = handle_decision
+
+if(confirm_deactivate != null)
+    confirm_deactivate.onclick = handle_decision
 
 function handle_decision(e) {
     var target_id = e.target.id
