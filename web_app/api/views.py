@@ -123,18 +123,19 @@ class AnalysisView(APIView):
             analysis["time_profile"] = True
         analysis["pass_threshold"] = problem_data["metadata"]["pass_threshold"]
         analysis["solution_text"] = code_data
+        analysis["score"] = percentage_score
         ### write comparison stats (with reference problem) to analysis dict
         comparison.write_comp(analysis, problem_data["analysis"])
         print("Course_ID =>", processed_data["course_id"])       
         ### only save submitted solution to db if all tests were passed, and hence submission was profiled, etc.
-        if passed:
-            solution, created = Solution.objects.update_or_create(
-                submitter_id=processed_data["uid"],
-                problem_id=processed_data["prob_id"],
-                course_id=processed_data["course_id"],
-                defaults={'analysis': analysis, 'date_submitted': datetime.now()}
-            )
-            solution.save()
+
+        solution, created = Solution.objects.update_or_create(
+            submitter_id=processed_data["uid"],
+            problem_id=processed_data["prob_id"],
+            course_id=processed_data["course_id"],
+            defaults={'analysis': analysis, 'date_submitted': datetime.now()}
+        )
+        solution.save()
         ### discard preprocessed executable script
         try:
             os.remove(filename)

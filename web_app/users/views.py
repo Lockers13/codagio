@@ -12,8 +12,7 @@ def delete_response(request):
     context = {'prob_id': prob_id}
     return render(request, 'profile/delete_response.html', context)
 
-def profile(request):
-    uid = request.user.id
+def profile(request, uid):
     profiles = list(Profile.objects.filter(user_id=uid).all().values(
         'user__username',
         'user__email',

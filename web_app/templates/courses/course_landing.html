@@ -14,6 +14,7 @@
             <button type="button" class="collapsible">{{ problem.name }} ({{ problem.metadata.difficulty }}) </button>
             <div class="content">
                 <p class="problem_desc" style="white-space: pre-wrap;">{{ problem.metadata.description }}</p>
+                {% if user.profile.role == "student" %}
                 <a href="{% url 'code:solution' prob_id=problem.id %}">
                     <div class="text-center">
                         <button type="button" class="text-center go_btn">
@@ -22,6 +23,15 @@
                     </div>
                 </a>
                 <p class="problem_author"> Created by {{ problem.author__username }}</p>
+                {% elif user.profile.role == "tutor" %}
+                <a href="{% url 'classes:problem_view' course_id=course.id prob_id=problem.id user_role=user.profile.role %}">
+                    <div class="text-center">
+                        <button type="button" class="text-center go_btn">
+                            Check out the status of your problem
+                        </button>
+                    </div>
+                </a>
+            {% endif %}
             </div>
         {% endfor %}
     {% else %}

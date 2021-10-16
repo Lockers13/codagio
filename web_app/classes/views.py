@@ -4,7 +4,8 @@ from .models import Course, Enrolment
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.decorators import api_view
-from code_analysis.models import Problem
+from code_analysis.models import Problem, Solution
+from django.db.models import Q
 # Create your views here.
 
 # def create_course_view(request):
@@ -32,3 +33,12 @@ def course_landing(request, course_id):
     problems = list(Problem.objects.filter(course_id=course.id).all())
     context = {'title': 'CGC: Code For Code\'s Sake', 'problems': problems, 'course': course, 'user': request.user}
     return render(request, 'courses/course_landing.html', context)
+
+def problem_view(request, course_id, prob_id, user_role):
+    if user_role == "tutor":
+        solutions = list(Solution.objects.filter(problem_id=prob_id).all())
+        problem = solutions[0].problem
+        submitter_ids = [solution.submitter_id for solution in solutions]
+        other_students = [enrolment.student for enrolment in list(Enrolment.objects.filter(course_id=course_id).filter(~Q(student_id__in=submitter_ids)).all())]
+        context = {'other_students': other_students, 'solutions': solutions, 'problem': problem}
+        return render(request, 'courses/problem_view.html', context)
