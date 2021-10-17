@@ -1,16 +1,9 @@
 from django.shortcuts import render
 from . import forms as course_forms
 from .models import Course, Enrolment
-from rest_framework.response import Response
-from rest_framework import status
-from rest_framework.decorators import api_view
 from code_analysis.models import Problem, Solution
 from django.db.models import Q
 # Create your views here.
-
-# def create_course_view(request):
-#     context = {'title': 'CGC: Code For Code\'s Sake', 'form': course_forms.CreateCourseForm}
-#     return render(request, 'main/create_course_view.html', context)
 
 def delete_response(request, del_type, course_id):
     course = Course.objects.filter(id=course_id).first()

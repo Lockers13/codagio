@@ -11,7 +11,14 @@
     <p id="date_sub"></p><br><br>
     <h4><u>Solution Text:</u></h4><br>
     <p id="solution_text"></p>
-</div>
+</div><br><br>
+<button type='button' class='text-center go_btn btn-sm' id='stat_btn'
+    style='width:15%;padding:10px;background-color:#1d2b5b'>Show Class Stats</button>
+<div height='400px' width='400px' style='margin-top:10%;width:80%;height:60vh;position:relative;'>
+    <canvas id='myChart' width='400' height='200'
+        style='position:absolute;top:0;bottom:0;right:0;left:0;margin:auto;'></canvas>
+    </div>
+<br><br>
 {% else %}
 <div style="text-align:center;margin-top:20%">
     <h5 style="color:#06D6A0;">Oops, it looks like you haven't any recorded submissions for this problem!</h5>
@@ -26,7 +33,11 @@
   const solution_analysis = JSON.parse(document.getElementById('soln_analysis').textContent);
   const username = "{{ solution.submitter.username }}";
   const date_sub = "{{ solution.date_submitted }}";
+  const valid_student = "{{ solution.submitter.id }}" == "{{ user.id }}";
+  const course_id = "{{ solution.course.id }}";
+  const problem_id = "{{ solution.problem.id }}";
 </script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.js"></script>
 <script type="text/javascript">const csrf_token = "{{ csrf_token }}";</script>
 <script type="text/javascript" src="{% static 'js/courses/problem_view.js' %}"></script>
 

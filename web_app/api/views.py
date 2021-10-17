@@ -330,3 +330,13 @@ def delete_entity(request, del_type, del_id):
         return Response("DEACTIVATION OK", status=status.HTTP_200_OK)
     else:
         return Response("Failure", status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET'])
+def get_global_problem_stats(request, problem_id, course_id):
+    enrolment = Enrolment.objects.filter(student_id=request.user.id).first()
+    if enrolment:
+        solutions = list(Solution.objects.filter(problem_id=problem_id).filter(course_id=course_id).all())
+        stats = [[solution.analysis.get("udef_func_time_tot", 0), solution.analysis.get("score", 0), solution.submitter.username] for solution in solutions]
+        return Response(stats, status=status.HTTP_200_OK)
+    else:
+        return Response("Failure", status=status.HTTP_403_FORBIDDEN)
