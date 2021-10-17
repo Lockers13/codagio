@@ -18,8 +18,18 @@
                 <a href="{% url 'code:solution' prob_id=problem.id %}">
                     <div class="text-center">
                         <button type="button" class="text-center go_btn">
-                            Get started
+                            Give it a shot
                         </button>
+                        
+                    </div>
+                </a>
+                <br>
+                <a href="{% url 'classes:problem_view' problem_id=problem.id uid=user.id %}">
+                    <div class="text-center">
+                        <button type="button" class="text-center go_btn" style="background-color:#1d2b5b;">
+                            Check out your stats
+                        </button>
+                        
                     </div>
                 </a>
                 <p class="problem_author"> Created by {{ problem.author__username }}</p>
@@ -76,24 +86,6 @@
     </div>
     {% endif %}
 
-<!--
-    <h1 style="text-align:center;text-transform:capitalize;"><u>Courses</u></h1>
-    <br>
-    {% for course in courses %}
-    <button type="button" class="collapsible">{{ course.name }}</button>
-    <div class="content">
-        <p class="problem_desc" style="white-space: pre-wrap;">{{ course.description }}</p>
-        <a href="#">
-            <div class="text-center">
-                <button type="button" class="text-center go_btn">
-                    Get started
-                </button>
-            </div>
-        </a>
-        <p class="problem_author"> Tutor: {{ course.tutor }}</p>
-    </div>
-
-    {% endfor %}  -->
 </div>
 </div>
 

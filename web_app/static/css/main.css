@@ -142,6 +142,7 @@ body::-webkit-scrollbar-thumb {
     border-radius: 20px;
     color: white;
     margin: 0 40% 0 40%;
+    padding: 1%;
 }
 
 .problem_author{

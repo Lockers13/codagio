@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
 {% block content %}
-
+{% if solution %}
 <div style="margin: 7% 0 0 5%">
     <h2><u>{{ solution.submitter.username|title }}'s submission for {{ solution.problem.name }}</u></h2> 
     <h5>({{ solution.course.name }} : {{ solution.course.code }})</h5><br><br> 
@@ -12,7 +12,14 @@
     <h4><u>Solution Text:</u></h4><br>
     <p id="solution_text"></p>
 </div>
-
+{% else %}
+<div style="text-align:center;margin-top:20%">
+    <h5 style="color:#06D6A0;">Oops, it looks like you haven't any recorded submissions for this problem!</h5>
+    <br>
+    <a href="{% url 'code:solution' prob_id=problem_id %}"><button type='button' class='text-center go_btn btn-sm'
+            style='width:15%;padding:10px;background-color:#1d2b5b'>Try it out</button></a>
+</div>
+{% endif %}
 
 {{ solution.analysis|json_script:"soln_analysis" }}
 <script>

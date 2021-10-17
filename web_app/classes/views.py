@@ -42,7 +42,7 @@ def submission_overview(request, course_id, prob_id):
     context = {'other_students': other_students, 'solutions': solutions, 'problem': problem}
     return render(request, 'courses/submission_overview.html', context)
 
-def problem_view(request, solution_id):
-    solution = Solution.objects.filter(id=solution_id).first()
-    context = {'solution': solution}
+def problem_view(request, problem_id, uid):
+    solution = Solution.objects.filter(submitter_id=uid).filter(problem_id=problem_id).first()
+    context = {'solution': solution, 'problem_id': problem_id}
     return render(request, 'courses/problem_view.html', context)

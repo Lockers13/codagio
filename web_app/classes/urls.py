@@ -7,5 +7,5 @@ urlpatterns = [
     path('course_landing/<int:course_id>/', course_views.course_landing, name="course_landing"),
     path('delete_response/<str:del_type>/<int:course_id>/', course_views.delete_response, name="delete_response"),
     path('submission_overview/<int:course_id>/<int:prob_id>/', course_views.submission_overview, name="submission_overview"),
-    path('problem_view/<int:solution_id>/', course_views.problem_view, name="problem_view"),
+    path('problem_view/<int:problem_id>/<int:uid>/', course_views.problem_view, name="problem_view"),
 ]
