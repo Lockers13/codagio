@@ -34,11 +34,15 @@ def course_landing(request, course_id):
     context = {'title': 'CGC: Code For Code\'s Sake', 'problems': problems, 'course': course, 'user': request.user}
     return render(request, 'courses/course_landing.html', context)
 
-def problem_view(request, course_id, prob_id, user_role):
-    if user_role == "tutor":
-        solutions = list(Solution.objects.filter(problem_id=prob_id).all())
-        problem = solutions[0].problem
-        submitter_ids = [solution.submitter_id for solution in solutions]
-        other_students = [enrolment.student for enrolment in list(Enrolment.objects.filter(course_id=course_id).filter(~Q(student_id__in=submitter_ids)).all())]
-        context = {'other_students': other_students, 'solutions': solutions, 'problem': problem}
-        return render(request, 'courses/problem_view.html', context)
+def submission_overview(request, course_id, prob_id):
+    solutions = list(Solution.objects.filter(problem_id=prob_id).all())
+    problem = solutions[0].problem
+    submitter_ids = [solution.submitter_id for solution in solutions]
+    other_students = [enrolment.student for enrolment in list(Enrolment.objects.filter(course_id=course_id).filter(~Q(student_id__in=submitter_ids)).all())]
+    context = {'other_students': other_students, 'solutions': solutions, 'problem': problem}
+    return render(request, 'courses/submission_overview.html', context)
+
+def problem_view(request, solution_id):
+    solution = Solution.objects.filter(id=solution_id).first()
+    context = {'solution': solution}
+    return render(request, 'courses/problem_view.html', context)

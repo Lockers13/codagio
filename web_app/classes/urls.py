@@ -6,5 +6,6 @@ urlpatterns = [
     path('search_course_view/<str:user_role>/', course_views.search_course_view, name="search_course_view"),
     path('course_landing/<int:course_id>/', course_views.course_landing, name="course_landing"),
     path('delete_response/<str:del_type>/<int:course_id>/', course_views.delete_response, name="delete_response"),
-    path('problem_view/<int:course_id>/<int:prob_id>/<str:user_role>/', course_views.problem_view, name="problem_view"),
+    path('submission_overview/<int:course_id>/<int:prob_id>/', course_views.submission_overview, name="submission_overview"),
+    path('problem_view/<int:solution_id>/', course_views.problem_view, name="problem_view"),
 ]

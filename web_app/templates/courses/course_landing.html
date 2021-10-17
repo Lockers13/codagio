@@ -24,7 +24,7 @@
                 </a>
                 <p class="problem_author"> Created by {{ problem.author__username }}</p>
                 {% elif user.profile.role == "tutor" %}
-                <a href="{% url 'classes:problem_view' course_id=course.id prob_id=problem.id user_role=user.profile.role %}">
+                <a href="{% url 'classes:submission_overview' course_id=course.id prob_id=problem.id %}">
                     <div class="text-center">
                         <button type="button" class="text-center go_btn">
                             Check out the status of your problem

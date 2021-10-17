@@ -124,6 +124,7 @@ class AnalysisView(APIView):
         analysis["pass_threshold"] = problem_data["metadata"]["pass_threshold"]
         analysis["solution_text"] = code_data
         analysis["score"] = percentage_score
+        analysis["passed"] = passed
         ### write comparison stats (with reference problem) to analysis dict
         comparison.write_comp(analysis, problem_data["analysis"])
         print("Course_ID =>", processed_data["course_id"])       

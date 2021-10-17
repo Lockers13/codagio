@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+<br><br>
+<div style="text-align:center;">
+    <h1 style="color:#06D6A0;"><u>Submission Overview: {{ problem.name }}</u></h1>
+</div>
+<hr>
+{% if solutions %}
+<br><br>
+<h2 style="color:rgba(255, 255, 255, 0.845);">&nbsp&nbspSubmitted:</h2>
+<br><br>
+<table class="table table-striped table-light">
+    <thead>
+      <tr>
+        <th scope="col">UserName</th>
+        <th scope="col">Score</th>
+        <th scope="col">Date Submitted</th>
+        <th scope="col">See More</th>
+      </tr>
+    </thead>
+    <tbody>
+{% for solution in solutions %}
+<tr>
+  {% if solution.analysis.passed %}
+    <td><a style="color:#06D6A0" class="nav-link" href="{% url 'users:profile' uid=solution.submitter.id %}">{{ solution.submitter.username }}</a></td>
+    <td><span style="color:#06D6A0">{{ solution.analysis.score }}%</span></td>
+    {% else %}
+    <td><a style="color:rgb(240, 79, 79)" class="nav-link" href="{% url 'users:profile' uid=solution.submitter.id %}">{{ solution.submitter.username }}</a></td>
+    <td><span style="color:rgb(240, 79, 79)">{{ solution.analysis.score }}%</span></td>  
+    {% endif %}
+    <td>{{ solution.date_submitted }}</td>
+    <td><a href="{% url 'classes:problem_view' solution_id=solution.id %}">Submission Breakdown</a></td>
+  </tr>
+{% endfor %}
+    </tbody>
+</table>
+{% endif %}
+<br><br>
+{% if other_students %}
+<h2 style="color:rgba(181, 180, 180, 0.502);">&nbsp&nbspNot Submitted:</h2>
+<table class="table table-striped table-dark">
+    <thead>
+      <tr>
+        <th scope="col">UserName</th>
+      </tr>
+    </thead>
+    <tbody>
+{% for other_student in other_students %}
+<tr>
+    <td><a class="nav-link" href="{% url 'users:profile' uid=other_student.id %}">{{ other_student.username }}</a></td>
+</tr>
+{% endfor %}
+{% endif %}
+<script type="text/javascript">window.course_id = "{{ course.id }}"; window.csrf_token = "{{ csrf_token }}";</script>
+
+{% endblock content %}
+
+
