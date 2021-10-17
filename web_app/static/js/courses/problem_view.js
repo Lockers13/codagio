@@ -8,10 +8,10 @@ var solution_text_elem = document.getElementById('solution_text')
 
 
 date_sub_elem.innerHTML = "Date Submitted: " + date_sub
-var rt_message = solution_analysis["time_profile"]?  solution_analysis["udef_func_time_tot"]: "Time profiling has not been configured for this problem"
+var rt_message = solution_analysis["time_profile"]?  (solution_analysis["udef_func_time_tot"]).toFixed(2) + "s": "Time profiling has not been configured for this problem"
 runtime_elem.innerHTML = "Runtime of " + capitalize(username) + "'s submission: " + rt_message
 var comparator = solution_analysis["udef_func_time_tot"]/solution_analysis["ref_time"] >= 1? "slower": "faster";
-var comp_msg = solution_analysis["time_profile"]? capitalize(username) + "'s submission was " + comparator + "than the reference problem by a fraction of " + solution_analysis["udef_func_time_tot"]/solution_analysis["ref_time"] + "s": "";
+var comp_msg = solution_analysis["time_profile"]? capitalize(username) + "'s submission was " + comparator + " than the reference problem by a fraction of " + (solution_analysis["udef_func_time_tot"]/solution_analysis["ref_time"]).toFixed(2): "";
 time_comp_elem.innerHTML = comp_msg
 var score_color = solution_analysis["passed"]? "#06D6A0": "rgb(240, 79, 79)";
 score_elem.style.color = score_color
