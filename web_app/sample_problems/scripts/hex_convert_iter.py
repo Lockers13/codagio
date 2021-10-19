@@ -1,11 +1,13 @@
 def hex_vert(inputs):
+    ret_list = []
+
     for h_string in inputs:
         if h_string.startswith("0x"):
             try:
-                print("{0} : {1}".format(h_string, int(h_string, 16)))
-                continue
+                ret_list.append("{0} : {1}".format(h_string, int(h_string, 16)))
             except ValueError as ve:
-                print("{0} : {1}".format(h_string, "Error: invalid characters"))
-                continue
+                ret_list.append("{0} : {1}".format(h_string, "Error: invalid characters"))
         else:
-            print("{0} : {1}".format(h_string, "Error: does not begin with a leading '0x'"))
+            ret_list.append("{0} : {1}".format(h_string, "Error: does not begin with a leading '0x'"))
+            
+    return ret_list

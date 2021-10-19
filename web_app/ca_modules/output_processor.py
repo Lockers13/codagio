@@ -44,8 +44,6 @@ def run_subprocess_ctrld(base_cmd, filename, input_arg=None, stage="verification
         except Exception as e:
             pass
         raise Exception("Error during {0} stage - subprocess timed out: retcode = {1}".format(stage, ret))
-    if stage == "memprof":
-        print(output)
 
     return output
 
@@ -57,7 +55,7 @@ def process_output(base_cmd, filename, input_arg=None, init_data=None, stage="ve
             if cleaned_output[-1] == "None":
                 cleaned_output = cleaned_output[:-1]
         elif stage == "memprof":
-            cleaned_output = [out.decode("utf-8").strip('\n') for out in output[:2]]
+            cleaned_output = [out.decode("utf-8").strip('\n') for out in output]
         else:
             cleaned_output = output
         ### clean up the returned output of subprocess - '\r' for windows, and 'None' because sometimes python sp.Popen adds this at the end (probably return value)

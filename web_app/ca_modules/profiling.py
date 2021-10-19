@@ -260,7 +260,7 @@ class Profiler:
                 contents = f.readlines()
             
             import_insert = "import os\nimport psutil\n"
-            profile_insert = "{0}print(round(psutil.Process(os.getpid()).memory_info().rss / 1024 ** 2, 2))\n{1}print(round(psutil.Process(os.getpid()).memory_info().vms / 1024 ** 2, 2))\n".format(" " * 8, " " * 8)
+            profile_insert = "{0}print('MEMORYSTATS')\n{1}print(round(psutil.Process(os.getpid()).memory_info().rss / 1024 ** 2, 2))\n{2}print(round(psutil.Process(os.getpid()).memory_info().vms / 1024 ** 2, 2))\n".format(" " * 8, " " * 8, " " * 8)
             contents.insert(0, import_insert)
             main_insert_idx = contents.index("{0}### insert memprof ###\n".format(" " * 8)) + 1
 
@@ -283,6 +283,13 @@ class Profiler:
             with open("memprof_script.py", 'w') as f:
                 f.write(self.__sample_inputs["files"]["file_1"])
             output = process_output("python", pro_file, input_arg="memprof_script.py", init_data=self.__init_data, stage="memprof")
-            self.__program_dict["total_physical_mem"] = float(output[0])
-            self.__program_dict["total_virtual_mem"] = float(output[1])
-            self.__remove_files(pro_file, "memprof_script.py")
+            mem_init_idx = output.index("MEMORYSTATS")
+            self.__program_dict["total_physical_mem"] = float(output[mem_init_idx + 1])
+            self.__program_dict["total_virtual_mem"] = float(output[mem_init_idx + 2])
+            # self.__remove_files(pro_file, "memprof_script.py")
+        elif self.__input_type == "default":
+            input_arg = json.dumps(self.__sample_inputs[0]) if self.__sample_inputs is not None else None
+            output = process_output("python", pro_file, input_arg=input_arg, init_data=self.__init_data, stage="memprof")
+            mem_init_idx = output.index("MEMORYSTATS")
+            self.__program_dict["total_physical_mem"] = float(output[mem_init_idx + 1])
+            self.__program_dict["total_virtual_mem"] = float(output[mem_init_idx + 2])
