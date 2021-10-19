@@ -20,6 +20,13 @@ class Profiler:
     ### metadata is not passed into profiler, so we get the input type by checking the key of the input dict
     ### Note: auto generated input should also be passed to DB as lists inside a dict with key 'auto' => this mod will require changes in several places
     
+    def __remove_files(self, *args):
+        for f in args:
+            try:
+                os.remove(f)
+            except FileNotFoundError:
+                pass
+
     def __get_udef_info(self):
         """Utility method to make user function defintiion info collected by ast visitor more easily accessible.
 
@@ -161,15 +168,7 @@ class Profiler:
             ### clean up ###
             
             # remove file with '@profile'
-            try: 
-                os.remove(pro_file)
-            except FileNotFoundError:
-                pass
-            # remove auto generated lprof output file
-            try:
-                os.remove("{0}.lprof".format(os.path.basename(pro_file)))
-            except FileNotFoundError:
-                pass
+            self.__remove_files(pro_file, "{0}.lprof".format(os.path.basename(pro_file)))
     
         # check that line profiler is installed for kernprof
         try:
@@ -223,7 +222,7 @@ class Profiler:
             with open('cprof_script.py', 'w') as f:
                 f.write(self.__sample_inputs["files"]["file_1"])
             output = process_output(base_cmd, self.__filename, input_arg="cprof_script.py", init_data=self.__init_data, stage="c_profile")
-            os.remove("cprof_script.py")
+            self.__remove_files("cprof_script.py")
         elif self.__input_type == "default":
             input_arg = json.dumps(self.__sample_inputs[0]) if self.__sample_inputs is not None else None
             output = process_output(base_cmd, self.__filename, input_arg=input_arg, init_data=self.__init_data, stage="c_profile")
@@ -254,3 +253,36 @@ class Profiler:
                 prog_dict["{0}".format(str(split_line[0]))] = float(split_line[1])
             except:
                 pass
+
+    def memprof(self):
+        def make_pro_file(filename):
+            with open(filename, "r") as f:
+                contents = f.readlines()
+            
+            import_insert = "import os\nimport psutil\n"
+            profile_insert = "{0}print(round(psutil.Process(os.getpid()).memory_info().rss / 1024 ** 2, 2))\n{1}print(round(psutil.Process(os.getpid()).memory_info().vms / 1024 ** 2, 2))\n".format(" " * 8, " " * 8)
+            contents.insert(0, import_insert)
+            main_insert_idx = contents.index("{0}### insert memprof ###\n".format(" " * 8)) + 1
+
+            # len_con = len(contents)
+            # if contents[len_con - 1] != "\n":
+            #     contents.insert(len_con, "\n")
+            #     len_con += 1
+
+            contents.insert(main_insert_idx, profile_insert)
+
+            split_fname = filename.split(".")
+            pro_file = "{0}_memprof.{1}".format(split_fname[0],split_fname[1])
+            with open(pro_file, "w") as g:
+                g.write("".join(contents))
+            
+            return pro_file
+
+        pro_file = make_pro_file(self.__filename)
+        if self.__input_type == "file":
+            with open("memprof_script.py", 'w') as f:
+                f.write(self.__sample_inputs["files"]["file_1"])
+            output = process_output("python", pro_file, input_arg="memprof_script.py", init_data=self.__init_data, stage="memprof")
+            self.__program_dict["total_physical_mem"] = float(output[0])
+            self.__program_dict["total_virtual_mem"] = float(output[1])
+            self.__remove_files(pro_file, "memprof_script.py")

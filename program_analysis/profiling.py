@@ -199,3 +199,30 @@ class Profiler:
                 prog_dict["{0}".format(str(split_line[0]))] = float(split_line[1])
             except:
                 pass
+
+    def memprof(self):
+
+        def make_pro_file(filename):
+            with open(filename, "r") as f:
+                contents = f.readlines()
+            
+            import_insert = "import os\nimport psutil\n"
+            profile_insert = "print(psutil.Process(os.getpid()).memory_info().rss / 1024 ** 2)\nprint(psutil.Process(os.getpid()).memory_info().vms / 1024 ** 2)"
+            contents.insert(0, import_insert)
+
+            len_con = len(contents)
+            if contents[len_con - 1] != "\n":
+                contents.insert(len_con, "\n")
+                len_con += 1
+
+            contents.insert(len_con, profile_insert)
+
+            split_fname = filename.split(".")
+            pro_file = "{0}_memprof.{1}".format(split_fname[0],split_fname[1])
+            print("".join(contents))
+            with open(pro_file, "w") as g:
+                g.write("".join(contents))
+            
+            return pro_file
+
+        pro_file = make_pro_file(self.__filename)

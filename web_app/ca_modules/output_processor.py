@@ -26,7 +26,9 @@ def run_subprocess_ctrld(base_cmd, filename, input_arg=None, stage="verification
         raise Exception("YOYO" + str(e))
     ### crucially 'readlines()' and 'read()' are blocking for pipes
     output = process.stdout.read() if stage == "verification" else process.stdout.readlines()
-    print("OI OP =>", output)
+    
+
+
     ### manually catch semantic error in submitted program by reading printed output that we control if an eexception is caught during its execution
     if stage == "verification":
         if b'EXCEPTION' in output:
@@ -42,19 +44,27 @@ def run_subprocess_ctrld(base_cmd, filename, input_arg=None, stage="verification
         except Exception as e:
             pass
         raise Exception("Error during {0} stage - subprocess timed out: retcode = {1}".format(stage, ret))
+    if stage == "memprof":
+        print(output)
+
     return output
 
 
 def process_output(base_cmd, filename, input_arg=None, init_data=None, stage="verification"):
     def clean_output(output):
-        cleaned_split_output = output.decode("utf-8").replace('\r', '').splitlines()
-        if cleaned_split_output[-1] == "None":
-            cleaned_split_output = cleaned_split_output[:-1]
+        if stage == "verification":
+            cleaned_output = output.decode("utf-8").replace('\r', '').splitlines()
+            if cleaned_output[-1] == "None":
+                cleaned_output = cleaned_output[:-1]
+        elif stage == "memprof":
+            cleaned_output = [out.decode("utf-8").strip('\n') for out in output[:2]]
+        else:
+            cleaned_output = output
         ### clean up the returned output of subprocess - '\r' for windows, and 'None' because sometimes python sp.Popen adds this at the end (probably return value)
 
         ### uncomment below line for debugging
         # print("CSO =>", cleaned_split_output)
-        return cleaned_split_output
+        return cleaned_output
     
     if init_data is not None:
         try:
@@ -63,9 +73,8 @@ def process_output(base_cmd, filename, input_arg=None, init_data=None, stage="ve
             raise Exception("hhh{0}".format(str(e)))
     else:
         try:
-            print(base_cmd, filename, input_arg, stage)
             output = run_subprocess_ctrld(base_cmd, filename, input_arg=input_arg, stage=stage)
         except Exception as e:
             raise Exception("hhh{0}".format(str(e)))
     
-    return clean_output(output) if stage == "verification" else output ### Note: can't remember exactly why but the output of the profilers needs to be treated differently from that of the verifier
+    return clean_output(output) ### Note: can't remember exactly why but the output of the profilers needs to be treated differently from that of the verifier

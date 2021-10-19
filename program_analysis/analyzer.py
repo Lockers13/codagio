@@ -56,6 +56,8 @@ class Analyzer:
         profiler = Profiler(self)
         
         profiler.cprof()
+        profiler.memprof()
+        
         if self.__args.get("l") or self.__args.get("type") == "sample":
             profiler.lprof()
         if self.__args.get("g"):
