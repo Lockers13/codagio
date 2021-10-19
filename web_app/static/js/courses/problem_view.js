@@ -2,6 +2,8 @@ var retrieve_stats_url = "http://localhost:8000/api/courses/get_global_problem_s
 console.log(solution_analysis)
 console.log(valid_student)
 
+window.init_fetch = true
+var data_obj;
 
 var ctx = document.getElementById('myChart').getContext('2d');
 if(ctx != null) {
@@ -33,27 +35,34 @@ for(let i = 0; i < soln_text.length; i++) {
 if(valid_student) {
     var stat_btn = document.getElementById('stat_btn')
     stat_btn.addEventListener("click", function(e) {
-        fetch(retrieve_stats_url + "/" + problem_id + "/" + course_id + "/") 
-        .then(response => response.json())
-        .then(function (data) {
-            data_array = []
-            spot_color_array = []
-            var unames = []
-            for(let i = 0; i < data.length; i++) {
-                var gtime = data[i][0]
-                var gscore = data[i][1]
-                var gusername = data[i][2]
-                data_array.push({
-                    x: gtime,
-                    y: gscore
-                })
-                var spot_color = gscore >= solution_analysis["pass_threshold"]? "#06D6A0": "rgb(240, 79, 79)";
-                spot_color_array.push(spot_color)
-                unames.push(gusername)
-            }
-            console.log(data_array)
-            display_scatterplot(data_array, unames)
-        })
+        if(window.init_fetch) {
+            fetch(retrieve_stats_url + "/" + problem_id + "/" + course_id + "/") 
+            .then(response => response.json())
+            .then(function (data) {
+                data_obj = data
+                data_array = []
+                spot_color_array = []
+                var unames = []
+                for(let i = 0; i < data.length; i++) {
+                    var gtime = data[i][0]
+                    var gscore = data[i][1]
+                    var gusername = data[i][2]
+                    data_array.push({
+                        x: gtime,
+                        y: gscore
+                    })
+                    var spot_color = gscore >= solution_analysis["pass_threshold"]? "#06D6A0": "rgb(240, 79, 79)";
+                    spot_color_array.push(spot_color)
+                    unames.push(gusername)
+                }
+                console.log(data_array)
+                display_scatterplot(data_array, unames)
+                window.init_fetch = false
+            })
+    }
+    else {
+        console.log(data_obj)
+    }
     })
 }
 
