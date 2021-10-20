@@ -241,20 +241,24 @@ function display_lp_graph(fdef) {
 
 function write_overview_stats(section, analysis, content_str, abs_success=false) {
     section.innerHTML = ""
+    var uphysical_mem = analysis["total_physical_mem"]
+    var rphysical_mem = analysis["ref_phys_mem"]
     var ufunc_tot = analysis["time_profile"] == true? Math.round(parseFloat(analysis["udef_func_time_tot"]) * 10000) / 10000: "Time profiling has not been configured for this problem!"
     var ref_func_tot = analysis["time_profile"] == true? Math.round(parseFloat(analysis["ref_time"]) * 10000) / 10000: "Time profiling has not been configured for this problem!"
-    if(abs_success) {
-        content_str += "<br><p>Total Time spent executing your functions: " + ufunc_tot + "</p>"
-        content_str += "<p>Total Time spent executing functions of reference program: " + ref_func_tot + "</p><br>"
-        content_str += "<ul>"
-        var fdefs = analysis["fdefs"]
-        for(fdef in fdefs) {
-            var cumulative_time = analysis["time_profile"] == true? fdefs[fdef]["cum_time"]: "Time profiling has not been configured for this problem!"
-            content_str += "<li>Function Name: " + fdefs[fdef]["name"] + "<br>" +
-                            "Cumulative Time spent in function: " + cumulative_time+ "</li><br>"
-        }
-        content_str += "</ul><br>"
+
+    content_str += "<br><p>Total Time spent executing your functions: " + ufunc_tot + "</p>"
+    content_str += "<p>Total Time spent executing functions of reference program: " + ref_func_tot + "</p><br>"
+    content_str += "<br><p>Total Memory Usage of your solution: " + uphysical_mem + " MiB</p>"
+    content_str += "<p>Total Memory Usage of reference program: " + rphysical_mem + " MiB</p><br>"
+    content_str += "<ul>"
+    var fdefs = analysis["fdefs"]
+    for(fdef in fdefs) {
+        var cumulative_time = analysis["time_profile"] == true? fdefs[fdef]["cum_time"]: "Time profiling has not been configured for this problem!"
+        content_str += "<li>Function Name: " + fdefs[fdef]["name"] + "<br>" +
+                        "Cumulative Time spent in function: " + cumulative_time+ "</li><br>"
     }
+    content_str += "</ul><br>"
+    
     content_str += "<p style='text-align:left;margin:20px 0px 20px 0px;' class='lead'>Let's see how you fared in more detail...</p>" +
     "<table style='align:left;max-width:80%;margin-left:auto;margin-right:auto;' class='table'>" +
     "<thead><tr><th style='color:white' class='topline scope='col'>Test #</th><th style='color:white' class='topline' scope='col'>Status</th><th style='color:white' class='topline' scope='col'>Input Length</th><th style='color:white' class='topline' scope='col'>Input Type</th><th style='color:white' class='topline' scope='col'>Detailed Stats</th></tr></thead><tbody>"

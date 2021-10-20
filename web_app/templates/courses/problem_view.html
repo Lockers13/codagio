@@ -6,8 +6,8 @@
     <h2><u>{{ solution.submitter.username|title }}'s submission for {{ solution.problem.name }}</u></h2> 
     <h5>({{ solution.course.name }} : {{ solution.course.code }})</h5><br><br> 
     <p id="score"></p>
-    <p id="runtime_direct"></p>
-    <p id="time_comp"></p><br>
+    <p id="cprof"></p>
+    <p id="memprof"></p><br>
     <p id="date_sub"></p><br><br>
     <h4><u>Solution Text:</u></h4><br>
     <p id="solution_text"></p>
@@ -31,9 +31,11 @@
 {{ solution.analysis|json_script:"soln_analysis" }}
 <script>
   const solution_analysis = JSON.parse(document.getElementById('soln_analysis').textContent);
-  const username = "{{ solution.submitter.username }}";
+  const submitter_name = "{{ solution.submitter.username }}";
   const date_sub = "{{ solution.date_submitted }}";
-  const valid_student = "{{ solution.submitter.id }}" == "{{ user.id }}";
+  const role = "{{ user.profile.role }}"
+  const valid_student = "{{ solution.submitter.id }}" == "{{ user.id }}"
+  const valid_tutor = "{{ solution.course.tutor_id }}" == "{{ user.id }}"
   const course_id = "{{ solution.course.id }}";
   const problem_id = "{{ solution.problem.id }}";
 </script>

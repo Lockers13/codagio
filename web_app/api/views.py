@@ -104,19 +104,20 @@ class AnalysisView(APIView):
         ### check if all tests were passed, and only profile submission if so (both lprof and cprof)
         passed = float(percentage_score) >= float(problem_data["metadata"]["pass_threshold"])
 
-        if passed:
-            try:
-                # default kwarg is init_data=None
-                analyzer.profile(problem_data)            
-            except Exception as e:
-                print("POST NOT OK: {0}".format(str(e)))
-                return Response(ERROR_CODES["Server-Side Error"], status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-              
+        try:
+            # default kwarg is init_data=None
+            analyzer.profile(problem_data)            
+        except Exception as e:
+            print("POST NOT OK: {0}".format(str(e)))
+            return Response(ERROR_CODES["Server-Side Error"], status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            
         ### get analysis dict
 
         analysis = analyzer.get_prog_dict()
         
         analysis["ref_time"] = problem.analysis["udef_func_time_tot"]
+        analysis["ref_phys_mem"] = problem.analysis["total_physical_mem"]
+        analysis["ref_virt_mem"] = problem.analysis["total_virtual_mem"]
         if not problem.metadata.get("time_profile"):
             analysis["time_profile"] = False
         else:
@@ -332,11 +333,25 @@ def delete_entity(request, del_type, del_id):
         return Response("Failure", status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET'])
-def get_global_problem_stats(request, problem_id, course_id):
-    enrolment = Enrolment.objects.filter(student_id=request.user.id).first()
-    if enrolment:
+def get_global_problem_stats(request, problem_id, course_id, role):
+    if role == "tutor":
+        valid_req = Course.objects.filter(tutor_id=request.user.id).first()
+    elif role == "student":
+        valid_req = Enrolment.objects.filter(student_id=request.user.id).first()
+    if valid_req:
         solutions = list(Solution.objects.filter(problem_id=problem_id).filter(course_id=course_id).all())
-        stats = [[solution.analysis.get("udef_func_time_tot", 0), solution.analysis.get("score", 0), solution.submitter.username] for solution in solutions]
-        return Response(stats, status=status.HTTP_200_OK)
+        stats_data = []
+        for solution in solutions:
+            time_res = solution.analysis.get("udef_func_time_tot", 0)
+            score_res = solution.analysis.get("score", 0)
+            mem_res = solution.analysis.get("total_physical_mem", 0)
+            uname = solution.submitter.username
+            stats_data.append({
+                "score": score_res,
+                "tot_time": time_res,
+                "tot_mem": mem_res,
+                "username": uname
+                })
+        return Response(stats_data, status=status.HTTP_200_OK)
     else:
         return Response("Failure", status=status.HTTP_403_FORBIDDEN)
