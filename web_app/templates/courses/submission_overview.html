@@ -52,7 +52,32 @@
 </tr>
 {% endfor %}
 {% endif %}
+<button type='button' class='text-center go_btn btn-sm' id='stat_btn'
+    style='width:15%;padding:10px;background-color:#1d2b5b'>View Score Chart</button>
+<div height='400px' width='400px' style='margin-top:10%;width:80%;height:60vh;position:relative;'>
+    <canvas id='myChart' width='400' height='200'
+        style='position:absolute;top:0;bottom:0;right:0;left:0;margin:auto;'></canvas>
+    </div>
+<br><br>
+
+<script>
+  const role = "{{ user.profile.role }}"
+  const submitter_name = null
+  const course_id = "{{ problem.course_id }}";
+  const problem_id = "{{ problem.id }}";
+  const pass_threshold = "{{ problem.metadata.pass_threshold }}"
+</script>
+
+{% if problem.author_id == user.id %}
+<script>const valid_tutor = true;</script>
+{% else %}
+<script>const valid_tutor = false;</script>
+{% endif %}
+
 <script type="text/javascript">window.course_id = "{{ course.id }}"; window.csrf_token = "{{ csrf_token }}";</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.js"></script>
+<script type="text/javascript" src="{% static 'js/charts/problem_view_charts.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/courses/submission_overview.js' %}"></script>
 
 {% endblock content %}
 
