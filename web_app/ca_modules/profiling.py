@@ -286,10 +286,12 @@ class Profiler:
             mem_init_idx = output.index("MEMORYSTATS")
             self.__program_dict["total_physical_mem"] = float(output[mem_init_idx + 1])
             self.__program_dict["total_virtual_mem"] = float(output[mem_init_idx + 2])
-            # self.__remove_files(pro_file, "memprof_script.py")
+            
         elif self.__input_type == "default":
             input_arg = json.dumps(self.__sample_inputs[0]) if self.__sample_inputs is not None else None
             output = process_output("python", pro_file, input_arg=input_arg, init_data=self.__init_data, stage="memprof")
             mem_init_idx = output.index("MEMORYSTATS")
             self.__program_dict["total_physical_mem"] = float(output[mem_init_idx + 1])
             self.__program_dict["total_virtual_mem"] = float(output[mem_init_idx + 2])
+
+        self.__remove_files(pro_file, "memprof_script.py")
