@@ -130,14 +130,14 @@ class AnalysisView(APIView):
         comparison.write_comp(analysis, problem_data["analysis"])
         print("Course_ID =>", processed_data["course_id"])       
         ### only save submitted solution to db if all tests were passed, and hence submission was profiled, etc.
-
-        solution, created = Solution.objects.update_or_create(
+        ### !!! TODO: Need to limit uploads à la leetcode (resource exhaustion), and number of tries !!!
+        Solution.objects.create(
             submitter_id=processed_data["uid"],
             problem_id=processed_data["prob_id"],
             course_id=processed_data["course_id"],
-            defaults={'analysis': analysis, 'date_submitted': datetime.now()}
+            analysis=analysis, 
+            date_submitted=datetime.now()
         )
-        solution.save()
         ### discard preprocessed executable script
         try:
             os.remove(filename)
@@ -339,7 +339,8 @@ def get_global_problem_stats(request, problem_id, course_id, role):
     elif role == "student":
         valid_req = Enrolment.objects.filter(student_id=request.user.id).first()
     if valid_req:
-        solutions = list(Solution.objects.filter(problem_id=problem_id).filter(course_id=course_id).all())
+        # solutions = list(Solution.objects.filter(problem_id=problem_id).filter(course_id=course_id).all())
+        solutions = list(Solution.objects.filter(problem_id=problem_id).filter(course_id=course_id).order_by('submitter_id', '-date_submitted').distinct('submitter_id'))
         stats_data = []
         for solution in solutions:
             time_res = solution.analysis.get("udef_func_time_tot", 0)

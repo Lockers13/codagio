@@ -4,18 +4,44 @@
 {% if solution %}
 <div style="margin: 7% 0 0 5%">
     {% if user.profile.role == "tutor" %}
-    <h2><u>{{ solution.submitter.username|title }}'s submission for {{ solution.problem.name }}</u></h2>
+    <h2><u>{{ solution.submitter.username|title }}'s submission for {{ solution.problem.name }} </u></h2>
     {% elif user.profile.role == "student" %}
     <h2><u>Your submission for {{ solution.problem.name }}</u></h2>
     {% endif %}
-    <h5>({{ solution.course.name }} : {{ solution.course.code }})</h5><br><br> 
+    <h4>{{ solution.course.name }} : {{ solution.course.code }}</h4> 
+    <h5>({{ solution.date_submitted }})</h5><br><br> 
     <p id="score"></p>
     <p id="cprof"></p>
     <p id="memprof"></p><br>
-    <p id="date_sub"></p><br><br>
     <h4><u>Solution Text:</u></h4><br>
     <p id="solution_text"></p>
 </div><br><br>
+{% if other_solutions %}
+<div style="margin: 2% 0 0 5%">
+<h2>Previous Solutions</h2>
+
+<table class="table table-striped table-light">
+    <thead>
+      <tr>
+        <th scope="col">Date Submitted</th>
+        <th scope="col">Score</th>
+      </tr>
+    </thead>
+    <tbody>
+{% for alt_soln in other_solutions %}
+<tr>
+      <td><a class="nav-link" href="{% url 'classes:problem_view' problem_id=alt_soln.problem.id uid=alt_soln.submitter.id %}?which=other&soln_id={{ alt_soln.id }}">{{ alt_soln.date_submitted }}</a></td>
+      {% if alt_soln.analysis.passed %}
+      <td><span style="color:#06D6A0">{{ alt_soln.analysis.score }}%</span></td>
+      {% else %}
+      <td><span style="color:rgb(240, 79, 79)">{{ alt_soln.analysis.score }}%</span></td>  
+      {% endif %}
+</tr>
+{% endfor %}
+</tbody>
+</table>
+</div><br><br>
+{% endif %}
 <button type='button' class='text-center go_btn btn-sm' id='stat_btn'
     style='width:15%;padding:10px;background-color:#1d2b5b'>View Score Chart</button>
 <div height='400px' width='400px' style='margin-top:10%;width:80%;height:60vh;position:relative;'>
@@ -37,7 +63,7 @@
   const solution_analysis = JSON.parse(document.getElementById('soln_analysis').textContent);
   const submitter_name = "{{ solution.submitter.username }}";
   const date_sub = "{{ solution.date_submitted }}";
-  const role = "{{ user.profile.role }}"
+  const role = "{{ user.profile.role }}";
   const course_id = "{{ solution.course.id }}";
   const problem_id = "{{ solution.problem.id }}";
 </script>
@@ -51,6 +77,11 @@
 <script>const valid_student = true;</script>
 {% else %}
 <script>const valid_student = false;</script>
+{% endif %}
+{% if latest %}
+<script>const latest = true;</script>
+{% else %}
+<script>const latest = false;</script>
 {% endif %}
 
 

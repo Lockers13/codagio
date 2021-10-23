@@ -1,7 +1,7 @@
 var retrieve_stats_url = "http://localhost:8000/api/courses/get_global_problem_stats" // /<int:problem_id>/<int:course_id>/"
 
 var stat_btn = document.getElementById('stat_btn')
-if(role == "tutor") {
+if(role == "tutor" || !latest) {
     stat_btn.style.visibility = "hidden"
 }
 const pass_threshold = solution_analysis["pass_threshold"]
@@ -19,13 +19,11 @@ if(ctx != null) {
     ctx.canvas.height = 500;
 }
 
-var date_sub_elem = document.getElementById('date_sub')
 var cprof_elem = document.getElementById('cprof')
 var memprof_elem = document.getElementById('memprof')
 var score_elem = document.getElementById('score')
 var solution_text_elem = document.getElementById('solution_text')
 
-date_sub_elem.innerHTML = "Date Submitted: " + date_sub
 var cprof_message = solution_analysis["time_profile"]?  (solution_analysis["udef_func_time_tot"]).toFixed(3) + "s (vs. " + (solution_analysis["ref_time"]).toFixed(3) + "s for reference problem)": "Time profiling has not been configured for this problem"
 cprof_elem.innerHTML = "Runtime of " + html_username + "submission: " + cprof_message
 var memprof_message = solution_analysis["total_physical_mem"] + "MiB (vs. " + solution_analysis["ref_phys_mem"] + "MiB for reference problem)"

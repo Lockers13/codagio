@@ -28,14 +28,21 @@ def course_landing(request, course_id):
     return render(request, 'courses/course_landing.html', context)
 
 def submission_overview(request, course_id, prob_id):
-    solutions = list(Solution.objects.filter(problem_id=prob_id).all())
-    problem = solutions[0].problem
+    solutions = list(Solution.objects.filter(problem_id=prob_id).order_by('submitter_id', '-date_submitted').distinct('submitter_id'))
+    problem = solutions[0].problem if solutions else None
     submitter_ids = [solution.submitter_id for solution in solutions]
     other_students = [enrolment.student for enrolment in list(Enrolment.objects.filter(course_id=course_id).filter(~Q(student_id__in=submitter_ids)).all())]
     context = {'other_students': other_students, 'solutions': solutions, 'problem': problem}
     return render(request, 'courses/submission_overview.html', context)
 
 def problem_view(request, problem_id, uid):
-    solution = Solution.objects.filter(submitter_id=uid).filter(problem_id=problem_id).first()
-    context = {'solution': solution, 'problem_id': problem_id}
+    which = request.GET.get('which', "latest")
+    if which == "latest":
+        solutions = list(Solution.objects.filter(submitter_id=uid).filter(problem_id=problem_id).all().order_by('-date_submitted'))
+        solution = solutions[0] if solutions else None
+        context = {'other_solutions': solutions[1:], 'problem_id': problem_id, 'solution': solution, 'latest': True}
+    elif which == "other":
+        soln_id = request.GET.get("soln_id", None)
+        solution = Solution.objects.filter(id=soln_id).first()
+        context = {'problem_id': problem_id, 'solution': solution, 'latest': False}
     return render(request, 'courses/problem_view.html', context)
