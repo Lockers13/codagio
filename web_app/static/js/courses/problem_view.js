@@ -25,7 +25,7 @@ var score_elem = document.getElementById('score')
 var solution_text_elem = document.getElementById('solution_text')
 
 var cprof_message = solution_analysis["time_profile"]?  (solution_analysis["udef_func_time_tot"]).toFixed(3) + "s (vs. " + (solution_analysis["ref_time"]).toFixed(3) + "s for reference problem)": "Time profiling has not been configured for this problem"
-cprof_elem.innerHTML = "Runtime of " + html_username + "submission: " + cprof_message
+cprof_elem.innerHTML = "Runtime of " + html_username + "submission: " + cprof_message + "<br><br>"
 var memprof_message = solution_analysis["total_physical_mem"] + "MiB (vs. " + solution_analysis["ref_phys_mem"] + "MiB for reference problem)"
 memprof_elem.innerHTML = "Memory Usage of " + html_username + "submission: " + memprof_message
 var score_color = solution_analysis["passed"]? "#06D6A0": "rgb(240, 79, 79)";
@@ -36,6 +36,15 @@ for(let i = 0; i < soln_text.length; i++) {
     solution_text_elem.innerHTML += "<span style='white-space:pre;'>" + soln_text[i].italics() + "</span><br>"
 }
 
+var content_str = "<ul>"
+var fdefs = solution_analysis["fdefs"]
+for(fdef in fdefs) {
+    var cumulative_time = solution_analysis["time_profile"] == true? fdefs[fdef]["cum_time"]: "Time profiling has not been configured for this problem!"
+    content_str += "<li>Function Name: " + fdefs[fdef]["name"] + "<br>" +
+                    "Cumulative Time spent in function: " + cumulative_time+ "</li><br>"
+}
+content_str += "</ul>"
+cprof_elem.innerHTML += content_str
 
 
 if((role == "student" && valid_student)) {
