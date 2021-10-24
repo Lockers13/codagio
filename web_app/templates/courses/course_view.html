@@ -34,18 +34,25 @@
     <br>
     <div id="enrol_form_div" class="row no-gutters" style="visibility:hidden;">
         <div class="col-sm-12 col-md-12 col-lg-12 col-xl-12 nopadding">
-            <div>
-                <h2 class="text-center" style="padding:20px;"><u>Enrol in a Course Now!</u></h2>
-            </div>
-            <div class="text-left upload_form" style="padding-left:20px;">
-                <form id="enrol_course_form" action="" method="post" enc="multipart/form-data">
+            <div class="text-center">
+            <div style="padding-left:20px;" class="form-group col-sm-12 col-md-12 col-lg-12 col-xl-12 item"><span class="upload-form-field">Course Code (Max Length: 15)</span> <span name="course_code" class="problem_name">{{ form.code }}</span></div>
+            
+                <button id="search_button" type="button" class="text-center go_btn">
+                    Search
+                </button>
+            </div><br>
+            <p id="course_fetch_error" style="text-align:center;margin:5 0 5 0;color:red;"></p>
+            <div id="course_info"></div>
+            <div id="effective_enrol" class="text-left upload_form" style="padding-left:20px;visibility:hidden;">
+                <form id="enrol_course_form" action="" method="get" enc="multipart/form-data">
                     {% csrf_token %}
-                    <div class="form-group col-sm-12 col-md-12 col-lg-12 col-xl-12 item"><span class="upload-form-field">Course Code (Max Length => 15):</span> <span class="problem_name">{{ form.code }}</span></div>
+                    <div class="form-group col-sm-12 col-md-12 col-lg-12 col-xl-12 item"><span class="upload-form-field">Enter Passcode:</span> <span class="problem_name">{{ form.password }}</span></div>
                     <div class="text-center">
                         <button id="sub_btn" type="submit" class="submit_form_btn">ENROL</button>
                     </div>
                 </form>
             </div>
+            
             <div><p id="ce_res" style="text-align:center;"></p></div>
         </div>
     </div>
@@ -87,6 +94,7 @@
                 {% csrf_token %}
                 <div class="form-group col-sm-12 col-md-12 col-lg-12 col-xl-12 item"><span class="upload-form-field">Course Name:</span> <span class="problem_name">{{ form.name }}</span></div>
                 <div class="form-group col-sm-12 col-md-12 col-lg-12 col-xl-12 item"><span class="upload-form-field">Course Code:</span> <span class="problem_name">{{ form.code }}</span></div>
+                <div class="form-group col-sm-12 col-md-12 col-lg-12 col-xl-12 item"><span class="upload-form-field">Course Password:</span> <span class="problem_name">{{ form.password }}</span></div>
                 <div class="form-group col-sm-12 col-md-12 col-lg-12 col-xl-12 item"><span class="upload-form-field">Course Description:</span> <span class="problem_desc">{{ form.description }}</span></div>
                 <div class="text-center">
                     <button id="sub_btn" type="submit" class="submit_form_btn">CREATE</button>

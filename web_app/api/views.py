@@ -17,6 +17,7 @@ from . import postmaster as pm
 from app import settings
 from code_analysis import forms as ca_forms
 from classes.models import Course, Enrolment
+import hashlib
 
 ################################################ code analysis API endpoints #######################################
 
@@ -287,12 +288,15 @@ def delete_problem(request, pk):
 @api_view(['POST'])
 def create_course(request):
     try:
+        password = request.POST.get("password", None)
+        hash_obj = hashlib.sha512(password.encode('utf-8'))
         course, created = Course.objects.update_or_create(
             tutor=request.user,
             name = request.POST.get("name", None),
             defaults={'name': request.POST.get("name", None), 
                 'description': request.POST.get("description", None),
-                'code': request.POST.get("code", None)
+                'code': request.POST.get("code", None),
+                'hash_digest': hash_obj.hexdigest()
             }
         )
         course.save()
@@ -301,11 +305,13 @@ def create_course(request):
         return Response("Failure: {0}".format(str(e)), status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['POST'])
-def enrol_course(request):
+def enrol_course(request, course_code):
     try:
-        course_code = request.POST.get("code", None)
+        password = request.POST.get("password", None)
+        hash_obj = hashlib.sha512(password.encode('utf-8'))
         course = Course.objects.filter(code=course_code).first()
-        if course:
+        correct_password = hash_obj.hexdigest() == course.hash_digest
+        if course and correct_password:
             enrolment, created = Enrolment.objects.update_or_create(
                 student=request.user,
                 course = course,
@@ -314,7 +320,8 @@ def enrol_course(request):
             enrolment.save()
             return Response(str(course.id), status=status.HTTP_200_OK)
         else:
-            return Response("Failure: no such course", status=status.HTTP_400_BAD_REQUEST)
+            resp = "Failure: no such course" if not course else "Failure: incorrect password" if not correct_password else ""
+            return Response(resp, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
         return Response("Failure {0}".format(str(e)), status=status.HTTP_400_BAD_REQUEST)
 
@@ -356,3 +363,21 @@ def get_global_problem_stats(request, problem_id, course_id, role):
         return Response(stats_data, status=status.HTTP_200_OK)
     else:
         return Response("Failure", status=status.HTTP_403_FORBIDDEN)
+
+@api_view(['GET'])
+def get_course(request):
+    try:
+        course_code = request.GET.get("course_code", None)
+        course = Course.objects.filter(code=course_code).first()
+        if course:
+            data = {
+                "name": course.name,
+                "code": course.code,
+                "description": course.description,
+                "tutor": course.tutor.username
+            }
+            return Response(data, status=status.HTTP_200_OK)
+        else:
+            return Response("Failure: no such course", status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        return Response("Failure {0}".format(str(e)), status=status.HTTP_400_BAD_REQUEST)
