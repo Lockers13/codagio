@@ -3,26 +3,35 @@ let course_landing_url = "http://localhost:8000/classes/course_landing/"
 const enrol_course_url = "http://localhost:8000/api/courses/enrol_course/"
 const get_course_url = "http://localhost:8000/api/courses/get_course/"
 
-let enrol_form_btn = document.getElementById("enrol_form_btn")
-let enrol_form_div = document.getElementById("enrol_form_div")
-let cc_form_btn = document.getElementById("cc_form_btn")
-let cc_form_div = document.getElementById("cc_form_div")
+var enrol_form_btn = document.getElementById("enrol_form_btn")
+var enrol_form_div = document.getElementById("enrol_form_div")
+var cc_form_btn = document.getElementById("cc_form_btn")
+var cc_form_div = document.getElementById("cc_form_div")
+var effective_enrol = document.getElementById("effective_enrol")
+
+$(document).ready(function(){
+    enrol_form_div.style.visibility = "hidden"
+})
+
+var csearch_btn = document.getElementById("search_button")
+var course_fetch_error = document.getElementById("course_fetch_error")
+var course_info = document.getElementById("course_info")
+var passcode_span = document.getElementById("passcode_span")
 
 if(enrol_form_btn != null) {
     enrol_form_btn.addEventListener('click', function(e) {
-        enrol_form_div.style.visibility = enrol_form_btn.value == 0? "visible": "hidden";
-        enrol_form_btn.value = enrol_form_btn.value == 0? 1: 0;
-        enrol_form_btn.innerHTML = enrol_form_btn.value == 0? "Click here to enrol in a new course": "Hide Enrolment Form";
-        var csearch_btn = document.getElementById("search_button")
-        var course_fetch_error = document.getElementById("course_fetch_error")
-        var course_info = document.getElementById("course_info")
+        enrol_form_div.style.visibility = "visible"
+        enrol_form_btn.style.visibility = "hidden"
         csearch_btn.addEventListener("click", function(e) {
             var course_code = document.getElementsByName("course_code")[0].firstChild.value
+            ce_res.innerHTML = ""
             fetch(get_course_url + "?course_code=" + course_code) 
             .then(response => response.json())
             .then(function (data) {
+                document.getElementById("passcode_entry_field").firstChild.value = ""
                 try {
                     if(data.includes("no such course")) {
+                        effective_enrol.style.visibility = "hidden"
                         course_fetch_error.innerHTML = "Sorry, we could not find that course...please try again!"
                         return
                     }
@@ -30,14 +39,14 @@ if(enrol_form_btn != null) {
                 catch {
                     ;
                 }
-                
-                console.log(data)
+                course_fetch_error.innerHTML = ""
+                passcode_span.innerHTML = "Enter Passcode for " + course_code + ":"
                 course_info.innerHTML = ""
                 // course_fetch_error.innerHTML = ""
                 // course_info.innerHTML += "<div style='text-align:center;'><ul><li>Name: " + data["name"] + "</li><br>"
                 // course_info.innerHTML += "<li>Description: \"<i>" + data["description"] + "<\i>\"</li><br>"
                 // course_info.innerHTML += "<li>Tutor: " + data["tutor"] + "</li></ul></div><br>"
-                document.getElementById("effective_enrol").style.visibility = "visible"
+                effective_enrol.style.visibility = "visible"
                 $("#enrol_course_form").submit(function(e) {
                     e.preventDefault();
                     var ce_res = document.getElementById("ce_res")
@@ -52,13 +61,13 @@ if(enrol_form_btn != null) {
                         contentType: false,
                     })
                     .done(function(resp_data) {
-                        console.log(resp_data)
+                        ce_res.innerHTML = ""
                         window.location.href = course_landing_url + resp_data // resp_data on success is course_id
                     })
                     .fail(function(resp_data) {
                         console.log(resp_data)
                         ce_res.style.color = "red"
-                        ce_res.innerHTML = "Oops, there was an error uploading your file, please ensure everything is in order and try again!"
+                        ce_res.innerHTML = resp_data["responseJSON"]
                     })
                 });
             })

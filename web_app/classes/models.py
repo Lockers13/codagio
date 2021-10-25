@@ -13,4 +13,7 @@ class Course(models.Model):
 class Enrolment(models.Model):
     student = models.ForeignKey(User, on_delete=models.CASCADE)
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
+
+    class Meta:
+        unique_together = ('student', 'course')
  

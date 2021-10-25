@@ -32,7 +32,7 @@
     <button id="enrol_form_btn" value="0">Click here to enrol in a new course</button>
     </div>
     <br>
-    <div id="enrol_form_div" class="row no-gutters" style="visibility:hidden;">
+    <div id="enrol_form_div" class="row no-gutters">
         <div class="col-sm-12 col-md-12 col-lg-12 col-xl-12 nopadding">
             <div class="text-center">
             <div style="padding-left:20px;" class="form-group col-sm-12 col-md-12 col-lg-12 col-xl-12 item"><span class="upload-form-field">Course Code (Max Length: 15)</span> <span name="course_code" class="problem_name">{{ form.code }}</span></div>
@@ -41,21 +41,22 @@
                     Search
                 </button>
             </div><br>
-            <p id="course_fetch_error" style="text-align:center;margin:5 0 5 0;color:red;"></p>
-            <div id="course_info"></div>
-            <div id="effective_enrol" class="text-left upload_form" style="padding-left:20px;visibility:hidden;">
-                <form id="enrol_course_form" action="" method="get" enc="multipart/form-data">
-                    {% csrf_token %}
-                    <div class="form-group col-sm-12 col-md-12 col-lg-12 col-xl-12 item"><span class="upload-form-field">Enter Passcode:</span> <span class="problem_name">{{ form.password }}</span></div>
-                    <div class="text-center">
-                        <button id="sub_btn" type="submit" class="submit_form_btn">ENROL</button>
-                    </div>
-                </form>
-            </div>
-            
-            <div><p id="ce_res" style="text-align:center;"></p></div>
         </div>
     </div>
+    <p id="course_fetch_error" style="text-align:center;margin:5 0 5 0;color:red;"></p>
+    <div id="course_info"></div>
+    <div id="effective_enrol" class="text-left upload_form" style="padding-left:20px;visibility:hidden;">
+        <form id="enrol_course_form" action="" method="post" enc="multipart/form-data">
+            {% csrf_token %}
+            <div class="form-group col-sm-12 col-md-12 col-lg-12 col-xl-12 item"><span id="passcode_span" class="upload-form-field"></span> <span id="passcode_entry_field" class="problem_name">{{ form.password }}</span></div>
+            <div class="text-center">
+                <button id="sub_btn" type="submit" class="submit_form_btn">ENROL</button>
+            </div>
+        </form>
+    </div>
+    
+    <div class="text-center"><p id="ce_res"></p></div>
+
 
 {% elif user.profile.role == "tutor" %}
 
