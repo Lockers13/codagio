@@ -6,6 +6,7 @@ class CreateCourseForm(forms.Form):
     description = forms.CharField(required=True, widget=forms.Textarea(attrs={"rows":10, "cols":20}))
     code = forms.CharField(max_length=15, required=True)
     password = forms.CharField(max_length=20, required=True, widget=forms.PasswordInput())
+    confirm_password = forms.CharField(max_length=20, required=True, widget=forms.PasswordInput())
 
 class EnrolCourseForm(forms.Form):
     code = forms.CharField(max_length=15, required=True)

@@ -9,9 +9,12 @@ var cc_form_btn = document.getElementById("cc_form_btn")
 var cc_form_div = document.getElementById("cc_form_div")
 var effective_enrol = document.getElementById("effective_enrol")
 
-$(document).ready(function(){
-    enrol_form_div.style.visibility = "hidden"
-})
+
+if(enrol_form_btn != null) {
+    $(document).ready(function(){
+        enrol_form_div.style.visibility = "hidden"
+    })
+}
 
 var csearch_btn = document.getElementById("search_button")
 var course_fetch_error = document.getElementById("course_fetch_error")
@@ -76,30 +79,39 @@ if(enrol_form_btn != null) {
 }
 
 if(cc_form_btn != null) {
+    var pword_unmatch = document.getElementById("password_unmatch")
     cc_form_btn.addEventListener('click', function(e) {
-        cc_form_div.style.visibility = cc_form_btn.value == 0? "visible": "hidden";
-        cc_form_btn.value = cc_form_btn.value == 0? 1: 0;
-        cc_form_btn.innerHTML = cc_form_btn.value == 0? "Click here to create a new course": "Hide Course Creation Form";
+        cc_form_div.style.visibility = "visible";
+        cc_form_btn.style.visibility = "hidden";
     })
 } 
 
 $("#create_course_form").submit(function(e) {
     e.preventDefault();
     var cc_res = document.getElementById("cc_res")
-    $.ajax({
-        url: create_course_url,
-        type: 'POST',
-        data: new FormData(this),
-        processData: false,
-        contentType: false,
-    })
-    .done(function(resp_data) {
-        console.log(resp_data)
-        window.location.href = course_landing_url + resp_data // resp_data on success is course_id
-    })
-    .fail(function(resp_data) {
-        console.log(resp_data)
-        cc_res.style.color = "red"
-        cc_res.innerHTML = "Oops, there was an error uploading your file, please ensure everything is in order and try again!"
-    })
+    var pword_main = document.getElementById("password_main").firstChild
+    var pword_confirm = document.getElementById("password2").firstChild
+    pword_unmatch.innerHTML = ""
+    if(pword_main.value == pword_confirm.value) {
+        $.ajax({
+            url: create_course_url,
+            type: 'POST',
+            data: new FormData(this),
+            processData: false,
+            contentType: false,
+        })
+        .done(function(resp_data) {
+            console.log(resp_data)
+            window.location.href = course_landing_url + resp_data // resp_data on success is course_id
+        })
+        .fail(function(resp_data) {
+            console.log(resp_data)
+            cc_res.style.color = "red"
+            cc_res.innerHTML = "Oops, there was an error uploading your file, please ensure everything is in order and try again!"
+        })
+    }
+    else {
+       pword_unmatch.innerHTML = "Sorry, the provided passwords must match!"
+       pword_main.scrollIntoView();
+    }
 });
