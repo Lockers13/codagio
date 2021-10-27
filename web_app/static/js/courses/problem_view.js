@@ -107,14 +107,17 @@ function handle_output_analysis(e) {
 
 function write_modal_body(test_idx, e) {
     // not sure why but JS engine is inverting the order of event and test_idx when passed in bind method
+    var modal_title = document.getElementById("modal_title")
     var modal_table = document.getElementById("modal_table")
     modal_table.innerHTML = ""
     modal_table.innerHTML += "<thead><tr style='width:100%;text-align:center;padding:5 5 5 5;'>"
     modal_table.innerHTML += "<th style='text-align:center;padding:5 5 5 5;' scope='col'><u>" + capitalize(submitter_name) + "'s Output</u></th><th style='text-align:center;padding:5 5 5 5;' scope='col'><u>Correct Solution</u></th>"
     modal_table.innerHTML += "</tr></thead><tbody>"
     var mismatches = solution_analysis["scores"]["test_" + test_idx]["detailed_stats"]["total_mismatches"]
+    modal_title.innerHTML = mismatches.length + " " + modal_title.innerHTML
     for(var mm_index = 0; mm_index < mismatches.length; mm_index++) {
-        modal_table.innerHTML += "<tr style='width:100%;text-align:center;padding:5 5 5 5;'><td><span style='color:rgb(240, 79, 79)'>" + mismatches[mm_index][0] + "</span></td>" + "<td><span style='color:#06D6A0'>" + mismatches[mm_index][1] + "</span></td></tr>"
+        var bg_color = mm_index % 2 == 0? '#101010': 'rgb(55, 55, 55)';
+        modal_table.innerHTML += "<tr style='width:100%;text-align:center;padding:7 7 7 7;background-color:" + bg_color +";'><td style='padding: 7 7 7 7'><span style='color:rgb(240, 79, 79)'>" + mismatches[mm_index][0] + "</span></td>" + "<td  style='padding: 5 5 5 5'><span style='color:#06D6A0'>" + mismatches[mm_index][1] + "</span></td></tr>"
     }
     modal_table.innerHTML += "</tbody>"
 }
