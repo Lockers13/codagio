@@ -111,6 +111,8 @@ class Verifier:
             num_correct_samples = 5 if num_correct > 3 else num_correct
             result_dict["mismatches"] = random.sample(mismatches, num_fail_samples)
             result_dict["matches"] = random.sample(matches, num_correct_samples)
+            result_dict["total_mismatches"] = mismatches
+            result_dict["total_matches"] = matches
             return result_dict
 
         sample_outputs = self.__sample_outputs

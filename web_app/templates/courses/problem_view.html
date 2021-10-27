@@ -10,12 +10,42 @@
     {% endif %}
     <h4>{{ solution.course.name }} : {{ solution.course.code }}</h4> 
     <h5>({{ solution.date_submitted }})</h5><br><br> 
+    <div style="float:right;margin:0 10% 0 0;">
+      <a id="output_review" class="nav-link dropdown-toggle text-left" href="#" data-toggle="dropdown">Review Outputs</a>
+      <ul id="output_review_dd" class="dropdown-menu">
+          
+          <li><a class="dropdown-item" data-toggle="modal" data-target="#exampleModalCenter">Test 2</a></li>
+      </ul>
+    </div>
     <p id="score"></p>
     <p id="cprof"></p>
     <p id="memprof"></p><br>
     <h4><u>Solution Text:</u></h4><br>
     <p id="solution_text"></p>
-</div><br><br>
+</div>
+
+
+<div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg" style="width:90%" role="document">
+        <div class="modal-content" style="background-color: #101010;">
+            <div class="modal-header" style="background-color: rgb(220, 215, 215);">
+                <h5 style="color:black;text-align:center;" class="modal-title" id="modal_title">Incorrect Outputs</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div style="color:black" class="modal-body" id="modal_body">
+              <table id="modal_table" class="table-striped table-black" style="width:100%;background-color:#101010;;"></table>
+            </div>
+            <div style="color:black" class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<br><br>
 {% if other_solutions %}
 <div style="margin: 2% 0 0 5%">
 <h2>Previous Solutions</h2>

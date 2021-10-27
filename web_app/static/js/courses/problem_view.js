@@ -46,6 +46,25 @@ for(fdef in fdefs) {
 content_str += "</ul>"
 cprof_elem.innerHTML += content_str
 
+var output_review = document.getElementById("output_review")
+var output_review_dd = document.getElementById("output_review_dd")
+
+
+if(output_review != null) {
+    output_review.addEventListener('click', function(e) {
+        e.preventDefault()
+        output_review_dd.innerHTML = ""
+        console.log(solution_analysis)
+        var scores = solution_analysis["scores"]
+        var lim = Object.keys(scores).length
+        for(var i = 1; i < lim; i++) {
+            output_review_dd.innerHTML += "<li><a id='review_test_" + i + "' class='dropdown-item' data-toggle='modal' data-target='#exampleModalCenter'>Test " + i + "</a></li>"
+            document.getElementById("review_test_" + i).addEventListener('click', write_modal_body.bind(e, i))
+        }
+
+        // handle_output_analysis()
+    })
+}
 
 if((role == "student" && valid_student)) {
     fetch(retrieve_stats_url + "/" + problem_id + "/" + course_id + "/" + role + "/") 
@@ -78,4 +97,24 @@ if((role == "student" && valid_student)) {
 
 function capitalize(string) {
     return string.charAt(0).toUpperCase() + string.slice(1);
+}
+
+function handle_output_analysis(e) {
+    var modal_body = document.getElementById("modal_body")
+    modal_body.innerHTML = "HEY YOU!"
+    console.log(solution_analysis)
+}
+
+function write_modal_body(test_idx, e) {
+    // not sure why but JS engine is inverting the order of event and test_idx when passed in bind method
+    var modal_table = document.getElementById("modal_table")
+    modal_table.innerHTML = ""
+    modal_table.innerHTML += "<thead><tr style='width:100%;text-align:center;padding:5 5 5 5;'>"
+    modal_table.innerHTML += "<th style='text-align:center;padding:5 5 5 5;' scope='col'><u>" + capitalize(submitter_name) + "'s Output</u></th><th style='text-align:center;padding:5 5 5 5;' scope='col'><u>Correct Solution</u></th>"
+    modal_table.innerHTML += "</tr></thead><tbody>"
+    var mismatches = solution_analysis["scores"]["test_" + test_idx]["detailed_stats"]["total_mismatches"]
+    for(var mm_index = 0; mm_index < mismatches.length; mm_index++) {
+        modal_table.innerHTML += "<tr style='width:100%;text-align:center;padding:5 5 5 5;'><td><span style='color:rgb(240, 79, 79)'>" + mismatches[mm_index][0] + "</span></td>" + "<td><span style='color:#06D6A0'>" + mismatches[mm_index][1] + "</span></td></tr>"
+    }
+    modal_table.innerHTML += "</tbody>"
 }
