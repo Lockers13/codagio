@@ -30,7 +30,7 @@ var memprof_message = solution_analysis["total_physical_mem"] + "MiB (vs. " + so
 memprof_elem.innerHTML = "Memory Usage of " + html_username + "submission: " + memprof_message
 var score_color = solution_analysis["passed"]? "#06D6A0": "rgb(240, 79, 79)";
 score_elem.style.color = score_color
-score_elem.innerHTML = "Score: " + solution_analysis["score"] + "%"
+score_elem.innerHTML = "Score: " + parseFloat(solution_analysis["score"]).toFixed(2) + "%"
 var soln_text = solution_analysis["solution_text"]
 for(let i = 0; i < soln_text.length; i++) {
     solution_text_elem.innerHTML += "<span style='white-space:pre;'>" + soln_text[i].italics() + "</span><br>"
@@ -111,13 +111,13 @@ function write_modal_body(test_idx, e) {
     var modal_table = document.getElementById("modal_table")
     modal_table.innerHTML = ""
     modal_table.innerHTML += "<thead><tr style='width:100%;text-align:center;padding:5 5 5 5;'>"
-    modal_table.innerHTML += "<th style='text-align:center;padding:5 5 5 5;' scope='col'><u>" + capitalize(submitter_name) + "'s Output</u></th><th style='text-align:center;padding:5 5 5 5;' scope='col'><u>Correct Solution</u></th>"
+    modal_table.innerHTML += "<th style='text-align:center;padding:5 5 5 5;' scope='col'><u>Input</u></th><th style='text-align:center;padding:5 5 5 5;' scope='col'><u>" + capitalize(submitter_name) + "'s Output</u></th><th style='text-align:center;padding:5 5 5 5;' scope='col'><u>Correct Output</u></th>"
     modal_table.innerHTML += "</tr></thead><tbody>"
     var mismatches = solution_analysis["scores"]["test_" + test_idx]["detailed_stats"]["total_mismatches"]
     modal_title.innerHTML = "Test " + test_idx + ": " + mismatches.length + " Incorrect Outputs"
     for(var mm_index = 0; mm_index < mismatches.length; mm_index++) {
         var bg_color = mm_index % 2 == 0? '#101010': 'rgb(55, 55, 55)';
-        modal_table.innerHTML += "<tr style='width:100%;text-align:center;padding:7 7 7 7;background-color:" + bg_color +";'><td style='padding: 7 7 7 7'><span style='color:rgb(240, 79, 79)'>" + mismatches[mm_index][0] + "</span></td>" + "<td  style='padding: 5 5 5 5'><span style='color:#06D6A0'>" + mismatches[mm_index][1] + "</span></td></tr>"
+        modal_table.innerHTML += "<tr style='width:100%;text-align:center;padding:7 7 7 7;background-color:" + bg_color +";'><td style='padding: 7 7 7 7'><span style='color:white;'>" + mismatches[mm_index][0] + "</span></td><td  style='padding: 5 5 5 5'><span style='color:rgb(240, 79, 79)'>" + mismatches[mm_index][1] + "</span></td><td  style='padding: 5 5 5 5'><span style='color:#06D6A0'>" + mismatches[mm_index][2] + "</span></td></tr>"
     }
     modal_table.innerHTML += "</tbody>"
 }

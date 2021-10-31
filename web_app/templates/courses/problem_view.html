@@ -10,6 +10,7 @@
     {% endif %}
     <h4>{{ solution.course.name }} : {{ solution.course.code }}</h4> 
     <h5>({{ solution.date_submitted }})</h5><br><br> 
+    {% if user.profile.role == "tutor" %}
     <div style="float:right;margin:0 10% 0 0;">
       <a id="output_review" class="nav-link dropdown-toggle text-left" href="#" data-toggle="dropdown">Review Outputs</a>
       <ul id="output_review_dd" class="dropdown-menu">
@@ -17,6 +18,7 @@
           <li><a class="dropdown-item" data-toggle="modal" data-target="#exampleModalCenter">Test 2</a></li>
       </ul>
     </div>
+    {% endif %}
     <p id="score"></p>
     <p id="cprof"></p>
     <p id="memprof"></p><br>

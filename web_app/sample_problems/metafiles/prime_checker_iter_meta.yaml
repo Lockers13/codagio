@@ -14,3 +14,4 @@ category: mathematics
 main_function: "is_prime"
 pass_threshold: 100
 time_profile: True
+output_analysis: one-to-one

@@ -18,6 +18,10 @@ from app import settings
 from code_analysis import forms as ca_forms
 from classes.models import Course, Enrolment
 import hashlib
+from django.utils import timezone
+
+
+
 
 ################################################ code analysis API endpoints #######################################
 
@@ -33,7 +37,7 @@ class AnalysisView(APIView):
         """Built-in django function to handle post requests to API endpoint
         
         Returns an HTTP response of some kind"""
-        print("YO")
+        
         
         uploaded_form = pm.get_uploaded_form(request, problem=False)
 
@@ -56,6 +60,12 @@ class AnalysisView(APIView):
             return ret_obj
         else:
             problem, user = ret_obj
+
+        # check whether number of allowed attempts has been exceeded - default (i.e. if not specified in metafile) is 10
+        attempts_allowed = problem.metadata.get("attempts_allowed", 10)
+        num_solutions = len(list(Solution.objects.filter(problem_id=problem.id).filter(submitter_id=request.user.id).all()))
+        if num_solutions >= attempts_allowed:
+            return Response(ERROR_CODES["Attempt Limit Exceeded"], status=status.HTTP_400_BAD_REQUEST)
 
         problem_data = pm.load_problem_data(problem)
         if isinstance(problem_data, Response):
@@ -137,7 +147,7 @@ class AnalysisView(APIView):
             problem_id=processed_data["prob_id"],
             course_id=processed_data["course_id"],
             analysis=analysis, 
-            date_submitted=datetime.now()
+            date_submitted=timezone.now()
         )
         ### discard preprocessed executable script
         try:

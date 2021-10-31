@@ -28,6 +28,7 @@ SUBMISSION_ERROR_CODES = {
     "Timeout Error": 14,
     "Form Submission Error": 15,
     "Permission Denied Error": 16,
+    "Attempt Limit Exceeded": 17
 }
 
 # Quick-start development settings - unsuitable for production

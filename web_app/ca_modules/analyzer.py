@@ -59,8 +59,10 @@ class Analyzer:
             profiler.cprof()
             # if solution:
             #     profiler.lprof()
-        
-        profiler.memprof()
+        try:
+            profiler.memprof()
+        except Exception as e:
+            print(str(e))
 
         #profiler.gnu_time_stats()
 

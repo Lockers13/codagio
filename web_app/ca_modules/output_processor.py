@@ -32,7 +32,8 @@ def run_subprocess_ctrld(base_cmd, filename, input_arg=None, stage="verification
     ### manually catch semantic error in submitted program by reading printed output that we control if an eexception is caught during its execution
     if stage == "verification":
         if b'EXCEPTION' in output:
-            raise Exception("Exception: semantic error in submitted program: {0}".format(str(output)))
+            output = output.decode("utf-8").split('@')[1]
+            raise Exception("{0}".format(str(output)))
     ### get return code of subprocess: if it is 124, then command has timed out - see 'man timeout'
     comm = process.communicate()[0]
     ret = int(process.returncode)
@@ -44,7 +45,6 @@ def run_subprocess_ctrld(base_cmd, filename, input_arg=None, stage="verification
         except Exception as e:
             pass
         raise Exception("Error during {0} stage - subprocess timed out: retcode = {1}".format(stage, ret))
-
     return output
 
 
@@ -52,7 +52,7 @@ def process_output(base_cmd, filename, input_arg=None, init_data=None, stage="ve
     def clean_output(output):
         if stage == "verification":
             cleaned_output = output.decode("utf-8").replace('\r', '').splitlines()
-            if cleaned_output[-1] == "None":
+            if cleaned_output and cleaned_output[-1] == "None":
                 cleaned_output = cleaned_output[:-1]
         elif stage == "memprof":
             cleaned_output = [out.decode("utf-8").strip('\n') for out in output]
@@ -68,11 +68,11 @@ def process_output(base_cmd, filename, input_arg=None, init_data=None, stage="ve
         try:
             output = run_subprocess_ctrld(base_cmd, filename, input_arg=input_arg, init_data=init_data, stage=stage)
         except Exception as e:
-            raise Exception("hhh{0}".format(str(e)))
+            raise Exception("{0}".format(str(e)))
     else:
         try:
             output = run_subprocess_ctrld(base_cmd, filename, input_arg=input_arg, stage=stage)
         except Exception as e:
-            raise Exception("hhh{0}".format(str(e)))
+            raise Exception("{0}".format(str(e)))
     
     return clean_output(output) ### Note: can't remember exactly why but the output of the profilers needs to be treated differently from that of the verifier

@@ -18,7 +18,7 @@ TEMPLATE_CODE_DEFAULT = ["def prep_input():",
                 "        else:",
                 "            print(output)",
                 "    except Exception as e:",
-                "        print('EXCEPTION: semantic error in submitted program: {0}'.format(str(e)))\n",
+                "        print('EXCEPTION: semantic error in submitted program: @{0}'.format(str(e)))\n",
                 "main()"]
 
 TEMPLATE_CODE_DEFAULT_WITH_INPUT_AND_DATA = ["def prep_input():",
@@ -38,7 +38,7 @@ TEMPLATE_CODE_DEFAULT_WITH_INPUT_AND_DATA = ["def prep_input():",
                 "        else:",
                 "            print(output)",
                 "    except Exception as e:",
-                "        print('EXCEPTION: semantic error in submitted program: {0}'.format(str(e)))\n",
+                "        print('EXCEPTION: semantic error in submitted program: @{0}'.format(str(e)))\n",
                 "main()"]
 
 TEMPLATE_CODE_FILE = ["def prep_output():",
@@ -60,7 +60,7 @@ TEMPLATE_CODE_FILE = ["def prep_output():",
                 "            else:",
                 "                print(i, False)",
                 "    except Exception as e:",
-                "        print('EXCEPTION: semantic error in submitted program: {0}'.format(str(e)))\n",
+                "        print('EXCEPTION: semantic error in submitted program: @{0}'.format(str(e)))\n",
                 "main()"]
 
 TEMPLATE_CODE_FILE_WITH_DATA = ["def prep_output():",
@@ -86,7 +86,7 @@ TEMPLATE_CODE_FILE_WITH_DATA = ["def prep_output():",
                 "            for line in output:",
                 "                print(line)",
                 "    except Exception as e:",
-                "        print('EXCEPTION: semantic error in submitted program: {0}'.format(str(e)))\n",
+                "        print('EXCEPTION: semantic error in submitted program: @{0}'.format(str(e)))\n",
                 "main()"]
 
 

@@ -19,6 +19,7 @@ class Verifier:
         self.__sample_inputs, self.__input_type = problem_data["inputs"], next(iter(self.__meta["input_type"]))
         self.__init_data = problem_data["init_data"]
         self.__num_tests = self.__meta["num_tests"]
+        self.__false_flag = True
 
     def __gen_sub_outputs(self):
         """Private utility method to make hashes from output of provided submission program.
@@ -48,7 +49,10 @@ class Verifier:
         elif self.__input_type == "default":
             if self.__sample_inputs is not None:
                 for sample_input in self.__sample_inputs:
-                    output = process_output(base_cmd, self.__filename, input_arg=json.dumps(sample_input), init_data=self.__init_data)
+                    try:
+                        output = process_output(base_cmd, self.__filename, input_arg=json.dumps(sample_input), init_data=self.__init_data)
+                    except Exception as e:
+                        output = [str(e)]
                     sub_outputs.append(output)
                     ### remove throwaway files after uploaded script has been run on them => if they exist!
             else:
@@ -69,9 +73,15 @@ class Verifier:
             input_types = ["file" for x in range(num_tests)]
         elif self.__input_type == "default":
             if self.__sample_inputs is not None:
-                num_tests = 1
-                input_lengths = len(self.__sample_inputs)
-                input_types = type(self.__sample_inputs[0]).__name__.lower()
+                if self.__meta.get("output_analysis", None) == "one-to-one":
+                    num_tests = 1
+                    input_lengths = [len(self.__sample_inputs)]
+                    input_types = [type(self.__sample_inputs[0]).__name__.lower()]
+                else:
+                    num_tests = len(self.__sample_inputs)
+                    ### note: below only works if i is a list
+                    input_lengths = [len(i) for i in self.__sample_inputs]
+                    input_types = [type(i).__name__.lower() for i in self.__sample_inputs]
             else:
                 num_tests = 1
                 input_lengths = ["N/A"]
@@ -84,35 +94,54 @@ class Verifier:
 
         Returns score as percentage (string) of exact matches (this point may need reviewing)."""
         
-        def get_result_stats():
-            num_outputs = len(sub_output)
+        def get_result_stats(count):
             result_dict = {}
-            mismatches = []
-            matches = []
-            for line_count, (line_sub, line_samp) in enumerate(zip(sub_output, samp_output)):
-                if line_sub != line_samp:
-                    mismatches.append((line_sub, line_samp))
+            if self.__meta.get("output_analysis", None) == "one-to-one":
+                result_dict["one-to-one"] = True
+                num_outputs = len(sub_output)
+                mismatches = []
+                matches = []
+                for line_count, (line_sub, line_samp) in enumerate(zip(sub_output, samp_output)):
+                    if line_sub != line_samp:
+                        mismatches.append((self.__sample_inputs[0][line_count], line_sub, line_samp))
+                    else:
+                        matches.append((self.__sample_inputs[0][line_count], line_sub, line_samp))
+                num_correct = len(matches)
+                result_dict["num_correct"] = num_correct
+                try:
+                    result_dict["success_rate"] = round(num_correct/num_outputs, 4) * 100
+                except Exception as e:
+                    result_dict["success_rate"] = "File IO"
+                num_failures = len(mismatches)
+                result_dict["num_failures"] = num_failures
+                result_dict["num_tests"] = test_stats[1]
+                try:
+                    result_dict["failure_rate"] = round((int(num_failures)/num_outputs), 4) * 100
+                except Exception as e:
+                    result_dict["failure_rate"] = "File IO"
+                num_fail_samples = 5 if num_failures > 3 else num_failures
+                num_correct_samples = 5 if num_correct > 3 else num_correct
+                result_dict["mismatches"] = random.sample(mismatches, num_fail_samples)
+                result_dict["matches"] = random.sample(matches, num_correct_samples)
+                result_dict["total_mismatches"] = mismatches
+                result_dict["total_matches"] = matches
+
+            else:
+                result_dict["one-to-one"] = False
+                correct = sub_output == samp_output
+                result_dict["success"] = correct
+                if correct or self.__false_flag:
+                    result_dict["input"] = self.__sample_inputs[count]
+                    result_dict["user_output"] = sub_output
+                    result_dict["reference_output"] = samp_output
+                    result_dict["clickable_link"] = True
+                    if correct == False and self.__false_flag:
+                        self.__false_flag = False
                 else:
-                    matches.append(line_sub)
-            num_correct = len(matches)
-            result_dict["num_correct"] = num_correct
-            try:
-                result_dict["success_rate"] = round(num_correct/num_outputs, 4) * 100
-            except Exception as e:
-                result_dict["success_rate"] = "File IO"
-            num_failures = len(mismatches)
-            result_dict["num_failures"] = num_failures
-            result_dict["num_tests"] = test_stats[1]
-            try:
-                result_dict["failure_rate"] = round((int(num_failures)/num_outputs), 4) * 100
-            except Exception as e:
-                result_dict["failure_rate"] = "File IO"
-            num_fail_samples = 5 if num_failures > 3 else num_failures
-            num_correct_samples = 5 if num_correct > 3 else num_correct
-            result_dict["mismatches"] = random.sample(mismatches, num_fail_samples)
-            result_dict["matches"] = random.sample(matches, num_correct_samples)
-            result_dict["total_mismatches"] = mismatches
-            result_dict["total_matches"] = matches
+                    result_dict["clickable_link"] = False
+                result_dict["success_rate"] = 1 if correct else 0
+                result_dict["failure_rate"] = 1 if not correct else 0
+            
             return result_dict
 
         sample_outputs = self.__sample_outputs
@@ -123,23 +152,29 @@ class Verifier:
         scores = self.__program_dict["scores"]
         ### stores input details (cf. __init__)
         test_stats = self.__detail_inputs()
-
         overall_score = 0
         
         ### loop to compare sub output with sample output in one go, as if they were two columns, one beside the other
         for count, (sub_output, samp_output) in enumerate(zip(sub_outputs, sample_outputs)):
-            result_dict = get_result_stats()
-            status = "success" if result_dict["success_rate"] == 100 else "failure"
+            result_dict = get_result_stats(count)
+            status = "success" if result_dict["success_rate"] == 100 or result_dict["success_rate"] == 1 else "failure"
             scores["test_{0}".format(count+1)] = {}
             test = scores["test_{0}".format(count+1)]
             test["status"] = status
-            test["input_length"] = test_stats[1]
-            test["input_type"] = test_stats[2]
+            test["input_length"] = test_stats[1][count]
+            test["input_type"] = test_stats[2][count]
             test["detailed_stats"] = result_dict
-            overall_score += result_dict["success_rate"] / 100
+            if result_dict["one-to-one"]:
+                overall_score += result_dict["success_rate"] / 100
+            elif status == "success":
+                overall_score += 1
+
 
         ### store score as string
-        percentage_score = round(overall_score/len(sample_outputs), 4) * 100
+        if self.__meta.get("output_analysis", None) == "one-to-one":
+            percentage_score = round(overall_score/len(sample_outputs), 4) * 100
+        else:
+            percentage_score = round(overall_score/len(self.__sample_inputs), 4) * 100
         scores["overall_score"] = "{0}%".format(percentage_score)
         ### since all pertinent data is written to program dict, we can just return the score here, for code_analysis.views to handle
         return percentage_score

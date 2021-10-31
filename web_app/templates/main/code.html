@@ -2,10 +2,12 @@
 {% load static %}
 {% block content %}
 
+{% if attempt_number <= allowed_attempts %}
 <div class="code-home">
     <div class="top_section">
         <img src="{% static 'images/back.png' %}" id="go_back" />
-        <h1 class="problem_name text-left" style="text-transform:capitalize;margin-left:20px;"><br><u>{{ problem_name }}</u><br></h1>
+        <h1 class="problem_name text-left" style="text-transform:capitalize;margin-left:20px;"><br><u>{{ problem.name }}</u><br></h1>
+        <h4>(Attempt number {{ attempt_number }} of {{ allowed_attempts }})</h4>
     </div>
     <br>
     <p class="problem_desc" id="description" style="white-space:pre-wrap;margin-left:2em;">{{ problem_desc }}</p>
@@ -119,7 +121,7 @@
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <div style="color:black" class="modal-body" id="modal_body">
+            <div style="color:black; overflow-x: scroll; overflow-y:scroll;" class="modal-body" id="modal_body" =>
             </div>
             <div style="color:black" class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -127,7 +129,19 @@
         </div>
     </div>
 </div>
-
+{% else %}
+<div style="text-align:center;margin-top:20%">
+    <h5 style="color:#06D6A0;">Oops, you appear to have exceeded the maximum number of attempts for this problem</h5><br>
+    <a href="{% url 'classes:problem_view' problem_id=problem.id uid=user.id %}">
+        <div class="text-center">
+            <button type="button" class="text-center go_btn" style="background-color:#1d2b5b;">
+                Check out your stats
+            </button>
+            
+        </div>
+    </a>
+</div>
+{% endif %}
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.12/ace.js" type="text/javascript" charset="utf-8"></script>
 <script type="text/javascript" src="{% static 'js/main/code.js' %}"></script>

@@ -36,7 +36,7 @@ class BaseProblemUploadForm(forms.Form):
             if len(content) > 10:
                 raise Exception("POST NOT OK: Simple input list too long!")
         else:
-            if len(content) > 3:
+            if len(content) > 10:
                 raise Exception("POST NOT OK: Nested iterative input list too long!")
             else:
                 total_len = sum([len(x) for x in content])

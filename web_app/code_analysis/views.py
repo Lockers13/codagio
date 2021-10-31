@@ -12,7 +12,8 @@ def solution_upload(request, prob_id):
     difficulty = metadata['difficulty']
     description = metadata['description']
     main_signature = problem.analysis.get("main_signature", None)
-    
+    allowed_attempts = metadata.get("attempts_allowed", 10)
+    num_attempts = len(list(Solution.objects.filter(problem_id=problem.id).filter(submitter_id=request.user.id).all()))
 
     initial_state = {
         'user_id': request.user.id,
@@ -27,10 +28,12 @@ def solution_upload(request, prob_id):
     ### set template context
     context = { 'title': 'CGC | Home',
                 'form': form,
-                'difficulty':difficulty,
-                'problem_name':problem.name,
-                'problem_desc':description,
+                'difficulty': difficulty,
+                'problem': problem,
+                'problem_desc': description,
                 'main_signature': main_signature,
+                'allowed_attempts': allowed_attempts,
+                'attempt_number': num_attempts + 1
                 }
 
     return render(request, 'main/code.html', context)

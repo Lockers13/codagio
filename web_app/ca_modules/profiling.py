@@ -270,7 +270,7 @@ class Profiler:
             #     len_con += 1
 
             contents.insert(main_insert_idx, profile_insert)
-
+        
             split_fname = filename.split(".")
             pro_file = "{0}_memprof.{1}".format(split_fname[0],split_fname[1])
             with open(pro_file, "w") as g:

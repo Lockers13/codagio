@@ -8,7 +8,9 @@ const ERROR_CODES = {
     12: "Sorry, your code violates one of the problem constraints!",
     13: "Sorry, it seems like there's something wrong with our server...check back later!",
     14: "Uh-oh...Your code timed out, please try again!",
-    15: "Sorry, there was a problem with your submission, please make sure everything is in order, and try again!"
+    15: "Sorry, there was a problem with your submission, please make sure everything is in order, and try again!",
+    16: "Oops, permission denied!",
+    17: "Sorry, you have exceeded the allowed number of attempts for this problem."
 }
 
 let error_paragraph = document.getElementById("error_message")
@@ -271,11 +273,11 @@ function write_overview_stats(section, analysis, content_str, abs_success=false)
             "<td style='color:white'>" + scores[test_key]["status"] + "</td>" +
             "<td style='color:white'>" + scores[test_key]["input_length"] + "</td>" +
             "<td style='color:white'>" + scores[test_key]["input_type"] + "</td>"
-        if (parseFloat(scores[test_key]["detailed_stats"]["success_rate"]) != 100.0) {
-            content_str += "<td style='color:red'><a class='link-danger' style='color:red;cursor:pointer;' name='detail_link' id='" + test_key + "' data-toggle='modal' data-target='#exampleModalCenter'>Failed - <br>(See More)</a></td>"
+        if (scores[test_key]["status"] != "success") {
+            content_str += "<td style='color:red'><a class='link-danger' style='color:red;cursor:pointer;' name='detail_link' id='" + test_key + "' data-toggle='modal' data-target='#exampleModalCenter'>See More</a></td>"
         }
         else {
-            content_str += "<td style='color:green;'>Passed - <br>(100%)</td>"
+            content_str += "<td style='color:green;'><a class='link' style='color:green;cursor:pointer;' name='detail_link' id='" + test_key + "' data-toggle='modal' data-target='#exampleModalCenter'>See More</a></td>"
         }
         content_str += "</tr>"
     }
@@ -302,23 +304,38 @@ function bind_detail_links(scores) {
 
 function write_detailed_stats(scores, test_key) {
     var modal_body = document.getElementById("modal_body")
-    modal_body.innerHTML = "<ul>"
+    modal_body.innerHTML = ""
     var detailed_stats = scores[test_key]["detailed_stats"]
-    modal_body.innerHTML += "<li>Number of Tests: " + detailed_stats["num_tests"] + "</li><br>" +
-                        "<li>Number of Correct Outputs: " + detailed_stats["num_correct"] + "</li>" + 
-                        "<li>Success Rate: " + detailed_stats["success_rate"] + "</li><br>" + 
-                        "<li>Number of Incorrect Outputs: " + detailed_stats["num_failures"] + "</li>" + 
-                        "<li>Failure Rate: " + detailed_stats["failure_rate"] + "</li></ul>" + 
-                        "<br><u>A sample of your correct outputs:<u><ul>"
+    if(detailed_stats["one-to-one"]) {
+        modal_body.innerHTML = "<ul>"
+        modal_body.innerHTML += "<li>Number of Tests: " + detailed_stats["num_tests"] + "</li><br>" +
+                            "<li>Number of Correct Outputs: " + detailed_stats["num_correct"] + "</li>" + 
+                            "<li>Success Rate: " + detailed_stats["success_rate"] + "</li><br>" + 
+                            "<li>Number of Incorrect Outputs: " + detailed_stats["num_failures"] + "</li>" + 
+                            "<li>Failure Rate: " + detailed_stats["failure_rate"] + "</li></ul>" + 
+                            "<br><u>A sample of your correct outputs:<u><ul>"
 
-    for(var m_index = 0; m_index < detailed_stats["matches"].length; m_index++) {
-        modal_body.innerHTML += "<li  style='color:green;padding-left:3em'>Your Output: " + detailed_stats["matches"][m_index] + "</li>"
+        for(var m_index = 0; m_index < detailed_stats["matches"].length; m_index++) {
+            modal_body.innerHTML += "<li  style='color:green;padding-left:3em'>Your Output: " + detailed_stats["matches"][m_index][0] + ": " + detailed_stats["matches"][m_index][1] + "</li>"
+        }
+        modal_body.innerHTML += "</ul><br><u>A sample of your incorrect outputs:<u><ul>"
+        for(var mm_index = 0; mm_index < detailed_stats["mismatches"].length; mm_index++) {
+            modal_body.innerHTML += "<li  style='color:red;padding-left:3em'>Input: " + detailed_stats["mismatches"][mm_index][0] + " | Your Output: " + detailed_stats["mismatches"][mm_index][1] + " | Expected Output:  " + detailed_stats["mismatches"][mm_index][2] + "</li>"
+        }
+        modal_body.innerHTML += "</ul"
     }
-    modal_body.innerHTML += "</ul><br><u>A sample of your incorrect outputs:<u><ul>"
-    for(var mm_index = 0; mm_index < detailed_stats["mismatches"].length; mm_index++) {
-        modal_body.innerHTML += "<li  style='color:red;padding-left:3em'>Your Output: " + detailed_stats["mismatches"][mm_index][0] + " - VS - Expected Output: " + detailed_stats["mismatches"][mm_index][1] + "</li>"
+    else {
+        if(detailed_stats["clickable_link"]) {
+            modal_body.innerHTML += "<h5><u>Input (" + detailed_stats["input"].length + " element" + add_s(detailed_stats["input"]) + ")"  + "</u>: </h5><p>[" + detailed_stats["input"].join(", ") + "]</p>"
+            modal_body.innerHTML += "<h5><u>Reference Output (" + detailed_stats["reference_output"].length + " element" + add_s(detailed_stats["reference_output"]) + ")" + "</u>: </h5><p>[" + detailed_stats["reference_output"].join(", ") + "]</p>"
+            modal_body.innerHTML += "<h5><u>Your Output (" + detailed_stats["user_output"].length + " element" + add_s(detailed_stats["user_output"]) + ")" + "</u>: </h5><p>[" + detailed_stats["user_output"].join(", ") + "]</p>"
+
+        }
+        else {
+            modal_body.innerHTML += "<h3>Access Not Permitted!</h3>"
+        }
     }
-    modal_body.innerHTML += "</ul"
+    
 }
 
 function write_skeleton(collapsible, skels, skel_str) {
@@ -412,4 +429,9 @@ function init_editor() {
     })
 
     return editor;
+}
+
+function add_s(array) {
+    var append_string = array.length == 1? "": "s";
+    return append_string
 }
