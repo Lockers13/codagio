@@ -5,7 +5,7 @@ if(role == "tutor" || !latest) {
     stat_btn.style.visibility = "hidden"
 }
 const pass_threshold = solution_analysis["pass_threshold"]
-
+console.log(solution_analysis)
 
 window.init_fetch = true
 window.student_chart_alt = 1
@@ -54,13 +54,19 @@ if(output_review != null) {
     output_review.addEventListener('click', function(e) {
         e.preventDefault()
         output_review_dd.innerHTML = ""
-        console.log(solution_analysis)
         var scores = solution_analysis["scores"]
         var lim = Object.keys(scores).length
         for(var i = 1; i < lim; i++) {
-            output_review_dd.innerHTML += "<li><a id='review_test_" + i + "' class='dropdown-item' data-toggle='modal' data-target='#exampleModalCenter'>Test " + i + "</a></li>"
-            document.getElementById("review_test_" + i).addEventListener('click', write_modal_body.bind(e, i))
+            output_review_dd.innerHTML += "<li><a name='test_link' id='tl_" + i + "' class='dropdown-item' data-toggle='modal' data-target='#exampleModalCenter'>Test " + i + "</a></li>"
+            
+
         }
+        var test_links = document.getElementsByName("test_link")
+        for(var i = 0; i < test_links.length; i++) {
+            var test_link = document.getElementById("tl_" + (i + 1))
+            test_link.addEventListener("click", write_modal_body.bind(e, (i+1)))
+        }
+
 
         // handle_output_analysis()
     })
@@ -107,17 +113,41 @@ function handle_output_analysis(e) {
 
 function write_modal_body(test_idx, e) {
     // not sure why but JS engine is inverting the order of event and test_idx when passed in bind method
-    var modal_title = document.getElementById("modal_title")
-    var modal_table = document.getElementById("modal_table")
-    modal_table.innerHTML = ""
-    modal_table.innerHTML += "<thead><tr style='width:100%;text-align:center;padding:5 5 5 5;'>"
-    modal_table.innerHTML += "<th style='text-align:center;padding:5 5 5 5;' scope='col'><u>Input</u></th><th style='text-align:center;padding:5 5 5 5;' scope='col'><u>" + capitalize(submitter_name) + "'s Output</u></th><th style='text-align:center;padding:5 5 5 5;' scope='col'><u>Correct Output</u></th>"
-    modal_table.innerHTML += "</tr></thead><tbody>"
-    var mismatches = solution_analysis["scores"]["test_" + test_idx]["detailed_stats"]["total_mismatches"]
-    modal_title.innerHTML = "Test " + test_idx + ": " + mismatches.length + " Incorrect Outputs"
-    for(var mm_index = 0; mm_index < mismatches.length; mm_index++) {
-        var bg_color = mm_index % 2 == 0? '#101010': 'rgb(55, 55, 55)';
-        modal_table.innerHTML += "<tr style='width:100%;text-align:center;padding:7 7 7 7;background-color:" + bg_color +";'><td style='padding: 7 7 7 7'><span style='color:white;'>" + mismatches[mm_index][0] + "</span></td><td  style='padding: 5 5 5 5'><span style='color:rgb(240, 79, 79)'>" + mismatches[mm_index][1] + "</span></td><td  style='padding: 5 5 5 5'><span style='color:#06D6A0'>" + mismatches[mm_index][2] + "</span></td></tr>"
+    var test_dict = solution_analysis["scores"]["test_" + test_idx]
+    var detailed_stats = test_dict["detailed_stats"]
+    if(detailed_stats["one-to-one"]) {
+        var modal_title = document.getElementById("modal_title")
+        var modal_table = document.getElementById("modal_table")
+        modal_table.innerHTML = ""
+        modal_table.innerHTML += "<thead><tr style='width:100%;text-align:center;padding:5 5 5 5;'>"
+        modal_table.innerHTML += "<th style='text-align:center;padding:5 5 5 5;' scope='col'><u>Input</u></th><th style='text-align:center;padding:5 5 5 5;' scope='col'><u>" + capitalize(submitter_name) + "'s Output</u></th><th style='text-align:center;padding:5 5 5 5;' scope='col'><u>Correct Output</u></th>"
+        modal_table.innerHTML += "</tr></thead><tbody>"
+        var mismatches = detailed_stats["total_mismatches"]
+        modal_title.innerHTML = "Test " + test_idx + ": " + mismatches.length + " Incorrect Outputs"
+        for(var mm_index = 0; mm_index < mismatches.length; mm_index++) {
+            var bg_color = mm_index % 2 == 0? '#101010': 'rgb(55, 55, 55)';
+            modal_table.innerHTML += "<tr style='width:100%;text-align:center;padding:7 7 7 7;background-color:" + bg_color +";'><td style='padding: 7 7 7 7'><span style='color:white;'>" + mismatches[mm_index][0] + "</span></td><td  style='padding: 5 5 5 5'><span style='color:rgb(240, 79, 79)'>" + mismatches[mm_index][1] + "</span></td><td  style='padding: 5 5 5 5'><span style='color:#06D6A0'>" + mismatches[mm_index][2] + "</span></td></tr>"
+        }
+        modal_table.innerHTML += "</tbody>"
     }
-    modal_table.innerHTML += "</tbody>"
+    else {
+        var modal_body = document.getElementById("modal_body")
+        modal_body.innerHTML = ""
+        if(detailed_stats["submitter_visible"] || role == "tutor") {
+            var color = test_dict["status"] == "success"? "#06D6A0": "rgb(240, 79, 79)";
+            modal_body.innerHTML += "<h5 style='color:white;'><u>Input (" + detailed_stats["input"].length + " element" + add_s(detailed_stats["input"]) + ")"  + "</u>: </h5><p style='color:white;'>[" + detailed_stats["input"].join(", ") + "]</p>"
+            modal_body.innerHTML += "<h5 style='color:white;'><u>Reference Output (" + detailed_stats["reference_output"].length + " element" + add_s(detailed_stats["reference_output"]) + ")" + "</u>: </h5><p style='color:#06D6A0;'>[" + detailed_stats["reference_output"].join(", ") + "]</p>"
+            modal_body.innerHTML += "<h5 style='color:white;'><u>Your Output (" + detailed_stats["user_output"].length + " element" + add_s(detailed_stats["user_output"]) + ")" + "</u>: </h5><p style='color:" + color + ";'>[" + detailed_stats["user_output"].join(", ") + "]</p>"
+
+        }
+        else {
+            modal_body.innerHTML += "<h3 style='color:#1d2b5b;'>Unavailable</h3>"
+        }
+    }
+}
+
+
+function add_s(array) {
+    var append_string = array.length == 1? "": "s";
+    return append_string
 }

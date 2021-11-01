@@ -35,14 +35,31 @@ def submission_overview(request, course_id, prob_id):
     context = {'other_students': other_students, 'solutions': solutions, 'problem': problem}
     return render(request, 'courses/submission_overview.html', context)
 
-def problem_view(request, problem_id, uid):
+def problem_view(request, problem_id, uid, role):
+    def prune_analysis():
+        scores_dict = solution.analysis["scores"]
+        for _, v in scores_dict.items():
+            try:
+                if v["detailed_stats"]["submitter_visible"] == False:
+                    v["detailed_stats"]["user_output"] = None
+                    v["detailed_stats"]["reference_output"] = None
+                    v["detailed_stats"]["input"] = None
+            except Exception as e:
+                pass
+
     which = request.GET.get('which', "latest")
+
     if which == "latest":
         solutions = list(Solution.objects.filter(submitter_id=uid).filter(problem_id=problem_id).all().order_by('-date_submitted'))
         solution = solutions[0] if solutions else None
+        if solution and role == "student":
+            prune_analysis()
         context = {'other_solutions': solutions[1:], 'problem_id': problem_id, 'solution': solution, 'latest': True}
     elif which == "other":
         soln_id = request.GET.get("soln_id", None)
         solution = Solution.objects.filter(id=soln_id).first()
+        if solution and role == "student":
+            prune_analysis()
         context = {'problem_id': problem_id, 'solution': solution, 'latest': False}
+        
     return render(request, 'courses/problem_view.html', context)

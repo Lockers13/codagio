@@ -30,7 +30,7 @@
     <td><span style="color:rgb(240, 79, 79)">{{ solution.analysis.score }}%</span></td>  
     {% endif %}
     <td>{{ solution.date_submitted }}</td>
-    <td><a href="{% url 'classes:problem_view' problem_id=solution.problem.id uid=solution.submitter.id %}">Submission Breakdown</a></td>
+    <td><a href="{% url 'classes:problem_view' problem_id=solution.problem.id uid=solution.submitter.id role=user.profile.role %}">Submission Breakdown</a></td>
   </tr>
 {% endfor %}
     </tbody>

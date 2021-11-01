@@ -10,7 +10,7 @@
     {% endif %}
     <h4>{{ solution.course.name }} : {{ solution.course.code }}</h4> 
     <h5>({{ solution.date_submitted }})</h5><br><br> 
-    {% if user.profile.role == "tutor" %}
+
     <div style="float:right;margin:0 10% 0 0;">
       <a id="output_review" class="nav-link dropdown-toggle text-left" href="#" data-toggle="dropdown">Review Outputs</a>
       <ul id="output_review_dd" class="dropdown-menu">
@@ -18,7 +18,7 @@
           <li><a class="dropdown-item" data-toggle="modal" data-target="#exampleModalCenter">Test 2</a></li>
       </ul>
     </div>
-    {% endif %}
+
     <p id="score"></p>
     <p id="cprof"></p>
     <p id="memprof"></p><br>
@@ -62,7 +62,7 @@
     <tbody>
 {% for alt_soln in other_solutions %}
 <tr>
-      <td><a class="nav-link" href="{% url 'classes:problem_view' problem_id=alt_soln.problem.id uid=alt_soln.submitter.id %}?which=other&soln_id={{ alt_soln.id }}">{{ alt_soln.date_submitted }}</a></td>
+      <td><a class="nav-link" href="{% url 'classes:problem_view' problem_id=alt_soln.problem.id uid=alt_soln.submitter.id role=user.profile.id %}?which=other&soln_id={{ alt_soln.id }}">{{ alt_soln.date_submitted }}</a></td>
       {% if alt_soln.analysis.passed %}
       <td><span style="color:#06D6A0">{{ alt_soln.analysis.score }}%</span></td>
       {% else %}

@@ -325,7 +325,7 @@ function write_detailed_stats(scores, test_key) {
         modal_body.innerHTML += "</ul"
     }
     else {
-        if(detailed_stats["clickable_link"]) {
+        if(detailed_stats["submitter_visible"]) {
             modal_body.innerHTML += "<h5><u>Input (" + detailed_stats["input"].length + " element" + add_s(detailed_stats["input"]) + ")"  + "</u>: </h5><p>[" + detailed_stats["input"].join(", ") + "]</p>"
             modal_body.innerHTML += "<h5><u>Reference Output (" + detailed_stats["reference_output"].length + " element" + add_s(detailed_stats["reference_output"]) + ")" + "</u>: </h5><p>[" + detailed_stats["reference_output"].join(", ") + "]</p>"
             modal_body.innerHTML += "<h5><u>Your Output (" + detailed_stats["user_output"].length + " element" + add_s(detailed_stats["user_output"]) + ")" + "</u>: </h5><p>[" + detailed_stats["user_output"].join(", ") + "]</p>"

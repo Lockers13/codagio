@@ -24,7 +24,7 @@
                     </div>
                 </a>
                 <br>
-                <a href="{% url 'classes:problem_view' problem_id=problem.id uid=user.id %}">
+                <a href="{% url 'classes:problem_view' problem_id=problem.id uid=user.id role=user.profile.role %}">
                     <div class="text-center">
                         <button type="button" class="text-center go_btn" style="background-color:#1d2b5b;">
                             Check out your stats

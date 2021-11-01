@@ -130,15 +130,15 @@ class Verifier:
                 result_dict["one-to-one"] = False
                 correct = sub_output == samp_output
                 result_dict["success"] = correct
+                result_dict["input"] = self.__sample_inputs[count]
+                result_dict["user_output"] = sub_output
+                result_dict["reference_output"] = samp_output
                 if correct or self.__false_flag:
-                    result_dict["input"] = self.__sample_inputs[count]
-                    result_dict["user_output"] = sub_output
-                    result_dict["reference_output"] = samp_output
-                    result_dict["clickable_link"] = True
+                    result_dict["submitter_visible"] = True
                     if correct == False and self.__false_flag:
                         self.__false_flag = False
                 else:
-                    result_dict["clickable_link"] = False
+                    result_dict["submitter_visible"] = False
                 result_dict["success_rate"] = 1 if correct else 0
                 result_dict["failure_rate"] = 1 if not correct else 0
             

@@ -37,6 +37,17 @@ class AnalysisView(APIView):
         """Built-in django function to handle post requests to API endpoint
         
         Returns an HTTP response of some kind"""
+
+        def prune_analysis():
+            for _, v in analysis["scores"].items():
+                try:
+                    if v["detailed_stats"]["submitter_visible"] == False:
+                        v["detailed_stats"]["input"] = None
+                        v["detailed_stats"]["reference_output"] = None
+                        v["detailed_stats"]["user_output"] = None
+                except Exception as e:
+                    pass
+
         
         
         uploaded_form = pm.get_uploaded_form(request, problem=False)
@@ -154,6 +165,10 @@ class AnalysisView(APIView):
             os.remove(filename)
         except FileNotFoundError:
             pass
+        
+        # we only want to show users the inputs/outputs for the first incorrect solution
+        prune_analysis()
+
         ### return analysis within successful http response
         return Response(json.dumps(analysis), status=status.HTTP_200_OK)
 
