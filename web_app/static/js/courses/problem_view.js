@@ -65,6 +65,8 @@ if(output_review != null) {
         for(var i = 0; i < test_links.length; i++) {
             var test_link = document.getElementById("tl_" + (i + 1))
             test_link.addEventListener("click", write_modal_body.bind(e, (i+1)))
+            
+            test_link.style.color = solution_analysis["scores"]["test_" + (i+1)]["status"] == "success"? "#06D6A0": "rgb(240, 79, 79)";
         }
 
 
@@ -115,23 +117,26 @@ function write_modal_body(test_idx, e) {
     // not sure why but JS engine is inverting the order of event and test_idx when passed in bind method
     var test_dict = solution_analysis["scores"]["test_" + test_idx]
     var detailed_stats = test_dict["detailed_stats"]
+    var modal_body = document.getElementById("modal_body")
     if(detailed_stats["one-to-one"]) {
         var modal_title = document.getElementById("modal_title")
         var modal_table = document.getElementById("modal_table")
         modal_table.innerHTML = ""
-        modal_table.innerHTML += "<thead><tr style='width:100%;text-align:center;padding:5 5 5 5;'>"
-        modal_table.innerHTML += "<th style='text-align:center;padding:5 5 5 5;' scope='col'><u>Input</u></th><th style='text-align:center;padding:5 5 5 5;' scope='col'><u>" + capitalize(submitter_name) + "'s Output</u></th><th style='text-align:center;padding:5 5 5 5;' scope='col'><u>Correct Output</u></th>"
-        modal_table.innerHTML += "</tr></thead><tbody>"
-        var mismatches = detailed_stats["total_mismatches"]
-        modal_title.innerHTML = "Test " + test_idx + ": " + mismatches.length + " Incorrect Outputs"
-        for(var mm_index = 0; mm_index < mismatches.length; mm_index++) {
-            var bg_color = mm_index % 2 == 0? '#101010': 'rgb(55, 55, 55)';
-            modal_table.innerHTML += "<tr style='width:100%;text-align:center;padding:7 7 7 7;background-color:" + bg_color +";'><td style='padding: 7 7 7 7'><span style='color:white;'>" + mismatches[mm_index][0] + "</span></td><td  style='padding: 5 5 5 5'><span style='color:rgb(240, 79, 79)'>" + mismatches[mm_index][1] + "</span></td><td  style='padding: 5 5 5 5'><span style='color:#06D6A0'>" + mismatches[mm_index][2] + "</span></td></tr>"
-        }
-        modal_table.innerHTML += "</tbody>"
+        var mismatches = role == "tutor"? detailed_stats["total_mismatches"]: detailed_stats["mismatches"];
+        modal_table.innerHTML += gen_comp_string(mismatches)
+        var output_type_btn = document.getElementById("output_type_btn")
+        output_type_btn.addEventListener("click", function(e) {
+            output_type_btn.innerHTML = output_type_btn.value == 0? "View Correct Outputs": "View Incorrect Outputs";
+            var comp_key = output_type_btn.value == 1? "matches": "mismatches";
+            var comp_elem = role == "tutor"? detailed_stats["total_" + comp_key]: detailed_stats[comp_key];
+            modal_title.innerHTML =
+            modal_table.innerHTML = ""
+            modal_table.innerHTML += gen_comp_string(comp_elem)
+            output_type_btn.value = output_type_btn.value == 1? 0: 1;
+        })
+ 
     }
     else {
-        var modal_body = document.getElementById("modal_body")
         modal_body.innerHTML = ""
         if(detailed_stats["submitter_visible"] || role == "tutor") {
             var color = test_dict["status"] == "success"? "#06D6A0": "rgb(240, 79, 79)";
@@ -141,7 +146,7 @@ function write_modal_body(test_idx, e) {
 
         }
         else {
-            modal_body.innerHTML += "<h3 style='color:#1d2b5b;'>Unavailable</h3>"
+            modal_body.innerHTML += "<h3 style='color:white;'>Unavailable</h3>"
         }
     }
 }
@@ -150,4 +155,19 @@ function write_modal_body(test_idx, e) {
 function add_s(array) {
     var append_string = array.length == 1? "": "s";
     return append_string
+}
+
+function gen_comp_string(comp_elem) {
+    var table_string = ""
+    table_string += "<thead><tr style='width:100%;text-align:center;padding:5 5 5 5;'>"
+    table_string += "<th style='text-align:center;padding:5 5 5 5;' scope='col'><u>Input</u></th><th style='text-align:center;padding:5 5 5 5;' scope='col'><u>" + capitalize(submitter_name) + "'s Output</u></th><th style='text-align:center;padding:5 5 5 5;' scope='col'><u>Reference Output</u></th>"
+    table_string += "</tr></thead><tbody>"
+
+    for(var mm_index = 0; mm_index < comp_elem.length; mm_index++) {
+        var bg_color = mm_index % 2 == 0? '#101010': 'rgb(55, 55, 55)';
+        table_string += "<tr style='width:100%;text-align:center;padding:7 7 7 7;background-color:" + bg_color +";'><td style='padding: 7 7 7 7'><span style='color:white;'>" + comp_elem[mm_index][0] + "</span></td><td  style='padding: 5 5 5 5'><span style='color:rgb(240, 79, 79)'>" + comp_elem[mm_index][1] + "</span></td><td  style='padding: 5 5 5 5'><span style='color:#06D6A0'>" + comp_elem[mm_index][2] + "</span></td></tr>"
+    }
+
+    table_string += "</tbody>"
+    return table_string
 }

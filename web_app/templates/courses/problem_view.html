@@ -32,7 +32,8 @@
     <div class="modal-dialog modal-dialog-centered modal-lg" style="width:90%" role="document">
         <div class="modal-content" style="background-color: #101010;">
             <div class="modal-header" style="background-color: rgb(220, 215, 215);">
-                <h5 style="color:black;text-align:center;" class="modal-title" id="modal_title">Incorrect Outputs</h5>
+                <h5 style="color:black;text-align:center;" class="modal-title" id="modal_title"></h5>
+                <span id="output_btn_space" style="margin-left:20px;"><button id="output_type_btn" style="float:right;margin:0 0 0 10;">View Correct Outputs</button></span>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -40,7 +41,7 @@
             <div style="color:black" class="modal-body" id="modal_body">
               <table id="modal_table" class="table-striped table-black" style="width:100%;background-color:#101010;;"></table>
             </div>
-            <div style="color:black" class="modal-footer">
+            <div style="color:black" class="modal-footer" id="modal_footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
             </div>
         </div>
