@@ -58,10 +58,10 @@ if(output_review != null) {
         var lim = Object.keys(scores).length
         for(var i = 1; i < lim; i++) {
             output_review_dd.innerHTML += "<li><a name='test_link' id='tl_" + i + "' class='dropdown-item' data-toggle='modal' data-target='#exampleModalCenter'>Test " + i + "</a></li>"
-            
-
         }
+
         var test_links = document.getElementsByName("test_link")
+
         for(var i = 0; i < test_links.length; i++) {
             var test_link = document.getElementById("tl_" + (i + 1))
             test_link.addEventListener("click", write_modal_body.bind(e, (i+1)))
@@ -69,8 +69,6 @@ if(output_review != null) {
             test_link.style.color = solution_analysis["scores"]["test_" + (i+1)]["status"] == "success"? "#06D6A0": "rgb(240, 79, 79)";
         }
 
-
-        // handle_output_analysis()
     })
 }
 
@@ -118,25 +116,34 @@ function write_modal_body(test_idx, e) {
     var test_dict = solution_analysis["scores"]["test_" + test_idx]
     var detailed_stats = test_dict["detailed_stats"]
     var modal_body = document.getElementById("modal_body")
+    var output_type_btn = document.getElementById("output_type_btn")
+    var modal_title = document.getElementById("modal_title")
+    
     if(detailed_stats["one-to-one"]) {
-        var modal_title = document.getElementById("modal_title")
+        output_type_btn.innerHTML = output_type_btn.value == 0? "View Correct Outputs": "View Incorrect Outputs";
+        output_type_btn.innerHTML = "View Correct Outputs"
+        
         var modal_table = document.getElementById("modal_table")
         modal_table.innerHTML = ""
         var mismatches = role == "tutor"? detailed_stats["total_mismatches"]: detailed_stats["mismatches"];
+        modal_title.innerHTML = role == "student"? "Output Review: A Sample of " + mismatches.length + " Incorrect Outputs": "Output Review: " + mismatches.length + " Incorrect Outputs"
         modal_table.innerHTML += gen_comp_string(mismatches)
-        var output_type_btn = document.getElementById("output_type_btn")
         output_type_btn.addEventListener("click", function(e) {
-            output_type_btn.innerHTML = output_type_btn.value == 0? "View Correct Outputs": "View Incorrect Outputs";
+            var correct_or_incorrect = output_type_btn.value == 1? " Incorrect Outputs": " Correct Outputs";
+            output_type_btn.innerHTML = output_type_btn.value == 1? "View Correct Outputs": "View Incorrect Outputs";
+            output_type_btn.value = output_type_btn.value == 1? 0: 1;
             var comp_key = output_type_btn.value == 1? "matches": "mismatches";
             var comp_elem = role == "tutor"? detailed_stats["total_" + comp_key]: detailed_stats[comp_key];
-            modal_title.innerHTML =
+            var title_message = role == "student"? "Output Review: A Sample of " + comp_elem.length + correct_or_incorrect: "Output Review: " + comp_elem.length + correct_or_incorrect;
+            modal_title.innerHTML = title_message
             modal_table.innerHTML = ""
             modal_table.innerHTML += gen_comp_string(comp_elem)
-            output_type_btn.value = output_type_btn.value == 1? 0: 1;
         })
  
     }
     else {
+        output_type_btn.style.visibility = "hidden"
+        modal_title.innerHTML = "I/O Review:"
         modal_body.innerHTML = ""
         if(detailed_stats["submitter_visible"] || role == "tutor") {
             var color = test_dict["status"] == "success"? "#06D6A0": "rgb(240, 79, 79)";
