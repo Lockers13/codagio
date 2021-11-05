@@ -5,7 +5,6 @@ if(role == "tutor" || !latest) {
     stat_btn.style.visibility = "hidden"
 }
 const pass_threshold = solution_analysis["pass_threshold"]
-console.log(solution_analysis)
 
 window.init_fetch = true
 window.student_chart_alt = 1
@@ -93,13 +92,12 @@ if((role == "student" && valid_student)) {
                         }
                     }
                     else {
-                        ;
+                        ; // implement?
                     }
             })
 
         })
     }
-
 
 function capitalize(string) {
     return string.charAt(0).toUpperCase() + string.slice(1);
@@ -111,8 +109,7 @@ function handle_output_analysis(e) {
     console.log(solution_analysis)
 }
 
-function write_modal_body(test_idx, e) {
-    // not sure why but JS engine is inverting the order of event and test_idx when passed in bind method
+function write_modal_body(test_idx) {
     var test_dict = solution_analysis["scores"]["test_" + test_idx]
     var detailed_stats = test_dict["detailed_stats"]
     var modal_body = document.getElementById("modal_body")
@@ -120,26 +117,9 @@ function write_modal_body(test_idx, e) {
     var modal_title = document.getElementById("modal_title")
     
     if(detailed_stats["one-to-one"]) {
-        output_type_btn.innerHTML = output_type_btn.value == 0? "View Correct Outputs": "View Incorrect Outputs";
-        output_type_btn.innerHTML = "View Correct Outputs"
-        
-        var modal_table = document.getElementById("modal_table")
-        modal_table.innerHTML = ""
-        var mismatches = role == "tutor"? detailed_stats["total_mismatches"]: detailed_stats["mismatches"];
-        modal_title.innerHTML = role == "student"? "Output Review: A Sample of " + mismatches.length + " Incorrect Outputs": "Output Review: " + mismatches.length + " Incorrect Outputs"
-        modal_table.innerHTML += gen_comp_string(mismatches)
-        output_type_btn.addEventListener("click", function(e) {
-            var correct_or_incorrect = output_type_btn.value == 1? " Incorrect Outputs": " Correct Outputs";
-            output_type_btn.innerHTML = output_type_btn.value == 1? "View Correct Outputs": "View Incorrect Outputs";
-            output_type_btn.value = output_type_btn.value == 1? 0: 1;
-            var comp_key = output_type_btn.value == 1? "matches": "mismatches";
-            var comp_elem = role == "tutor"? detailed_stats["total_" + comp_key]: detailed_stats[comp_key];
-            var title_message = role == "student"? "Output Review: A Sample of " + comp_elem.length + correct_or_incorrect: "Output Review: " + comp_elem.length + correct_or_incorrect;
-            modal_title.innerHTML = title_message
-            modal_table.innerHTML = ""
-            modal_table.innerHTML += gen_comp_string(comp_elem)
-        })
- 
+        handle_one_to_one(detailed_stats, role)
+        var e = undefined
+        output_type_btn.addEventListener("click", handle_one_to_one.bind(e, detailed_stats, role))
     }
     else {
         output_type_btn.style.visibility = "hidden"
@@ -157,7 +137,6 @@ function write_modal_body(test_idx, e) {
         }
     }
 }
-
 
 function add_s(array) {
     var append_string = array.length == 1? "": "s";
@@ -177,4 +156,18 @@ function gen_comp_string(comp_elem) {
 
     table_string += "</tbody>"
     return table_string
+}
+
+function handle_one_to_one(detailed_stats, role) {
+    var modal_table = document.getElementById("modal_table")
+    modal_table.innerHTML = ""
+    var correct_or_incorrect = output_type_btn.value == 1? " Correct Outputs": " Incorrect Outputs";
+    output_type_btn.innerHTML = output_type_btn.value == 1? "View Incorrect Outputs": "View Correct Outputs";
+    var comp_key = output_type_btn.value == 1? "matches": "mismatches";
+    var comp_elem = role == "tutor"? detailed_stats["total_" + comp_key]: detailed_stats[comp_key];
+    var title_message = role == "student"? "Output Review: A Sample of " + comp_elem.length + correct_or_incorrect: "Output Review: " + comp_elem.length + correct_or_incorrect;
+    modal_title.innerHTML = title_message
+    modal_table.innerHTML = ""
+    modal_table.innerHTML += gen_comp_string(comp_elem)
+    output_type_btn.value = output_type_btn.value == 1? 0: 1;
 }
