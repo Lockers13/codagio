@@ -303,7 +303,7 @@ function bind_detail_links(scores) {
 }
 
 function write_detailed_stats(scores, test_key) {
-    var modal_body = document.getElementById("modal_body")
+    var modal_body = document.getElementById("modal_body_inner")
     modal_body.innerHTML = ""
     var detailed_stats = scores[test_key]["detailed_stats"]
     if(detailed_stats["one-to-one"]) {
@@ -313,26 +313,27 @@ function write_detailed_stats(scores, test_key) {
                             "<li>Success Rate: " + detailed_stats["success_rate"] + "</li><br>" + 
                             "<li>Number of Incorrect Outputs: " + detailed_stats["num_failures"] + "</li>" + 
                             "<li>Failure Rate: " + detailed_stats["failure_rate"] + "</li></ul>" + 
-                            "<br><u>A sample of your correct outputs:<u><ul>"
-
-        for(var m_index = 0; m_index < detailed_stats["matches"].length; m_index++) {
-            modal_body.innerHTML += "<li  style='color:green;padding-left:3em'>Your Output: " + detailed_stats["matches"][m_index][0] + ": " + detailed_stats["matches"][m_index][1] + "</li>"
-        }
-        modal_body.innerHTML += "</ul><br><u>A sample of your incorrect outputs:<u><ul>"
-        for(var mm_index = 0; mm_index < detailed_stats["mismatches"].length; mm_index++) {
-            modal_body.innerHTML += "<li  style='color:red;padding-left:3em'>Input: " + detailed_stats["mismatches"][mm_index][0] + " | Your Output: " + detailed_stats["mismatches"][mm_index][1] + " | Expected Output:  " + detailed_stats["mismatches"][mm_index][2] + "</li>"
-        }
-        modal_body.innerHTML += "</ul"
+                            "<br></ul>"
+        
+        var modal_table_success = document.getElementById("mtsuc")
+        var hdr_success = document.getElementById("mtsuc_hdr")
+        var hdr_err = document.getElementById("mterr_hdr")
+        var modal_table_error = document.getElementById("mterr")
+        hdr_success.innerHTML = "<u>A sample of your Correct Outputs</u>"
+        hdr_err.innerHTML = "<u>A sample of your Incorrect Outputs</u>"
+        modal_table_success.innerHTML += gen_comp_string(detailed_stats["matches"])
+        modal_table_error.innerHTML += gen_comp_string(detailed_stats["mismatches"])
     }
     else {
         if(detailed_stats["submitter_visible"]) {
+            var text_color = scores[test_key]["status"] == "success"? "#06D6A0": "rgb(240, 79, 79)";
             modal_body.innerHTML += "<h5><u>Input (" + detailed_stats["input"].length + " element" + add_s(detailed_stats["input"]) + ")"  + "</u>: </h5><p>[" + detailed_stats["input"].join(", ") + "]</p>"
-            modal_body.innerHTML += "<h5><u>Reference Output (" + detailed_stats["reference_output"].length + " element" + add_s(detailed_stats["reference_output"]) + ")" + "</u>: </h5><p>[" + detailed_stats["reference_output"].join(", ") + "]</p>"
-            modal_body.innerHTML += "<h5><u>Your Output (" + detailed_stats["user_output"].length + " element" + add_s(detailed_stats["user_output"]) + ")" + "</u>: </h5><p>[" + detailed_stats["user_output"].join(", ") + "]</p>"
+            modal_body.innerHTML += "<h5><u>Reference Output (" + detailed_stats["reference_output"].length + " element" + add_s(detailed_stats["reference_output"]) + ")" + "</u>: </h5><p style='color:#06D6A0;'>[" + detailed_stats["reference_output"].join(", ") + "]</p>"
+            modal_body.innerHTML += "<h5><u>Your Output (" + detailed_stats["user_output"].length + " element" + add_s(detailed_stats["user_output"]) + ")" + "</u>: </h5><p style='color:" + text_color + ";'>[" + detailed_stats["user_output"].join(", ") + "]</p>"
 
         }
         else {
-            modal_body.innerHTML += "<h3>Access Not Permitted!</h3>"
+            modal_body.innerHTML += "<h3>Unavailable</h3>"
         }
     }
     
@@ -434,4 +435,19 @@ function init_editor() {
 function add_s(array) {
     var append_string = array.length == 1? "": "s";
     return append_string
+}
+
+function gen_comp_string(comp_elem) {
+    var table_string = ""
+    table_string += "<thead><tr style='width:100%;text-align:center;padding:5 5 5 5;'>"
+    table_string += "<th style='text-align:center;padding:5 5 5 5;' scope='col'><u>Input</u></th><th style='text-align:center;padding:5 5 5 5;' scope='col'><u>Your Output</u></th><th style='text-align:center;padding:5 5 5 5;' scope='col'><u>Reference Output</u></th>"
+    table_string += "</tr></thead><tbody>"
+
+    for(var mm_index = 0; mm_index < comp_elem.length; mm_index++) {
+        var bg_color = mm_index % 2 == 0? '#101010': 'rgb(55, 55, 55)';
+        table_string += "<tr style='width:100%;text-align:center;padding:7 7 7 7;background-color:" + bg_color +";'><td style='padding: 7 7 7 7'><span style='color:white;'>" + comp_elem[mm_index][0] + "</span></td><td  style='padding: 5 5 5 5'><span style='color:rgb(240, 79, 79)'>" + comp_elem[mm_index][1] + "</span></td><td  style='padding: 5 5 5 5'><span style='color:#06D6A0'>" + comp_elem[mm_index][2] + "</span></td></tr>"
+    }
+
+    table_string += "</tbody>"
+    return table_string
 }

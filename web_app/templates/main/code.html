@@ -121,7 +121,13 @@
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <div style="color:black; overflow-x: scroll; overflow-y:scroll;" class="modal-body" id="modal_body" =>
+            <div style="color:black; overflow-x: scroll; overflow-y:scroll;" class="modal-body" id="modal_body">
+                <div style="color:black; overflow-x: scroll; overflow-y:scroll;" class="modal-body" id="modal_body_inner"></div>
+                <h5 id="mtsuc_hdr" style="color:#06D6A0;"></h5><br>
+                <table id="mtsuc" class="table-striped table-black" style="width:100%;background-color:#101010;border-width: 5px;border-color: #06D6A0;"></table>
+                <br>
+                <h5 id="mterr_hdr" style="color:rgb(240, 79, 79)"></h5><br>
+                <table id="mterr" class="table-striped table-black" style="width:100%;background-color:#101010;border-width: 5px;border-color: rgb(240, 79, 79);"></table>
             </div>
             <div style="color:black" class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
