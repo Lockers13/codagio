@@ -22,7 +22,8 @@ var cprof_elem = document.getElementById('cprof')
 var memprof_elem = document.getElementById('memprof')
 var score_elem = document.getElementById('score')
 var solution_text_elem = document.getElementById('solution_text')
-
+var pseudo_section = document.getElementById('pseudocode')
+console.log(solution_analysis)
 var cprof_message = solution_analysis["time_profile"]?  (solution_analysis["udef_func_time_tot"]).toFixed(3) + "s (vs. " + (solution_analysis["ref_time"]).toFixed(3) + "s for reference problem)": "Time profiling has not been configured for this problem"
 cprof_elem.innerHTML = "Runtime of " + html_username + "submission: " + cprof_message + "<br><br>"
 var memprof_message = solution_analysis["total_physical_mem"] + "MiB (vs. " + solution_analysis["ref_phys_mem"] + "MiB for reference problem)"
@@ -31,8 +32,15 @@ var score_color = solution_analysis["passed"]? "#06D6A0": "rgb(240, 79, 79)";
 score_elem.style.color = score_color
 score_elem.innerHTML = "Score: " + parseFloat(solution_analysis["score"]).toFixed(2) + "%"
 var soln_text = solution_analysis["solution_text"]
+solution_text_elem.innerHTML = "<h4><u>Solution Text:</u></h4><br>"
 for(let i = 0; i < soln_text.length; i++) {
     solution_text_elem.innerHTML += "<span style='white-space:pre;'>" + soln_text[i].italics() + "</span><br>"
+}
+var pseudocode = solution_analysis["samp_skels"][0]
+
+pseudo_section.innerHTML = "<h4><u>Reference Pseudocode:</u></h4><br>"
+for(let i = 0; i < pseudocode.length; i++) {
+    pseudo_section.innerHTML += "<span style='white-space:pre;'>" + pseudocode[i].italics() + "</span><br>"
 }
 
 var content_str = "<ul>"

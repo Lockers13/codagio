@@ -10,7 +10,7 @@ const ERROR_CODES = {
     14: "Uh-oh...Your code timed out, please try again!",
     15: "Sorry, there was a problem with your submission, please make sure everything is in order, and try again!",
     16: "Oops, permission denied!",
-    17: "Sorry, you have exceeded the allowed number of attempts for this problem."
+    17: "Sorry, you have exceeded the allowed number of attempts for this problem.",
 }
 
 let error_paragraph = document.getElementById("error_message")
@@ -31,6 +31,10 @@ submitbtn.addEventListener('click', function () {
     desc.style.display = 'none';
     loader.style.display = 'block';
 });
+
+var attempt_hdr = document.getElementById("attempt_hdr")
+attempt_hdr.innerHTML = "(Attempt Number " + attempt_number + " of " + allowed_attempts + ")"
+attempt_hdr.value = attempt_number
 
 back.addEventListener('click', reset);
 
@@ -60,6 +64,12 @@ function reset() {
     collapse_section.style.display = 'none';
     collapseAllOpenContent()
     error_paragraph.innerHTML = ""
+    if(attempt_hdr.value > allowed_attempts) {
+        location.reload()
+    }
+    else {
+        attempt_hdr.innerHTML = "(Attempt Number " + attempt_hdr.value + " of " + allowed_attempts + ")"
+    }
 }
 
 //Form submission logic
@@ -111,8 +121,13 @@ $("#sub_form").submit(function (e) {
             overall.style.display = 'block';
             overall.innerHTML = '<h1>Total Score: ' + result + '</h1>';
             collapse_section.style.display = 'block';
+            var new_attempt_number = parseInt(analysis["num_solutions"]) + 1
 
-            if (result >= parseFloat(analysis["pass_threshold"])) {
+            if(new_attempt_number > attempt_hdr.value) {
+                attempt_hdr.value = new_attempt_number
+            }
+
+            if(result >= parseFloat(analysis["pass_threshold"])) {
                 overall.style.color = "#06D6A0"
                 overall.innerHTML = "<h3>You Scored: " + result + "%</h3>"
                 overall.innerHTML += "<br>Congratulations, your code passed the threshold score..!<br>Now check out some of your feedback below:"
@@ -144,6 +159,10 @@ $("#sub_form").submit(function (e) {
                 loader.style.display = 'none';
                 back.style.display = 'block';
                 var error_code = parseInt(resp_data["responseJSON"])
+                if(error_code == 17) {
+                    // attempt limit exceeded
+                    location.reload()
+                }
                 var message = ERROR_CODES[error_code]
 
                 loader.style.display = 'none';
@@ -321,6 +340,8 @@ function write_detailed_stats(scores, test_key) {
         var modal_table_error = document.getElementById("mterr")
         hdr_success.innerHTML = "<u>A sample of your Correct Outputs</u>"
         hdr_err.innerHTML = "<u>A sample of your Incorrect Outputs</u>"
+        modal_table_success.innerHTML = ""
+        modal_table_error.innerHTML = ""
         modal_table_success.innerHTML += gen_comp_string(detailed_stats["matches"])
         modal_table_error.innerHTML += gen_comp_string(detailed_stats["mismatches"])
     }

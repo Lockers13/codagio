@@ -22,8 +22,10 @@
     <p id="score"></p>
     <p id="cprof"></p>
     <p id="memprof"></p><br>
-    <h4><u>Solution Text:</u></h4><br>
-    <p id="solution_text"></p>
+    <div style="display:flex;margin:2% 1% 0% 1%;">
+    <p style="float:left;width:50%" id="solution_text"></p>
+    <p style="float:right;width:50%" id="pseudocode"></p>
+    </div>
 </div>
 
 
@@ -50,9 +52,8 @@
 
 <br><br>
 {% if other_solutions %}
-<div style="margin: 2% 0 0 5%">
-<h2>Previous Solutions</h2>
-
+<div style="display:block;margin: 2% 0 0 5%">
+<h4><u>Previous Solutions:</u></h4><br>
 <table class="table table-striped table-light">
     <thead>
       <tr>

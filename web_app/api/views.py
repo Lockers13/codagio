@@ -21,8 +21,6 @@ import hashlib
 from django.utils import timezone
 
 
-
-
 ################################################ code analysis API endpoints #######################################
 
 ERROR_CODES = settings.SUBMISSION_ERROR_CODES
@@ -168,7 +166,7 @@ class AnalysisView(APIView):
         
         # we only want to show users the inputs/outputs for the first incorrect solution
         prune_analysis()
-
+        analysis["num_solutions"] = num_solutions + 1
         ### return analysis within successful http response
         return Response(json.dumps(analysis), status=status.HTTP_200_OK)
 
