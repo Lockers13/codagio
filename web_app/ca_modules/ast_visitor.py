@@ -63,6 +63,7 @@ class AstTreeVisitor(ast.NodeVisitor):
         self.__num_args = int(self.__metadata.get("constraints").get("num_args", 0))
         self.__program_dict["constraint_violation"] = []
         self.__program_dict["udef_func_time_tot"] = 0
+        self.__program_dict["imports"] = []
 
  
     def get_program_dict(self):
@@ -198,6 +199,9 @@ class AstTreeVisitor(ast.NodeVisitor):
         self.__program_dict["line_indents"]["line_{0}".format(node.lineno)] = self.__count_hash["level"]
         self.__process_body(node)
 
+    def __process_import(self, node):
+        pass
+
     def __process_body(self, node, in_else=False):
 
         """Utility method to recursively process the body of any given AST construct containing a body. 
@@ -222,6 +226,8 @@ class AstTreeVisitor(ast.NodeVisitor):
                 elseif = False
             elif isinstance(body_node, ast.With):
                 self.__process_with(body_node)
+            elif isinstance(body_node, ast.Import):
+                self.__process_import(body_node)
             elif isinstance(body_node, ast.Expr):
                 value = body_node.value
                 if isinstance(value, ast.Call):
@@ -302,6 +308,7 @@ class AstTreeVisitor(ast.NodeVisitor):
         self.generic_visit(node)
 
     def visit_Import(self, node):
+        self.__program_dict["imports"].append("{0}".format("absolute import"))
         for imp in node.names:
             if imp.name not in self.__allowed_abs_imports:
                unsafe_entry_list = self.__program_dict["constraint_violation"]
@@ -311,6 +318,7 @@ class AstTreeVisitor(ast.NodeVisitor):
                 })
                 
     def visit_ImportFrom(self, node):
+        self.__program_dict["imports"].append("{0}".format("relative import"))
         module = node.module
         rel_imps = self.__allowed_rel_imports.get(module, None)
         if rel_imps is None:

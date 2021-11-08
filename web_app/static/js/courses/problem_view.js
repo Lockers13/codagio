@@ -33,16 +33,23 @@ score_elem.style.color = score_color
 score_elem.innerHTML = "Score: " + parseFloat(solution_analysis["score"]).toFixed(2) + "%"
 var soln_text = solution_analysis["solution_text"]
 solution_text_elem.innerHTML = "<h4><u>Solution Text:</u></h4><br>"
+
 for(let i = 0; i < soln_text.length; i++) {
     solution_text_elem.innerHTML += "<span style='white-space:pre;'>" + soln_text[i].italics() + "</span><br>"
 }
-var pseudocode = solution_analysis["samp_skels"][0]
+solution_text_elem.innerHTML += "<br>"
+var pseudocode = solution_analysis["samp_skels"]
+
 
 pseudo_section.innerHTML = "<h4><u>Reference Pseudocode:</u></h4><br>"
 for(let i = 0; i < pseudocode.length; i++) {
-    pseudo_section.innerHTML += "<span style='white-space:pre;'>" + pseudocode[i].italics() + "</span><br>"
+    for(let j = 0; j < pseudocode[i].length; j++) {
+        real_str = pseudocode[i][j].replace(/\s/g, '&nbsp')
+        pseudo_section.innerHTML += "" + real_str.italics() + "<br>"
+    }
+    pseudo_section.innerHTML += "<br>"
 }
-
+pseudo_section.innerHTML += "<br>"
 var content_str = "<ul>"
 var fdefs = solution_analysis["fdefs"]
 for(fdef in fdefs) {

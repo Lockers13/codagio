@@ -234,6 +234,7 @@ class SaveProblemView(APIView):
         analysis = analyzer.get_prog_dict()
         analysis["code_data"] = code_data
         print("HI")
+
         ### save uploaded problem, with associated inputs, outputs, and metadata to DB
         problem, created = Problem.objects.update_or_create(
             name=processed_data["name"], author_id=processed_data["author_id"], course_id=processed_data["course_id"],

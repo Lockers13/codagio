@@ -27,3 +27,10 @@ def write_comp(sub, samp):
     
     sub["comp_stats"] = fdef_comp
     sub["samp_skels"] = samp_skels
+
+    i = 0
+    for imp in samp["imports"]:
+        sub["samp_skels"].insert(i, [imp])
+        i += 1
+    # sub["samp_skels"].insert(i, ["\n"])
+    

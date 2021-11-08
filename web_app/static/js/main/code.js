@@ -162,6 +162,7 @@ $("#sub_form").submit(function (e) {
                 if(error_code == 17) {
                     // attempt limit exceeded
                     location.reload()
+                    return
                 }
                 var message = ERROR_CODES[error_code]
 
@@ -363,7 +364,8 @@ function write_detailed_stats(scores, test_key) {
 function write_skeleton(collapsible, skels, skel_str) {
     collapsible.innerHTML = ""
     skel_str += "<p style='color:white;font-style:italic;margin:20px 0px; padding: 10px 10px;' class='table'>"
-    for (let i = 0; i < skels.length; i++) {
+    var i = 0;
+    for (; i < skels.length; i++) {
         let skeleton = skels[i]
         for (let j = 0; j < skeleton.length; j++) {
             real_str = skeleton[j].replace(/\s/g, '&nbsp')
