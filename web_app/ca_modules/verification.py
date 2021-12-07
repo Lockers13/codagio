@@ -60,6 +60,13 @@ class Verifier:
                 sub_outputs.append(output)
         return sub_outputs
 
+    def __is_iter(self, obj):
+        try:
+            iter(obj)
+            return True
+        except TypeError as te:
+            return False
+
     def __detail_inputs(self):
         """Utility function to get info about input type, length, etc.
 
@@ -79,8 +86,11 @@ class Verifier:
                     input_types = [type(self.__sample_inputs[0]).__name__.lower()]
                 else:
                     num_tests = len(self.__sample_inputs)
-                    ### note: below only works if i is a list
-                    input_lengths = [len(i) for i in self.__sample_inputs]
+                    ### 
+                    if all(self.__is_iter(i) for i in self.__sample_inputs):
+                        input_lengths = [len(i) for i in self.__sample_inputs]
+                    else:
+                        input_lengths = [1 for _ in self.__sample_inputs]
                     input_types = [type(i).__name__.lower() for i in self.__sample_inputs]
             else:
                 num_tests = 1

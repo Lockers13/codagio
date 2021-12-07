@@ -8,7 +8,6 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="preconnect" href="https://fonts.gstatic.com">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;700;800&display=swap" rel="stylesheet">
@@ -40,9 +39,9 @@
                 <li class="nav-item"></li>
                     <a class="nav-link" href="{% url 'classes:search_course_view' user_role=user.profile.role %}">Courses</a>
                 </li>
-                <li class="nav-item">
+                <!-- <li class="nav-item">
                     <a class="nav-link" href="{% url 'users:profile' uid=user.id %}">View Profile</a>
-                </li>
+                </li> -->
                 {% else %}
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'accounts:login' %}">Login</a>

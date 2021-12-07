@@ -8,10 +8,9 @@ constraints:
 input_type:
   default:
     "string"
-input_length: 1000
+input_length: 10
 num_tests: 1
-category: ["string_manipulation", "encryption"]
-main_function: "rot13"
+category: ["string_manipulation"]
+main_function: "reverseWords"
 pass_threshold: 90
-time_profile: True
-output_analysis: one-to-one
+time_profile: False

@@ -9,6 +9,16 @@
         <br><br>
         {% if user.is_authenticated %}
         <p>Welcome back {{ user.username }}...!</p>
+        {% else %}
+        <p>It looks like you are not yet logged in. Why not test out the app by following these simple steps:<br>
+            <div style="text-align:left;">
+            <ol>
+                <li>Register an account</li>
+                <li>Go to your 'Courses' and enrol in the course 'MIT_CS201' with password 'test_teacher123'</li>
+                <li>Try to solve any of the problems proposed in this sample course</li>
+            </ol>
+            </div>
+        </p>
         {% endif %}
         <a href="#problems"><button class="scroll-down-btn" id="scroll-down-btn"> <img src="{% static 'images/scroll-down.png' %}"/></button></a>
     </div>
@@ -74,7 +84,7 @@
         <button type="button" class="collapsible">Brush up on your theory</button>
         <div class="content">
             <p class="problem_desc"></p>
-            <a href="{% url 'code:problem_view' category='mathematics' %}">
+            <a href="#">
                 <div class="text-center">
                     <button type="button" class="text-center go_btn">
                         Enter
@@ -86,7 +96,7 @@
         <button type="button" class="collapsible">Share your thoughts in our forum</button>
         <div class="content">
             <p class="problem_desc"></p>
-            <a href="{% url 'code:problem_view' category='mathematics' %}">
+            <a href="#">
                 <div class="text-center">
                     <button type="button" class="text-center go_btn">
                         Enter

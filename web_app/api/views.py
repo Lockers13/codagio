@@ -183,6 +183,11 @@ class SaveProblemView(APIView):
         Returns an HTTP response of some kind"""
         ### get data, process it, and handle errors
         # processed_data = pm.retrieve_form_data(request, submission_type="problem_upload")
+        if not request.user.is_superuser:
+            return Response(ERROR_CODES["Permission Denied Error"], status=status.HTTP_400_BAD_REQUEST)
+        else:
+            print("SUPERUSER")
+
 
         uploaded_form = pm.get_uploaded_form(request)
 

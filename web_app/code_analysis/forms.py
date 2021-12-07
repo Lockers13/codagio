@@ -33,10 +33,10 @@ class BaseProblemUploadForm(forms.Form):
         if not isinstance(content, list):
                 raise Exception("POST NOT OK: Incorrectly formatted custom inputs!")
         if not isinstance(content[0], list):
-            if len(content) > 10:
+            if len(content) > 100:
                 raise Exception("POST NOT OK: Simple input list too long!")
         else:
-            if len(content) > 10:
+            if len(content) > 100:
                 raise Exception("POST NOT OK: Nested iterative input list too long!")
             else:
                 total_len = sum([len(x) for x in content])
