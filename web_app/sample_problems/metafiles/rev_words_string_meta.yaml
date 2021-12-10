@@ -13,4 +13,4 @@ num_tests: 1
 category: ["string_manipulation"]
 main_function: "reverseWords"
 pass_threshold: 90
-time_profile: False
+time_profile: True
