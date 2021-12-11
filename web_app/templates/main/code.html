@@ -12,6 +12,13 @@
     <br>
     <p class="problem_desc" id="description" style="white-space:pre-wrap;margin-left:2em;">{{ problem_desc }}</p>
     <br>
+    {% if problem.metadata.sample_answer %}
+    <div style="text-align:left">
+        <button type='button' id="sample_answer" class='text-center go_btn btn-sm'
+            style='width:15%;padding:10px;background-color:#1d2b5b'>Show Sample Answer</button>
+    </div>
+    <br>
+    {% endif %}
     {% if sample_input %}
     <p>Sample input: {{ sample_input }}</p>
     <p>Sample output: {{ sample_output }} </p>
@@ -147,6 +154,10 @@
     </a>
 </div>
 {% endif %}
+{{ problem.metadata|json_script:"problem_metadata" }}
+<script>
+const metadata = JSON.parse(document.getElementById('problem_metadata').textContent);
+</script>
 <script>const attempt_number = "{{ attempt_number }}";</script>
 <script>const allowed_attempts = "{{ allowed_attempts }}";</script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>

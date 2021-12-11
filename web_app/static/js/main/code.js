@@ -26,6 +26,20 @@ var ctx = document.getElementById('myChart').getContext('2d');
 ctx.canvas.width = 700;
 ctx.canvas.height = 500;
 
+var sample_answer_btn = document.getElementById('sample_answer')
+if(sample_answer_btn != null) {
+    sample_answer_btn.addEventListener("click", function() {
+        let editor = ace.edit("editor");
+        var build_string = ""
+        var sample_ans = metadata["sample_answer"]
+        for(let i = 0; i < sample_ans.length; i++) {
+            let end_char = i == sample_ans.length - 1? '': '\n'
+            build_string += sample_ans[i] + end_char
+        }
+        editor.setValue(build_string);   
+    })
+}
+
 submitbtn.addEventListener('click', function () {
     submitbtn.style.visibility = 'hidden';
     desc.style.display = 'none';

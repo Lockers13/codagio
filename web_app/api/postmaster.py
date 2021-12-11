@@ -57,6 +57,11 @@ def retrieve_form_data(form, submission_type="solution"):
             processed_data["program_file"] = data.get("program")
             processed_data["code"] = [line.decode("utf-8") for line in processed_data["program_file"].read().splitlines()]
             processed_data["metadata"] = data.get("meta_file")
+            processed_data["sample_answer"] = data.get("sample_answer", None)
+            
+            if processed_data["sample_answer"] is not None:
+                processed_data["sample_answer"] = [line.decode("utf-8") for line in processed_data["sample_answer"].read().splitlines()]
+            processed_data["metadata"]["sample_answer"] = processed_data["sample_answer"]
             processed_data["metadata"]["description"] = description
             processed_data["date_submitted"] = datetime.now()
             processed_data["inputs"] = data.get("inputs", None)

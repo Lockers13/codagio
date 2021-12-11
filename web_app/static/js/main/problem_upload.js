@@ -18,8 +18,8 @@ $("#prob_form").submit(function(e) {
         }
     }
 
-    var input_elems =[]
-    var name_str_list = ["program", "meta_file", "custom_inputs", "target_file", "data_file"]
+    var input_elems = []
+    var name_str_list = ["program", "meta_file", "custom_inputs", "target_file", "data_file", "sample_answer"]
 
     for(let index = 0; index < name_str_list.length; index++) {
         get_elem_if_any(name_str_list[index], input_elems)
@@ -52,7 +52,6 @@ $("#prob_form").submit(function(e) {
     }
 
     // end of file size check
-
     $.ajax({
         url: problem_upload_url,
         type: 'POST',
@@ -68,7 +67,7 @@ $("#prob_form").submit(function(e) {
     })
     .fail(function(resp_data) {
         console.log(resp_data)
-        upload_res.style.color = "red"
+        upload_res.style.color = "orange"
         upload_res.innerHTML = "Oops, there was an error uploading your file, please ensure everything is in order and try again!"
     })
 });

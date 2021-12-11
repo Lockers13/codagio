@@ -1,9 +1,10 @@
 # git clone https://github.com/Lockers13/codagio
 # cd codagio
 # git checkout portf_deployment
+# chmod u+x web_app/deployment.sh
 python3 -m venv env; . env/bin/activate
 pip3 install wheel; pip3 install -r requirements.txt
-HOST_IP=$(ifconfig | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1')
+echo $PUB_IP
 cd web_app
 sed -i 's/ALLOWED_HOSTS = []/ALLOWED_HOSTS = [$HOST_IP]/g' app/settings.py
 sed -i "s/'USER': 'lorcan'/'USER': 'postgres'/g" app/settings.py

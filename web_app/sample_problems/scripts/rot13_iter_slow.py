@@ -1,4 +1,5 @@
 def rot13(inputs):
+    ret_list = []
     ascii_lower = (97, 122)
     ascii_upper = (65, 90)
     LEN_ALPHA = 26
@@ -19,4 +20,5 @@ def rot13(inputs):
             else:
                 pass
             new_string += chr(ascii_num)
-        print(phrase, ":", new_string)
+        ret_list.append(new_string)
+    return ret_list

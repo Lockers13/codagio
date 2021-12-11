@@ -50,6 +50,14 @@ class BaseProblemUploadForm(forms.Form):
         if content.size > settings.MAX_UPLOAD_SIZE_PROG:
             raise forms.ValidationError(_('Please keep filesize under %s. Current filesize %s') % (filesizeformat(settings.MAX_UPLOAD_SIZE), filesizeformat(content.size)))
         return content
+
+    def clean_sample_answer(self):
+        content = self.cleaned_data['sample_answer']
+        print(content)
+        content_type = content.content_type.split('/')[0]
+        if content.size > settings.MAX_UPLOAD_SIZE_PROG:
+            raise forms.ValidationError(_('Please keep filesize under %s. Current filesize %s') % (filesizeformat(settings.MAX_UPLOAD_SIZE), filesizeformat(content.size)))
+        return content
         
     def clean_target_file(self):
         content = self.cleaned_data['target_file']
@@ -90,6 +98,8 @@ class BaseProblemUploadForm(forms.Form):
     meta_file = forms.FileField(required=True, widget=forms.ClearableFileInput(attrs={'style':'display:block;margin-top:20px;', 'class':'form-control-sm'}))
     data_file = forms.FileField(required=False, widget=forms.ClearableFileInput(attrs={'style':'display:block;margin-top:20px;', 'class':'form-control-sm'}))
     course_id = forms.IntegerField(widget=forms.HiddenInput(), required=True)
+    sample_answer = forms.FileField(required=False, widget=forms.ClearableFileInput(attrs={'style':'display:block;margin-top:20px;', 'class':'form-control-sm'}))
+
 
 class IOProblemUploadForm(BaseProblemUploadForm):
     target_file = forms.FileField(required=True, widget=forms.ClearableFileInput(attrs={'style':'display:block;margin-top:20px;', 'class':'form-control-sm'}))
