@@ -71,7 +71,7 @@ def gen_sample_outputs(filename, problem_data, init_data=None, input_type="defau
     platform = sys.platform.lower()
     SAMPUP_TIMEOUT = "8"
     SAMPUP_MEMOUT = "1000"
-    timeout_cmd = "gtimeout {0}".format(SAMPUP_TIMEOUT) if platform == "darwin" else "timeout {0} -m {1}".format(SAMPUP_TIMEOUT, SAMPUP_MEMOUT) if platform == "linux" or platform == "linux2" else ""
+    timeout_cmd = "gtimeout {0}".format(SAMPUP_TIMEOUT) if platform == "darwin" else "timeout {0}".format(SAMPUP_TIMEOUT) if platform == "linux" or platform == "linux2" else ""
     base_cmd = "{0} python".format(timeout_cmd)
     outputs = []
     if input_type == "default":

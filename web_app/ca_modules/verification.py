@@ -31,7 +31,7 @@ class Verifier:
         platform = sys.platform.lower()
         VERIF_TIMEOUT = "8"
         VERIF_MEMOUT = "1000"
-        timeout_cmd = "gtimeout {0}".format(VERIF_TIMEOUT) if platform == "darwin" else "timeout {0} -m {1}".format(VERIF_TIMEOUT, VERIF_MEMOUT) if platform == "linux" or platform == "linux2" else ""
+        timeout_cmd = "gtimeout {0}".format(VERIF_TIMEOUT) if platform == "darwin" else "timeout {0}".format(VERIF_TIMEOUT) if platform == "linux" or platform == "linux2" else ""
         base_cmd = "{0} python".format(timeout_cmd)
         file_list = []
 
