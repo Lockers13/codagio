@@ -13,4 +13,4 @@ num_tests: 10
 category: mathematics
 main_function: "is_prime"
 pass_threshold: 100
-time_profile: False
+time_profile: True

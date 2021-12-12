@@ -53,10 +53,10 @@ class BaseProblemUploadForm(forms.Form):
 
     def clean_sample_answer(self):
         content = self.cleaned_data['sample_answer']
-        print(content)
-        content_type = content.content_type.split('/')[0]
-        if content.size > settings.MAX_UPLOAD_SIZE_PROG:
-            raise forms.ValidationError(_('Please keep filesize under %s. Current filesize %s') % (filesizeformat(settings.MAX_UPLOAD_SIZE), filesizeformat(content.size)))
+        if content is not None:
+            content_type = content.content_type.split('/')[0]
+            if content.size > settings.MAX_UPLOAD_SIZE_PROG:
+                raise forms.ValidationError(_('Please keep filesize under %s. Current filesize %s') % (filesizeformat(settings.MAX_UPLOAD_SIZE), filesizeformat(content.size)))
         return content
         
     def clean_target_file(self):
