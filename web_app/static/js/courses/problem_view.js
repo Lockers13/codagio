@@ -142,10 +142,9 @@ function write_modal_body(test_idx) {
         modal_body.innerHTML = ""
         if(detailed_stats["submitter_visible"] || role == "tutor") {
             var color = test_dict["status"] == "success"? "#06D6A0": "rgb(240, 79, 79)";
-            modal_body.innerHTML += "<h5 style='color:white;'><u>Input (" + detailed_stats["input"].length + " element" + add_s(detailed_stats["input"]) + ")"  + "</u>: </h5><p style='color:white;'>[" + detailed_stats["input"].join(", ") + "]</p>"
             modal_body.innerHTML += "<h5 style='color:white;'><u>Reference Output (" + detailed_stats["reference_output"].length + " element" + add_s(detailed_stats["reference_output"]) + ")" + "</u>: </h5><p style='color:#06D6A0;'>[" + detailed_stats["reference_output"].join(", ") + "]</p>"
             modal_body.innerHTML += "<h5 style='color:white;'><u>Your Output (" + detailed_stats["user_output"].length + " element" + add_s(detailed_stats["user_output"]) + ")" + "</u>: </h5><p style='color:" + color + ";'>[" + detailed_stats["user_output"].join(", ") + "]</p>"
-
+            modal_body.innerHTML += "<h5 style='color:white;'><u>Input (" + detailed_stats["input"].length + " element" + add_s(detailed_stats["input"]) + ")"  + "</u>: </h5><p style='color:white;'>[" + detailed_stats["input"].join(", ") + "]</p>"
         }
         else {
             modal_body.innerHTML += "<h3 style='color:white;'>Unavailable</h3>"

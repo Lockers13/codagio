@@ -363,10 +363,7 @@ function write_detailed_stats(scores, test_key) {
     else {
         if(detailed_stats["submitter_visible"]) {
             var text_color = scores[test_key]["status"] == "success"? "#06D6A0": "rgb(240, 79, 79)";
-            if(isIterable(detailed_stats["input"]) && !(isStr(detailed_stats["input"])))
-                modal_body.innerHTML += "<h5><u>Input (" + detailed_stats["input"].length + " element" + add_s(detailed_stats["input"]) + ")"  + "</u>: </h5><p>[" + detailed_stats["input"].join(", ") + "]</p>"
-            else
-                modal_body.innerHTML += "<h5><u>Input (1 element)"  + "</u>: </h5><p>" + encodeSpaces(detailed_stats["input"]) + "</p>"
+
             if(isIterable(detailed_stats["reference_output"]) && !(isStr(detailed_stats["reference_output"])))
                 modal_body.innerHTML += "<h5><u>Reference Output (" + detailed_stats["reference_output"].length + " element" + add_s(detailed_stats["reference_output"]) + ")" + "</u>: </h5><p style='color:#06D6A0;'>[" + detailed_stats["reference_output"].join(", ") + "]</p>"
             else
@@ -375,6 +372,10 @@ function write_detailed_stats(scores, test_key) {
                 modal_body.innerHTML += "<h5><u>Your Output (" + detailed_stats["user_output"].length + " element" + add_s(detailed_stats["user_output"]) + ")" + "</u>: </h5><p style='color:" + text_color + ";'>[" + detailed_stats["user_output"].join(", ") + "]</p>"
             else
                 modal_body.innerHTML += "<h5><u>Your Output (1 element)" + "</u>: </h5><p style='color:" + text_color + ";'>" + encodeSpaces(detailed_stats["user_output"]) + "</p>" 
+            if(isIterable(detailed_stats["input"]) && !(isStr(detailed_stats["input"])))
+                modal_body.innerHTML += "<h5><u>Input (" + detailed_stats["input"].length + " element" + add_s(detailed_stats["input"]) + ")"  + "</u>: </h5><p>[" + detailed_stats["input"].join(", ") + "]</p>"
+            else
+                modal_body.innerHTML += "<h5><u>Input (1 element)"  + "</u>: </h5><p>" + encodeSpaces(detailed_stats["input"]) + "</p>"
         }
         else {
             modal_body.innerHTML += "<h3>Unavailable</h3>"

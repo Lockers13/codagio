@@ -1,0 +1,16 @@
+difficulty: "Medium"
+constraints:
+  num_args: 1
+  allowed_abs_imports: ["math"]
+  allowed_rel_imports: 
+    os: ["listdir", "chdir"]
+  disallowed_functions: ["eval", "print", "abs"]
+input_type:
+  default:
+    "list"
+input_length: 10000
+num_tests: 7
+category: mathematics
+main_function: "second_largest"
+pass_threshold: 100
+time_profile: True

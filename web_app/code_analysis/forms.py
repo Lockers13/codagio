@@ -40,7 +40,7 @@ class BaseProblemUploadForm(forms.Form):
                 raise Exception("POST NOT OK: Nested iterative input list too long!")
             else:
                 total_len = sum([len(x) for x in content])
-                if total_len > 5000:
+                if total_len > 100000:
                     raise Exception("POST NOT OK: Too many inputs in list elements!")
         return content
 
