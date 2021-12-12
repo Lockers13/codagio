@@ -358,7 +358,7 @@ function write_detailed_stats(scores, test_key) {
         modal_table_success.innerHTML = ""
         modal_table_error.innerHTML = ""
         modal_table_success.innerHTML += gen_comp_string(detailed_stats["matches"])
-        modal_table_error.innerHTML += gen_comp_string(detailed_stats["mismatches"])
+        modal_table_error.innerHTML += gen_comp_string(detailed_stats["mismatches"], matches=false)
     }
     else {
         if(detailed_stats["submitter_visible"]) {
@@ -483,15 +483,16 @@ function add_s(array) {
     return append_string
 }
 
-function gen_comp_string(comp_elem) {
+function gen_comp_string(comp_elem, matches=true) {
     var table_string = ""
+    var text_color = matches? "#06D6A0": "rgb(240, 79, 79)";
     table_string += "<thead><tr style='width:100%;text-align:center;padding:5 5 5 5;'>"
     table_string += "<th style='text-align:center;padding:5 5 5 5;' scope='col'><u>Input</u></th><th style='text-align:center;padding:5 5 5 5;' scope='col'><u>Your Output</u></th><th style='text-align:center;padding:5 5 5 5;' scope='col'><u>Reference Output</u></th>"
     table_string += "</tr></thead><tbody>"
 
     for(var mm_index = 0; mm_index < comp_elem.length; mm_index++) {
         var bg_color = mm_index % 2 == 0? '#101010': 'rgb(55, 55, 55)';
-        table_string += "<tr style='width:100%;text-align:center;padding:7 7 7 7;background-color:" + bg_color +";'><td style='padding: 7 7 7 7'><span style='color:white;'>" + comp_elem[mm_index][0] + "</span></td><td  style='padding: 5 5 5 5'><span style='color:rgb(240, 79, 79)'>" + comp_elem[mm_index][1] + "</span></td><td  style='padding: 5 5 5 5'><span style='color:#06D6A0'>" + comp_elem[mm_index][2] + "</span></td></tr>"
+        table_string += "<tr style='width:100%;text-align:center;padding:7 7 7 7;background-color:" + bg_color +";'><td style='padding: 7 7 7 7'><span style='color:white;'>" + comp_elem[mm_index][0] + "</span></td><td  style='padding: 5 5 5 5'><span style='color:" + text_color + "'>" + comp_elem[mm_index][1] + "</span></td><td  style='padding: 5 5 5 5'><span style='color:#06D6A0'>" + comp_elem[mm_index][2] + "</span></td></tr>"
     }
 
     table_string += "</tbody>"

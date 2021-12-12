@@ -157,15 +157,15 @@ function add_s(array) {
     return append_string
 }
 
-function gen_comp_string(comp_elem) {
+function gen_comp_string(comp_elem, matches=true) {
     var table_string = ""
     table_string += "<thead><tr style='width:100%;text-align:center;padding:5 5 5 5;'>"
     table_string += "<th style='text-align:center;padding:5 5 5 5;' scope='col'><u>Input</u></th><th style='text-align:center;padding:5 5 5 5;' scope='col'><u>" + capitalize(submitter_name) + "'s Output</u></th><th style='text-align:center;padding:5 5 5 5;' scope='col'><u>Reference Output</u></th>"
     table_string += "</tr></thead><tbody>"
-
+    var text_color = matches? "#06D6A0": "rgb(240, 79, 79)";
     for(var mm_index = 0; mm_index < comp_elem.length; mm_index++) {
         var bg_color = mm_index % 2 == 0? '#101010': 'rgb(55, 55, 55)';
-        table_string += "<tr style='width:100%;text-align:center;padding:7 7 7 7;background-color:" + bg_color +";'><td style='padding: 7 7 7 7'><span style='color:white;'>" + comp_elem[mm_index][0] + "</span></td><td  style='padding: 5 5 5 5'><span style='color:rgb(240, 79, 79)'>" + comp_elem[mm_index][1] + "</span></td><td  style='padding: 5 5 5 5'><span style='color:#06D6A0'>" + comp_elem[mm_index][2] + "</span></td></tr>"
+        table_string += "<tr style='width:100%;text-align:center;padding:7 7 7 7;background-color:" + bg_color +";'><td style='padding: 7 7 7 7'><span style='color:white;'>" + comp_elem[mm_index][0] + "</span></td><td  style='padding: 5 5 5 5'><span style='color:" + text_color + "'>" + comp_elem[mm_index][1] + "</span></td><td  style='padding: 5 5 5 5'><span style='color:#06D6A0'>" + comp_elem[mm_index][2] + "</span></td></tr>"
     }
 
     table_string += "</tbody>"
@@ -182,6 +182,6 @@ function handle_one_to_one(detailed_stats, role) {
     var title_message = role == "student"? "Output Review: A Sample of " + comp_elem.length + correct_or_incorrect: "Output Review: " + comp_elem.length + correct_or_incorrect;
     modal_title.innerHTML = title_message
     modal_table.innerHTML = ""
-    modal_table.innerHTML += gen_comp_string(comp_elem)
+    modal_table.innerHTML += gen_comp_string(comp_elem, matches=(comp_key=="matches"))
     output_type_btn.value = output_type_btn.value == 1? 0: 1;
 }
