@@ -25,11 +25,27 @@
 
         {% endfor %}
     {% else %}
-        <p style="text-align:center;">You are not enrolled in any courses!</p>
+        <p style="text-align:center;">
+            You are not enrolled in any courses!<br><br>
+            Why not use the following credentials to enrol in our sample course and test out the app?
+            <div class="text-center">
+            <ul style="list-style-type:none;">
+                <li>
+                    Course Code: MIT_CS201
+                </li>
+                <li>
+                    Course Password: test_teacher123
+                </li>
+            </ul>
+            <button class="scroll-down-btn" id="scroll-down-btn"> <img src="{% static 'images/scroll-down.png' %}"/></button>
+        </div>
+        </p>
     {% endif %}
+
     <br><br>
     <div style="text-align:center">
-    <button id="enrol_form_btn" value="0">Click here to enrol in a new course</button>
+    <button id="enrol_form_btn" value="0" type='button' class='text-center go_btn btn-sm'
+    style='width:15%;padding:10px;background-color:#1d2b5b'>Click here to enrol in a new course</button>
     </div>
     <br>
     <div id="enrol_form_div" class="row no-gutters">
