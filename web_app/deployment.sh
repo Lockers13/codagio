@@ -3,11 +3,13 @@
 # git checkout portf_deployment
 # chmod u+x web_app/deployment.sh
 python3 -m venv env; . env/bin/activate
-pip3 install wheel; pip3 install -r requirements.txt
+pip3 install wheel; pip3 install -r requirements.txt; pip3 install gunicorn
+sudo apt install python3-line-profiler
 echo $PUB_IP
 cd web_app
 sed -i 's/ALLOWED_HOSTS = []/ALLOWED_HOSTS = [$HOST_IP]/g' app/settings.py
 sed -i "s/'USER': 'lorcan'/'USER': 'postgres'/g" app/settings.py
+# DEBUG=False
 # echo $PUB_IP #! copy-paste
 #
 # ALLOWED_HOSTS = [$PUB_IP]
@@ -15,7 +17,8 @@ sed -i "s/'USER': 'lorcan'/'USER': 'postgres'/g" app/settings.py
 # DB => sudo -u postgres psql postgres
 # python manage.py makemigrations
 # python manage.py migrate
-for i in $(find static/js -name "*.js"); do sed -i 's/localhost/$HOST_IP/g' "$i"; done
+for i in $(find static/js -name "*.js"); do sed -i 's/localhost:8000/$HOST_IP/g' "$i"; done
+# CHANGE TO PYTHON3!!!
 # make sample_tutor superuser
 
 # MAKE REGISTRATION/LOGIN EXPERIENCE BETTER

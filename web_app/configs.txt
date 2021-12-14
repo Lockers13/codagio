@@ -1,0 +1,49 @@
+/etc/nginx/sites-available/cgc
+
+server {
+    listen 80;
+    listen [::]:80;
+    server_name cgc.actogen.com www.cgc.actogen.com 178.79.187.230;
+
+    location = /favicon.ico { access_log off; log_not_found off; }
+    location /static/ {
+            root /home/coco/codagio/web_app;
+    }
+
+    location / {
+        include proxy_params;
+        proxy_pass http://unix:/run/gunicorn.sock;
+    }
+}
+
+/etc/systemd/system/gunicorn.socket
+
+[Unit]
+Description=gunicorn socket
+
+[Socket]
+ListenStream=/run/gunicorn.sock
+
+[Install]
+WantedBy=sockets.target
+
+/etc/systemd/system/gunicorn.service                                 
+                      
+[Unit]
+Description=gunicorn daemon
+Requires=gunicorn.socket
+After=network.target
+
+[Service]
+User=coco
+Group=www-data
+WorkingDirectory=/home/coco/codagio/web_app
+ExecStart=/home/coco/codagio/env/bin/gunicorn \
+          --access-logfile - \
+          --workers 3 \
+          --bind unix:/run/gunicorn.sock \
+          app.wsgi:application
+
+[Install]
+WantedBy=multi-user.target
+
